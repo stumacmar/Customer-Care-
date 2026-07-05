@@ -755,24 +755,11 @@ select:focus {
   flex: 1;
 }
 
-.mic {
-  min-width: var(--tap);
-  height: var(--tap);
-  border-radius: 10px;
-  background: var(--bg-elev-2);
-  border: 1px solid var(--line);
-  font-size: 20px;
-  flex: 0 0 auto;
-}
-.mic.live {
-  background: var(--red);
-  border-color: var(--red);
-  animation: pulse 1s infinite;
-}
-@keyframes pulse {
-  50% {
-    opacity: 0.55;
-  }
+.dictate-hint {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-top: 6px;
+  line-height: 1.4;
 }
 
 .type-picker {
