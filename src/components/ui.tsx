@@ -1,12 +1,11 @@
 /*
  * Small shared UI pieces: the bottom sheet, a toast, a photo capture control,
- * and a dictation-enabled text field. Kept together because they are tiny and
- * used everywhere.
+ * and a text field with a dictation hint. Kept together because they are tiny
+ * and used everywhere.
  */
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
-import { isSpeechSupported, startDictation } from '../lib/speech'
 
 export function Sheet({
   title,
@@ -106,7 +105,16 @@ export function PhotoField({
   )
 }
 
-/** A textarea with a mic button for one-line voice-to-text. */
+/**
+ * A plain textarea with a one-line hint pointing at the phone keyboard's own
+ * dictation button.
+ *
+ * We deliberately do NOT use the Web Speech API here: its support is patchy and
+ * inconsistent across phones (unreliable on iOS Safari, absent in Firefox) and
+ * it could hang the page. Every phone keyboard already has a built-in mic key
+ * that dictates into any text field — that is the genuinely device-agnostic
+ * way to talk instead of type, so we just point the user at it.
+ */
 export function DictationField({
   value,
   onChange,
@@ -118,55 +126,22 @@ export function DictationField({
   placeholder?: string
   rows?: number
 }) {
-  const [live, setLive] = useState(false)
-  const stopRef = useRef<(() => void) | null>(null)
-  const supported = isSpeechSupported()
-  // Text captured before dictation began, so results append instead of replace.
-  const baseRef = useRef('')
-
-  const toggle = () => {
-    if (live) {
-      stopRef.current?.()
-      return
-    }
-    baseRef.current = value ? value.trim() + ' ' : ''
-    const stop = startDictation(
-      (transcript) => onChange(baseRef.current + transcript),
-      () => {
-        setLive(false)
-        stopRef.current = null
-      },
-      () => {
-        setLive(false)
-        stopRef.current = null
-      }
-    )
-    if (stop) {
-      stopRef.current = stop
-      setLive(true)
-    }
-  }
-
-  useEffect(() => () => stopRef.current?.(), [])
+  const [focused, setFocused] = useState(false)
 
   return (
-    <div className="field row" style={{ margin: 0 }}>
+    <div style={{ margin: 0 }}>
       <textarea
         rows={rows}
         value={value}
         placeholder={placeholder}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         onChange={(e) => onChange(e.target.value)}
       />
-      {supported && (
-        <button
-          type="button"
-          className={`mic${live ? ' live' : ''}`}
-          onClick={toggle}
-          aria-label={live ? 'Stop dictation' : 'Dictate'}
-          title={live ? 'Stop dictation' : 'Dictate'}
-        >
-          {live ? '■' : '🎤'}
-        </button>
+      {focused && !value && (
+        <div className="dictate-hint">
+          🎤 Prefer to talk? Tap the microphone on your keyboard to dictate.
+        </div>
       )}
     </div>
   )
