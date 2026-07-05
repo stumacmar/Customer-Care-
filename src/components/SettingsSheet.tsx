@@ -9,11 +9,9 @@ import { useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { buildSeedState } from '../lib/seed'
-import { diffDays, formatDate, todayISO } from '../lib/dates'
+import { formatDate } from '../lib/dates'
 import { exportPlotPrintable } from '../lib/export'
-
-/** Plots completed more than this long ago get a housekeeping nudge. */
-const RETENTION_DAYS = 365 * 2
+import { isPlotRetired } from '../lib/status'
 
 export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (m: string) => void }) {
   const { state, dispatch } = useStore()
@@ -26,10 +24,17 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
   }
 
   const loadDemo = () => {
-    if (state.plots.length && !confirm('Load demo plots? This adds sample data alongside what you have.')) return
+    if (state.plots.length && !confirm('Load demo data? This adds a sample development alongside what you have.')) return
     const seed = buildSeedState(state.developerName || 'Meadow Homes Ltd')
-    dispatch({ type: 'REPLACE_STATE', state: { ...seed, plots: [...seed.plots, ...state.plots] } })
-    onToast('Demo plots added')
+    dispatch({
+      type: 'REPLACE_STATE',
+      state: {
+        ...seed,
+        developments: [...seed.developments, ...state.developments],
+        plots: [...seed.plots, ...state.plots],
+      },
+    })
+    onToast('Demo development added')
     onClose()
   }
 
@@ -46,7 +51,10 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       if (typed !== null) onToast('Not deleted — you must type DELETE exactly')
       return
     }
-    dispatch({ type: 'REPLACE_STATE', state: { version: 1, developerName: name, plots: [] } })
+    dispatch({
+      type: 'REPLACE_STATE',
+      state: { version: 2, developerName: name, developments: [], plots: [] },
+    })
     onToast('All data cleared')
     onClose()
   }
@@ -57,13 +65,12 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
     onToast('Plot deleted')
   }
 
-  // Housekeeping: plots whose completion date is over 2 years ago — the New
-  // Homes Ombudsman window has closed, so (GDPR data minimisation) it may be
-  // time to export a copy and delete the personal data.
-  const today = todayISO()
-  const oldPlots = state.plots.filter(
-    (p) => p.completionDate && diffDays(p.completionDate, today) > RETENTION_DAYS
-  )
+  // Housekeeping: retired plots — completion over 2 years ago, so the New Homes
+  // Ombudsman window has closed. They already auto-retire out of the active
+  // view; here (GDPR data minimisation) is where you export a copy and delete
+  // the personal data for good.
+  const oldPlots = state.plots.filter((p) => isPlotRetired(p))
+  const devName = (id: string) => state.developments.find((d) => d.id === id)?.name || ''
 
   return (
     <Sheet title="Settings" onClose={onClose}>
@@ -98,6 +105,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 600 }}>{p.address}</div>
                       <div className="muted" style={{ fontSize: 12 }}>
+                        {devName(p.developmentId) ? `${devName(p.developmentId)} · ` : ''}
                         Completed {formatDate(p.completionDate)}
                       </div>
                     </div>
@@ -162,11 +170,11 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <h3>Demo</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
-            See the app with realistic plots — a snag ticking down, a live complaint
-            mid-procedure, and an emergency.
+            See the app with a realistic development — a snag ticking down, a live complaint
+            mid-procedure, an emergency, plus a finished development with a retired plot.
           </p>
           <button className="btn btn-sm btn-primary" onClick={loadDemo}>
-            Load demo plots
+            Load demo data
           </button>
         </div>
       </div>

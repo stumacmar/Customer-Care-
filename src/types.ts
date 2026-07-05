@@ -97,8 +97,23 @@ export interface SavedLetter {
   createdAt: string // ISO datetime
 }
 
+/**
+ * A development (site) groups the plots built on it. A small developer finishes
+ * a development and moves on to the next, so a development can be marked
+ * "finished" and tucked away without losing its records.
+ */
+export interface Development {
+  id: string
+  name: string
+  location?: string
+  status: 'active' | 'finished'
+  createdAt: string // ISO datetime
+}
+
 export interface Plot {
   id: string
+  /** The development this plot belongs to. */
+  developmentId: string
   address: string
   customerNames: string
   /** Optional — only needed to email letters. GDPR: store no more than this. */
@@ -115,6 +130,7 @@ export interface Plot {
 export interface AppState {
   version: number
   developerName: string
+  developments: Development[]
   plots: Plot[]
 }
 

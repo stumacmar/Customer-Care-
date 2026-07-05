@@ -8,8 +8,10 @@
  * plain-English lead-in for search only. Section references (e.g. "3.4") match
  * the Code's own numbering so the developer can always cite the clause.
  *
- * Version 2 applies to homes reserved from a registered developer on or after
- * 2 March 2026.
+ * Version 2 was published in March 2026. Under the Code, a customer is
+ * protected from their developer's own "activation" date — the point each
+ * registered developer goes live — so the exact cut-over can differ by
+ * developer; V2 is the current published version.
  *
  * This is a navigation aid, not legal advice. Where it matters, the app links
  * the developer back to the exact clause number to read in full.
@@ -84,7 +86,7 @@ export const CODE_SECTIONS: CodeSection[] = [
     summary: 'Minimum information you must give about the property, e.g. size, tenure, price, energy rating, completion date, warranty.',
     points: [
       'Must not mislead; must meet Material Information obligations under the Digital Markets, Competition & Consumers Act 2024 for property listings.',
-      'As a minimum, information must include: size (room and total, per RICS Code of Measuring Practice); tenure (including lease length); specification (including items not in standard spec such as floorcoverings, turf); indicative energy performance ratings; price; mobility adaptations; estimated legal completion dates; the warranty that applies; management services; service charges; future phases (with timescales where known); any agreements/restrictions affecting future sale; costs and cover of additional products such as insurances/warranties; expected Council Tax band (Rates in Northern Ireland).',
+      'As a minimum, information must include: size (room and total, per the RICS Code of Measuring Practice for gross internal area); tenure (including lease length); specification (including items not in standard spec such as floorcoverings, turf); indicative energy performance ratings; price; mobility adaptations; estimated legal completion dates; the warranty that applies; management services; service charges; future phases (with timescales where known); any agreements/restrictions affecting future sale; costs and cover of additional products such as insurances/warranties; expected Council Tax band (Rates in Northern Ireland).',
     ],
     keywords: ['describe', 'size', 'tenure', 'price', 'energy', 'epc', 'council tax', 'specification', 'material information', 'completion date', 'floor area', 'measurements'],
   },
@@ -173,7 +175,7 @@ export const CODE_SECTIONS: CodeSection[] = [
     points: [
       'A customer reserving a home must enter a formal Reservation Agreement; it must not be entered until all required information has been provided.',
       'Terms must be clear, fair, in plain language; both parties sign (digitally or in person) and the developer gives the customer a copy.',
-      'Terms must include (among others): who they are buying from; the reservation fee amount; the right to cancel within the reservation period; refund terms and any admin fees; a 14-day cooling-off period; how to cancel; that the sale is “subject to contract” (England, Wales & NI); details of the home; the purchase price; how long price/agreement are valid; warranty provider contact details and a summary of cover; the date by which exchange must take place (reasonable, and not less than six weeks after reservation — 28 days plus the 14-day cooling-off — unless the customer asks for earlier); tenure and associated costs; management/factoring costs; the process for requesting changes.',
+      'Terms must include (among others): who they are buying from; the reservation fee amount; the right to cancel within the reservation period; refund terms and any admin fees; a 14-day cooling-off period; how to cancel; that the sale is “subject to contract” (England, Wales & NI); details of the home; the purchase price; how long price/agreement are valid; warranty provider contact details and a summary of cover; the date by which exchange must take place (reasonable, and not less than six weeks after reservation — 28 days plus the 14-day cooling-off — unless the customer asks for earlier; if exchange and completion happen within the cooling-off period it must only be with the customer’s express consent); tenure and associated costs; management/factoring costs; the process for requesting changes.',
       'An Affordability Schedule must be provided covering likely costs over the five years after sale: ground rent (amount, dates, formula); estimated additional costs (management fees, event fees, future/rising service charges, sinking funds); costs for regular maintenance of built-in equipment (shared heating, grey-water systems, air-source heat pumps); estimated costs to maintain the property and repair/replace fixtures or appliances in the first five years.',
     ],
     keywords: ['reservation agreement', 'reservation fee', 'affordability schedule', 'subject to contract', 'six weeks', 'ground rent', 'service charge', 'sinking fund'],
@@ -381,7 +383,7 @@ export const CODE_SECTIONS: CodeSection[] = [
       'Closure Letter: can be sent at any stage after the complaint start date. Must include: (i) a list of the items agreed in the Assessment and Response Letter and confirmation each is resolved; (ii) how to refer matters to the New Homes Ombudsman Service if not satisfied.',
       'Multiple complaints can be combined into one, but the timetable applies from the date the first complaint was received.',
     ],
-    keywords: ['complaint', 'complaints procedure', 'acknowledgement', 'path to resolution', 'assessment and response', 'eight week', '8 week', '56 days', '5 days', '10 days', '30 days', '28 days', 'complaint start date', 'closure letter', 'letters', 'timetable'],
+    keywords: ['complaint', 'complaints procedure', 'complaint deadlines', 'deadline', 'deadlines', 'timescale', 'acknowledgement', 'path to resolution', 'assessment and response', 'eight week', '8 week', '56 days', '5 days', '10 days', '30 days', '28 days', 'complaint start date', 'closure letter', 'letters', 'timetable'],
   },
   {
     ref: '3.5',

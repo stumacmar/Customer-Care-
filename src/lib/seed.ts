@@ -8,15 +8,19 @@
 import { buildDocumentChecklist } from './code'
 import { addDays, nowISO, todayISO } from './dates'
 import { id } from './storage'
-import type { AppState, Issue, Plot, TimelineEvent } from '../types'
+import type { AppState, Development, Issue, Plot, TimelineEvent } from '../types'
 
 function ev(type: TimelineEvent['type'], summary: string, detail?: string, issueId?: string): TimelineEvent {
   return { id: id('ev_'), timestamp: nowISO(), type, summary, detail, issueId }
 }
 
-function plot(partial: Partial<Plot> & Pick<Plot, 'address' | 'customerNames'>): Plot {
+function plot(
+  developmentId: string,
+  partial: Partial<Plot> & Pick<Plot, 'address' | 'customerNames'>
+): Plot {
   return {
     id: id('plot_'),
+    developmentId,
     reservationDate: undefined,
     completionDate: undefined,
     documents: buildDocumentChecklist(),
@@ -31,8 +35,24 @@ function plot(partial: Partial<Plot> & Pick<Plot, 'address' | 'customerNames'>):
 export function buildSeedState(developerName: string): AppState {
   const today = todayISO()
 
+  const meadow: Development = {
+    id: id('dev_'),
+    name: 'Meadow View',
+    location: 'Cheltenham',
+    status: 'active',
+    createdAt: nowISO(),
+  }
+  const brook: Development = {
+    id: id('dev_'),
+    name: 'Brookfield Rise (2023)',
+    location: 'Gloucester',
+    status: 'finished',
+    createdAt: nowISO(),
+  }
+  const dev = meadow.id
+
   // 1. Green plot — all documents done, no open clocks.
-  const green = plot({
+  const green = plot(dev, {
     address: 'Plot 1, Meadow View',
     customerNames: 'Mr & Mrs Okafor',
     reservationDate: addDays(today, -180),
@@ -41,7 +61,7 @@ export function buildSeedState(developerName: string): AppState {
   green.documents = green.documents.map((d) => ({ ...d, completed: true, completedDate: addDays(today, -119) }))
 
   // 2. Amber plot — snag due in 3 days, a couple of docs outstanding.
-  const amber = plot({
+  const amber = plot(dev, {
     address: 'Plot 2, Meadow View',
     customerNames: 'Ms Farrell',
     reservationDate: addDays(today, -150),
@@ -61,8 +81,8 @@ export function buildSeedState(developerName: string): AppState {
   amber.timeline = [ev('snag_logged', 'Snag logged (S-001)', snag.description, snag.id), ...amber.timeline]
 
   // 3. Red plot — a live complaint past two milestones, plus an open emergency.
-  const red = plot({
-    address: 'Plot 7, Brookfield',
+  const red = plot(dev, {
+    address: 'Plot 7, Meadow View',
     customerNames: 'Mr Ali & Ms Chen',
     customerEmail: 'ali.chen@example.com',
     reservationDate: addDays(today, -110),
@@ -102,5 +122,20 @@ export function buildSeedState(developerName: string): AppState {
     ...red.timeline,
   ]
 
-  return { version: 1, developerName, plots: [red, amber, green] }
+  // 4. A RETIRED plot on the finished Brookfield development — completed ~2.5
+  // years ago, so its two-year Ombudsman window has closed and it auto-retires.
+  const retired = plot(brook.id, {
+    address: 'Plot 4, Brookfield Rise',
+    customerNames: 'Mr & Mrs Doyle',
+    reservationDate: addDays(today, -1000),
+    completionDate: addDays(today, -900), // ~2 years 6 months ago
+  })
+  retired.documents = retired.documents.map((d) => ({ ...d, completed: true, completedDate: addDays(today, -899) }))
+
+  return {
+    version: 2,
+    developerName,
+    developments: [meadow, brook],
+    plots: [red, amber, green, retired],
+  }
 }

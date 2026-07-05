@@ -9,7 +9,58 @@
  */
 
 import { clocksForPlot } from './code'
-import type { Plot, Rag } from '../types'
+import { daysFromToday } from './dates'
+import type { Development, Plot, Rag } from '../types'
+
+/** The Ombudsman window: two years from completion. */
+export const RETENTION_DAYS = 365 * 2
+
+/**
+ * A plot auto-retires once its completion date is more than two years ago —
+ * the point the customer's New Homes Ombudsman window has closed. Retired plots
+ * drop out of the active list (but are never auto-deleted; the record is kept
+ * until the developer chooses to export and remove it).
+ */
+export function isPlotRetired(plot: Plot, today?: string): boolean {
+  if (!plot.completionDate) return false
+  void today
+  return daysFromToday(plot.completionDate) < -RETENTION_DAYS
+}
+
+/** Roll a development's plots up into one status for the developments list. */
+export interface DevelopmentStatus {
+  rag: Rag
+  activePlots: number
+  retiredPlots: number
+  needAction: number
+  dueSoon: number
+  headline: string
+}
+
+export function developmentStatus(dev: Development, plots: Plot[]): DevelopmentStatus {
+  const mine = plots.filter((p) => p.developmentId === dev.id)
+  const active = mine.filter((p) => !isPlotRetired(p))
+  const retired = mine.length - active.length
+
+  const statuses = active.map(plotStatus)
+  const needAction = statuses.filter((s) => s.rag === 'red').length
+  const dueSoon = statuses.filter((s) => s.rag === 'amber').length
+
+  let rag: Rag = 'green'
+  if (dev.status === 'finished') rag = 'green'
+  else if (needAction > 0) rag = 'red'
+  else if (dueSoon > 0) rag = 'amber'
+
+  const parts: string[] = []
+  parts.push(`${active.length} plot${active.length === 1 ? '' : 's'}`)
+  if (needAction > 0) parts.push(`${needAction} need action`)
+  else if (dueSoon > 0) parts.push(`${dueSoon} due soon`)
+  else if (dev.status === 'active' && active.length > 0) parts.push('all on track')
+  if (retired > 0) parts.push(`${retired} retired`)
+  if (dev.status === 'finished') parts.unshift('Finished')
+
+  return { rag, activePlots: active.length, retiredPlots: retired, needAction, dueSoon, headline: parts.join(' · ') }
+}
 
 export interface PlotStatus {
   rag: Rag
