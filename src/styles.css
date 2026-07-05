@@ -78,7 +78,44 @@ select:focus {
   max-width: 720px;
   margin: 0 auto;
   min-height: 100%;
-  padding-bottom: calc(24px + var(--safe-bottom));
+  /* Leave room for the fixed bottom tab bar. */
+  padding-bottom: calc(64px + var(--safe-bottom));
+}
+
+/* ---- Bottom tab bar ---- */
+.tabbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 40;
+  display: flex;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  padding-bottom: var(--safe-bottom);
+}
+.tabbar .tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 9px 0 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+}
+.tabbar .tab .tab-ico {
+  font-size: 21px;
+  line-height: 1;
+  filter: grayscale(1) opacity(0.6);
+}
+.tabbar .tab.active {
+  color: var(--text);
+}
+.tabbar .tab.active .tab-ico {
+  filter: none;
 }
 
 /* ---- Top bar ---- */
@@ -297,7 +334,7 @@ select:focus {
 .fab {
   position: fixed;
   right: max(16px, calc((100% - 720px) / 2 + 16px));
-  bottom: calc(20px + var(--safe-bottom));
+  bottom: calc(76px + var(--safe-bottom));
   z-index: 30;
   height: 56px;
   padding: 0 22px;

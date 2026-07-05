@@ -1,7 +1,8 @@
 /*
- * App shell. Two views — the dashboard and a single plot screen — with a plain
- * state-based router (no dependency, and the back button on a phone maps to
- * "close the sheet / go back to plots"). Keeps the whole thing one tap deep.
+ * App shell. Two tabs — Plots (dashboard + a single plot screen) and Code (the
+ * searchable New Homes Quality Code) — with a plain state-based router (no
+ * dependency). A bottom tab bar switches between them. Keeps the whole thing
+ * one or two taps deep.
  */
 
 import { useEffect, useState } from 'react'
@@ -10,13 +11,16 @@ import { PlotScreen } from './components/PlotScreen'
 import { NewPlotSheet } from './components/NewPlotSheet'
 import { SettingsSheet } from './components/SettingsSheet'
 import { HelpSheet } from './components/HelpSheet'
+import { CodeSearch } from './components/CodeSearch'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
 
+type Tab = 'plots' | 'code'
 type View = { name: 'dashboard' } | { name: 'plot'; plotId: string }
 
 export function App() {
   const { state } = useStore()
+  const [tab, setTab] = useState<Tab>('plots')
   const [view, setView] = useState<View>({ name: 'dashboard' })
   const [showNewPlot, setShowNewPlot] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
@@ -50,12 +54,12 @@ export function App() {
     setView({ name: 'dashboard' })
   }
 
-  const onPlot = view.name === 'plot'
+  const onPlotDetail = tab === 'plots' && view.name === 'plot'
 
   return (
     <div className="app">
       <header className="topbar">
-        {onPlot ? (
+        {onPlotDetail ? (
           <button className="backbtn" onClick={backToDashboard} aria-label="Back to plots">
             ‹ Plots
           </button>
@@ -77,17 +81,40 @@ export function App() {
         </button>
       </header>
 
-      {view.name === 'dashboard' ? (
-        <Dashboard onOpenPlot={openPlot} onNewPlot={() => setShowNewPlot(true)} />
-      ) : (
-        <PlotScreen plotId={view.plotId} onBack={backToDashboard} onToast={show} />
-      )}
+      <main className="tab-body">
+        {tab === 'plots' ? (
+          view.name === 'dashboard' ? (
+            <Dashboard onOpenPlot={openPlot} onNewPlot={() => setShowNewPlot(true)} />
+          ) : (
+            <PlotScreen plotId={view.plotId} onBack={backToDashboard} onToast={show} />
+          )
+        ) : (
+          <CodeSearch />
+        )}
+      </main>
 
-      {view.name === 'dashboard' && (
+      {tab === 'plots' && view.name === 'dashboard' && (
         <button className="fab" onClick={() => setShowNewPlot(true)}>
           + Plot
         </button>
       )}
+
+      <nav className="tabbar">
+        <button
+          className={`tab${tab === 'plots' ? ' active' : ''}`}
+          onClick={() => setTab('plots')}
+        >
+          <span className="tab-ico">🏠</span>
+          Plots
+        </button>
+        <button
+          className={`tab${tab === 'code' ? ' active' : ''}`}
+          onClick={() => setTab('code')}
+        >
+          <span className="tab-ico">📖</span>
+          The Code
+        </button>
+      </nav>
 
       {showNewPlot && (
         <NewPlotSheet
