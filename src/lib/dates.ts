@@ -47,6 +47,22 @@ export function daysFromToday(iso: string): number {
   return diffDays(todayISO(), iso)
 }
 
+/**
+ * The first business day AFTER the given date (Mon–Fri; bank holidays are not
+ * accounted for — the Code's "complaint start date" is the first business day
+ * after the complaint is received, and starting a day early is never
+ * non-compliant).
+ */
+export function nextBusinessDay(iso: string): string {
+  let d = addDays(iso, 1)
+  let day = parseISODate(d).getDay()
+  while (day === 0 || day === 6) {
+    d = addDays(d, 1)
+    day = parseISODate(d).getDay()
+  }
+  return d
+}
+
 const MONTHS = [
   'Jan',
   'Feb',

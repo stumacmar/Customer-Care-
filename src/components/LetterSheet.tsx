@@ -65,7 +65,7 @@ export function LetterSheet({
     win.document.close()
   }
 
-  const save = () => {
+  const save = (toast = 'Letter saved to the record') => {
     dispatch({
       type: 'SAVE_LETTER',
       plotId: plot.id,
@@ -74,8 +74,19 @@ export function LetterSheet({
       title: generated.title,
       body,
     })
-    onDone('Letter saved to the record')
+    onDone(toast)
     onClose()
+  }
+
+  const email = () => {
+    const to = plot.customerEmail || ''
+    const href = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(
+      generated.subject
+    )}&body=${encodeURIComponent(body)}`
+    // Opens the user's own mail app with the letter pre-filled — they still
+    // press send themselves, so nothing goes out unreviewed.
+    window.location.href = href
+    save('Email opened — letter saved to the record')
   }
 
   return (
@@ -106,6 +117,9 @@ export function LetterSheet({
       </div>
 
       <div className="wrap-actions" style={{ marginBottom: 12 }}>
+        <button className="btn btn-sm btn-primary" onClick={email}>
+          ✉ Email to customer
+        </button>
         <button className="btn btn-sm" onClick={copy}>
           📋 Copy
         </button>
@@ -113,12 +127,18 @@ export function LetterSheet({
           🖨 Print / PDF
         </button>
       </div>
+      {!plot.customerEmail && (
+        <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 12 }}>
+          No customer email saved for this plot — the email will open with a blank "To" box.
+          Add it via "Edit details" on the plot screen.
+        </p>
+      )}
 
       <div className="sheet-actions">
         <button className="btn btn-ghost" onClick={onClose}>
           Close
         </button>
-        <button className="btn btn-primary" onClick={save}>
+        <button className="btn btn-primary" onClick={() => save()}>
           Save to record
         </button>
       </div>

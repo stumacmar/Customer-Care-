@@ -15,6 +15,7 @@ import { IssueSection } from './IssueSection'
 import { Timeline } from './Timeline'
 import { LogIssueSheet } from './LogIssueSheet'
 import { LetterSheet } from './LetterSheet'
+import { EditPlotSheet } from './EditPlotSheet'
 import type { Issue, IssueType } from '../types'
 
 export function PlotScreen({
@@ -30,6 +31,7 @@ export function PlotScreen({
   const { state, dispatch } = useStore()
   const [logType, setLogType] = useState<IssueType | null>(null)
   const [letterFor, setLetterFor] = useState<{ issue: Issue; key?: string } | null>(null)
+  const [editing, setEditing] = useState(false)
 
   if (!plot) {
     return (
@@ -75,6 +77,17 @@ export function PlotScreen({
         <div>
           <div className="k">Completed</div>
           <div className="v">{formatDate(plot.completionDate)}</div>
+        </div>
+        <div>
+          <div className="k">Customer email</div>
+          <div className="v" style={{ overflowWrap: 'anywhere' }}>
+            {plot.customerEmail || <span className="muted">not set</span>}
+          </div>
+        </div>
+        <div style={{ alignSelf: 'end' }}>
+          <button className="btn btn-sm" onClick={() => setEditing(true)}>
+            ✏️ Edit details
+          </button>
         </div>
       </div>
 
@@ -155,6 +168,8 @@ export function PlotScreen({
           onDone={onToast}
         />
       )}
+
+      {editing && <EditPlotSheet plot={plot} onClose={() => setEditing(false)} onSaved={onToast} />}
     </div>
   )
 }

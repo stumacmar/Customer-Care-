@@ -9,6 +9,7 @@ import { Dashboard } from './components/Dashboard'
 import { PlotScreen } from './components/PlotScreen'
 import { NewPlotSheet } from './components/NewPlotSheet'
 import { SettingsSheet } from './components/SettingsSheet'
+import { HelpSheet } from './components/HelpSheet'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
 
@@ -19,6 +20,7 @@ export function App() {
   const [view, setView] = useState<View>({ name: 'dashboard' })
   const [showNewPlot, setShowNewPlot] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
+  const [showHelp, setShowHelp] = useState(false)
   const { show, node: toastNode } = useToast()
 
   // Keep the browser/hardware back button in sync with our view stack.
@@ -26,6 +28,18 @@ export function App() {
     const onPop = () => setView({ name: 'dashboard' })
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  // First-ever open: show the 7-line guide once. After that it lives behind ❓.
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('plot-clock-help-seen')) {
+        localStorage.setItem('plot-clock-help-seen', '1')
+        setShowHelp(true)
+      }
+    } catch {
+      /* private browsing — skip */
+    }
   }, [])
 
   const openPlot = (plotId: string) => {
@@ -55,6 +69,9 @@ export function App() {
           </>
         )}
         <div style={{ flex: 1 }} />
+        <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">
+          ❓
+        </button>
         <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label="Settings">
           ⚙️
         </button>
@@ -83,6 +100,8 @@ export function App() {
       )}
 
       {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} onToast={show} />}
+
+      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
 
       {toastNode}
     </div>
