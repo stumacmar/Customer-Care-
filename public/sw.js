@@ -6,7 +6,7 @@
  * we haven't seen. This is deliberately simple — the audience uses this
  * standing outside a house, often with no signal.
  */
-const CACHE = 'plot-clock-v1'
+const CACHE = 'plot-clock-v2'
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg']
 
 self.addEventListener('install', (event) => {
@@ -28,10 +28,14 @@ self.addEventListener('fetch', (event) => {
   const { request } = event
   if (request.method !== 'GET') return
 
-  // Navigation requests: serve the app shell so deep links work offline.
+  // Navigation requests: always fetch the freshest HTML from the network
+  // (bypassing the browser's HTTP cache) so a new deploy is picked up on the
+  // next load. Fall back to the cached shell only when offline.
   if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(request).catch(() => caches.match('./index.html').then((r) => r || caches.match('./')))
+      fetch(request, { cache: 'no-store' }).catch(() =>
+        caches.match('./index.html').then((r) => r || caches.match('./'))
+      )
     )
     return
   }
