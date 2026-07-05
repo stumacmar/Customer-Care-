@@ -15,6 +15,7 @@ import {
 } from '../lib/code'
 import { describeCountdown, formatDate } from '../lib/dates'
 import { snagReminderText } from '../lib/letters'
+import { downloadCalendar } from '../lib/ics'
 import type { Issue, Plot } from '../types'
 
 export function IssueSection({
@@ -119,6 +120,12 @@ function IssueCard({
           {clock.label} — due {formatDate(clock.dueDate)}
         </div>
       )}
+      {issue.type === 'complaint' && issue.receivedAt && issue.receivedAt !== issue.startedAt && (
+        <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
+          Received {formatDate(issue.receivedAt)} · clock runs from {formatDate(issue.startedAt)} (first
+          business day after receipt, per the Code)
+        </div>
+      )}
       {issue.type === 'emergency' && isOpen && (
         <div className="badge emergency" style={{ marginBottom: 8 }}>
           Health / safety / wellbeing risk — deal with this first.
@@ -142,6 +149,15 @@ function IssueCard({
         <div className="wrap-actions" style={{ marginTop: 12 }}>
           <button className="btn btn-sm btn-primary" onClick={() => setResolving(true)}>
             {issue.type === 'complaint' ? 'Close complaint' : 'Mark resolved'}
+          </button>
+          <button
+            className="btn btn-sm"
+            onClick={() => {
+              downloadCalendar(plot, issue)
+              onToast('Calendar file downloaded — open it to add the reminders')
+            }}
+          >
+            🗓 Remind me
           </button>
           {issue.type === 'snag' && (
             <button className="btn btn-sm" onClick={copyReminder}>

@@ -19,6 +19,7 @@ export function NewPlotSheet({
   const { dispatch } = useStore()
   const [address, setAddress] = useState('')
   const [customerNames, setCustomerNames] = useState('')
+  const [customerEmail, setCustomerEmail] = useState('')
   const [reservationDate, setReservationDate] = useState('')
   const [completionDate, setCompletionDate] = useState('')
 
@@ -30,6 +31,7 @@ export function NewPlotSheet({
       plotId,
       address,
       customerNames,
+      customerEmail: customerEmail || undefined,
       reservationDate: reservationDate || undefined,
       completionDate: completionDate || undefined,
     })
@@ -57,6 +59,15 @@ export function NewPlotSheet({
           value={customerNames}
           onChange={(e) => setCustomerNames(e.target.value)}
           placeholder="e.g. Mr & Mrs Patel"
+        />
+      </div>
+      <div className="field">
+        <label>Customer email (optional — lets you email letters in one tap)</label>
+        <input
+          type="email"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+          placeholder="e.g. customer@email.com"
         />
       </div>
       <div className="field">

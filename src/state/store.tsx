@@ -20,7 +20,7 @@ import type {
   TimelineEventType,
 } from '../types'
 import { buildDocumentChecklist } from '../lib/code'
-import { nowISO, todayISO } from '../lib/dates'
+import { formatDate, nextBusinessDay, nowISO, todayISO } from '../lib/dates'
 import { emptyState, id, loadState, saveState } from '../lib/storage'
 
 type Action =
@@ -30,8 +30,16 @@ type Action =
       plotId: string
       address: string
       customerNames: string
+      customerEmail?: string
       reservationDate?: string
       completionDate?: string
+    }
+  | {
+      type: 'UPDATE_PLOT_DETAILS'
+      plotId: string
+      patch: Partial<
+        Pick<Plot, 'address' | 'customerNames' | 'customerEmail' | 'reservationDate' | 'completionDate'>
+      >
     }
   | { type: 'DELETE_PLOT'; plotId: string }
   | {
@@ -124,6 +132,7 @@ function reducer(state: AppState, action: Action): AppState {
         id: action.plotId,
         address: action.address.trim(),
         customerNames: action.customerNames.trim(),
+        customerEmail: action.customerEmail?.trim() || undefined,
         reservationDate: action.reservationDate,
         completionDate: action.completionDate,
         documents: buildDocumentChecklist(),
@@ -135,6 +144,19 @@ function reducer(state: AppState, action: Action): AppState {
       return { ...state, plots: [plot, ...state.plots] }
     }
 
+    case 'UPDATE_PLOT_DETAILS':
+      return updatePlot(state, action.plotId, (plot) => {
+        const patch = { ...action.patch }
+        if (patch.address !== undefined) patch.address = patch.address.trim()
+        if (patch.customerNames !== undefined) patch.customerNames = patch.customerNames.trim()
+        if (patch.customerEmail !== undefined)
+          patch.customerEmail = patch.customerEmail.trim() || undefined
+        return {
+          plot: { ...plot, ...patch },
+          events: [event('note', 'Plot details updated')],
+        }
+      })
+
     case 'DELETE_PLOT':
       return { ...state, plots: state.plots.filter((p) => p.id !== action.plotId) }
 
@@ -142,23 +164,28 @@ function reducer(state: AppState, action: Action): AppState {
       return updatePlot(state, action.plotId, (plot) => {
         const meta = ISSUE_META[action.issueType]
         const reference = nextReference(plot, action.issueType)
+        const received = todayISO()
+        // Per the Code, a complaint's clock runs from the "complaint start
+        // date" — the first business day AFTER it is received. Snags run from
+        // the day they are reported.
+        const isComplaint = action.issueType === 'complaint'
+        const startedAt = isComplaint ? nextBusinessDay(received) : received
         const issue: Issue = {
           id: id('iss_'),
           type: action.issueType,
           description: action.description.trim(),
           photoDataUrl: action.photoDataUrl,
-          startedAt: todayISO(),
+          startedAt,
+          receivedAt: isComplaint ? received : undefined,
           status: 'open',
           reference,
-          milestoneProgress: action.issueType === 'complaint' ? {} : undefined,
+          milestoneProgress: isComplaint ? {} : undefined,
           createdAt: nowISO(),
         }
-        const ev = event(
-          meta.logType,
-          `${meta.noun} logged (${reference})`,
-          action.description.trim(),
-          issue.id
-        )
+        const detail = isComplaint
+          ? `${action.description.trim()}\nComplaint start date: ${formatDate(startedAt)} (first business day after receipt)`
+          : action.description.trim()
+        const ev = event(meta.logType, `${meta.noun} logged (${reference})`, detail, issue.id)
         return { plot: { ...plot, issues: [issue, ...plot.issues] }, events: [ev] }
       })
 

@@ -64,6 +64,7 @@ export function buildSeedState(developerName: string): AppState {
   const red = plot({
     address: 'Plot 7, Brookfield',
     customerNames: 'Mr Ali & Ms Chen',
+    customerEmail: 'ali.chen@example.com',
     reservationDate: addDays(today, -110),
     completionDate: addDays(today, -35),
   })

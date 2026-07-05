@@ -32,8 +32,14 @@ export interface Issue {
   description: string
   /** Optional photo captured at logging time, stored as a data URL. */
   photoDataUrl?: string
-  /** ISO date the clock started (usually the day it was logged). */
+  /**
+   * ISO date the clock started. For complaints this is the Code's "complaint
+   * start date" — the first business day after the complaint was received —
+   * which may be later than the day it was logged.
+   */
   startedAt: string
+  /** ISO date the issue was actually received/logged (complaints only). */
+  receivedAt?: string
   status: IssueStatus
   resolvedAt?: string // ISO date the issue was put right / closed
   resolutionNote?: string
@@ -95,6 +101,8 @@ export interface Plot {
   id: string
   address: string
   customerNames: string
+  /** Optional — only needed to email letters. GDPR: store no more than this. */
+  customerEmail?: string
   reservationDate?: string // ISO date
   completionDate?: string // ISO date
   documents: DocumentItem[]
