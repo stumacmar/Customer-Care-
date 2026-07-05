@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#0f172a"/>
+  <!-- house roofline -->
+  <path d="M256 96 118 208h40v168h196V208h40L256 96z" fill="#1e293b" stroke="#334155" stroke-width="10" stroke-linejoin="round"/>
+  <!-- clock face -->
+  <circle cx="256" cy="300" r="86" fill="#0f172a" stroke="#f8fafc" stroke-width="16"/>
+  <!-- clock hands -->
+  <line x1="256" y1="300" x2="256" y2="246" stroke="#22c55e" stroke-width="16" stroke-linecap="round"/>
+  <line x1="256" y1="300" x2="300" y2="316" stroke="#f59e0b" stroke-width="16" stroke-linecap="round"/>
+  <circle cx="256" cy="300" r="12" fill="#f8fafc"/>
+</svg>

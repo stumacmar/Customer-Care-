@@ -1,0 +1,19 @@
+{
+  "name": "Plot Clock — NHQB Compliance Tracker",
+  "short_name": "Plot Clock",
+  "description": "Every property has a clock. Know what's due, when, and prove you did it.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
