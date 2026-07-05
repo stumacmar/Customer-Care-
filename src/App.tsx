@@ -69,7 +69,7 @@ export function App() {
             <span className="dot-xl rag-green" style={{ width: 20, height: 20, boxShadow: 'none' }} />
             <h1>
               Plot Clock
-              <span className="sub"> · {state.developerName || 'NHQB compliance tracker'}</span>
+              <span className="sub"> · {state.developerName || 'Customer communications tracker'}</span>
             </h1>
           </>
         )}
@@ -107,7 +107,9 @@ export function App() {
         )}
       </main>
 
-      {tab === 'plots' && view.name === 'developments' && (
+      {/* The FAB is hidden on the empty state, which has its own centred CTA —
+          otherwise "add development" appears twice (most obvious on desktop). */}
+      {tab === 'plots' && view.name === 'developments' && state.developments.length > 0 && (
         <button className="fab" onClick={() => setShowNewDev(true)}>
           + Development
         </button>

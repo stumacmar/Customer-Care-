@@ -122,13 +122,13 @@ export function PlotScreen({
 
       <Timeline plot={plot} />
 
-      {/* Audit export — the safety net. */}
+      {/* Export — one file of everything supplied and when. */}
       <div className="section">
-        <h3>Compliance record</h3>
+        <h3>Records &amp; export</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
-            One clean record of everything on this plot — for an NHQB audit, the Ombudsman, or
-            your insurer.
+            One clean file showing every document you supplied and the dates you did so, plus the
+            full history — ready if a customer query is ever escalated to the Ombudsman.
           </p>
           <div className="wrap-actions">
             <button className="btn btn-sm btn-primary" onClick={() => exportPlotPrintable(plot, state.developerName)}>
