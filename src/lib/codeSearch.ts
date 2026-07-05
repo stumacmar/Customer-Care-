@@ -27,7 +27,8 @@ function tokenize(s: string): string[] {
 const SYNONYMS: Record<string, string[]> = {
   fix: ['put', 'right', 'repair', 'settle'],
   repair: ['put', 'right', 'settle'],
-  deadline: ['days', 'timescale', 'within'],
+  deadline: ['days', 'timescale', 'timetable', 'within'],
+  deadlines: ['days', 'timescale', 'timetable', 'within'],
   letter: ['acknowledgement', 'response', 'closure'],
   email: ['letter'],
   reminder: ['days', 'timescale'],

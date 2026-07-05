@@ -6,25 +6,56 @@
  * else.
  */
 
-import type { AppState } from '../types'
+import type { AppState, Development, Plot } from '../types'
 
 const STORAGE_KEY = 'plot-clock-state-v1'
 
-export const CURRENT_VERSION = 1
+export const CURRENT_VERSION = 2
 
 export function emptyState(): AppState {
-  return { version: CURRENT_VERSION, developerName: '', plots: [] }
+  return { version: CURRENT_VERSION, developerName: '', developments: [], plots: [] }
+}
+
+/**
+ * Bring any older saved state up to the current shape without losing data.
+ * v1 had a flat list of plots with no developments — migrate those into one
+ * default development so existing users keep every plot, issue and letter.
+ */
+function migrate(parsed: Partial<AppState>): AppState {
+  const plots: Plot[] = Array.isArray(parsed.plots) ? (parsed.plots as Plot[]) : []
+  let developments: Development[] = Array.isArray(parsed.developments)
+    ? (parsed.developments as Development[])
+    : []
+
+  const orphaned = plots.filter((p) => !p.developmentId)
+  if (orphaned.length > 0 || (plots.length > 0 && developments.length === 0)) {
+    const defaultDev: Development = {
+      id: 'dev_default',
+      name: 'My development',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    }
+    developments = [defaultDev, ...developments.filter((d) => d.id !== 'dev_default')]
+    for (const p of plots) if (!p.developmentId) p.developmentId = defaultDev.id
+  }
+
+  return {
+    version: CURRENT_VERSION,
+    developerName: parsed.developerName || '',
+    developments,
+    plots,
+  }
 }
 
 export function loadState(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return emptyState()
-    const parsed = JSON.parse(raw) as AppState
+    const parsed = JSON.parse(raw) as Partial<AppState>
     if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.plots)) {
       return emptyState()
     }
-    return { version: CURRENT_VERSION, developerName: parsed.developerName || '', plots: parsed.plots }
+    return migrate(parsed)
   } catch {
     return emptyState()
   }

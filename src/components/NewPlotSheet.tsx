@@ -10,9 +10,11 @@ import { useStore } from '../state/store'
 import { id } from '../lib/storage'
 
 export function NewPlotSheet({
+  developmentId,
   onClose,
   onCreated,
 }: {
+  developmentId: string
   onClose: () => void
   onCreated: (plotId: string) => void
 }) {
@@ -29,6 +31,7 @@ export function NewPlotSheet({
     dispatch({
       type: 'ADD_PLOT',
       plotId,
+      developmentId,
       address,
       customerNames,
       customerEmail: customerEmail || undefined,

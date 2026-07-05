@@ -11,6 +11,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer } from 'react
 import type { ReactNode } from 'react'
 import type {
   AppState,
+  Development,
   DocumentItem,
   Issue,
   IssueType,
@@ -25,9 +26,17 @@ import { emptyState, id, loadState, saveState } from '../lib/storage'
 
 type Action =
   | { type: 'SET_DEVELOPER_NAME'; name: string }
+  | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string }
+  | {
+      type: 'UPDATE_DEVELOPMENT'
+      devId: string
+      patch: Partial<Pick<Development, 'name' | 'location' | 'status'>>
+    }
+  | { type: 'DELETE_DEVELOPMENT'; devId: string }
   | {
       type: 'ADD_PLOT'
       plotId: string
+      developmentId: string
       address: string
       customerNames: string
       customerEmail?: string
@@ -127,9 +136,41 @@ function reducer(state: AppState, action: Action): AppState {
     case 'SET_DEVELOPER_NAME':
       return { ...state, developerName: action.name }
 
+    case 'ADD_DEVELOPMENT': {
+      const dev: Development = {
+        id: action.devId,
+        name: action.name.trim(),
+        location: action.location?.trim() || undefined,
+        status: 'active',
+        createdAt: nowISO(),
+      }
+      return { ...state, developments: [dev, ...state.developments] }
+    }
+
+    case 'UPDATE_DEVELOPMENT': {
+      const patch = { ...action.patch }
+      if (patch.name !== undefined) patch.name = patch.name.trim()
+      if (patch.location !== undefined) patch.location = patch.location.trim() || undefined
+      return {
+        ...state,
+        developments: state.developments.map((d) =>
+          d.id === action.devId ? { ...d, ...patch } : d
+        ),
+      }
+    }
+
+    case 'DELETE_DEVELOPMENT':
+      // Removes the development and every plot on it.
+      return {
+        ...state,
+        developments: state.developments.filter((d) => d.id !== action.devId),
+        plots: state.plots.filter((p) => p.developmentId !== action.devId),
+      }
+
     case 'ADD_PLOT': {
       const plot: Plot = {
         id: action.plotId,
+        developmentId: action.developmentId,
         address: action.address.trim(),
         customerNames: action.customerNames.trim(),
         customerEmail: action.customerEmail?.trim() || undefined,
