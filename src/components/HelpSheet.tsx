@@ -4,6 +4,7 @@
  */
 
 import { Sheet } from './ui'
+import { BrandMark } from './Brand'
 
 const STEPS: { ico: string; text: string }[] = [
   { ico: '➕', text: 'Add your development, then add a plot as each sale nears completion.' },
@@ -32,7 +33,27 @@ const STEPS: { ico: string; text: string }[] = [
 
 export function HelpSheet({ onClose }: { onClose: () => void }) {
   return (
-    <Sheet title="How to use Plot Clock" subtitle="The whole app in 7 lines." onClose={onClose}>
+    <Sheet title="How to use NHQB" subtitle="The whole app in 7 lines." onClose={onClose}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          margin: '2px 0 16px',
+          padding: '12px 14px',
+          background: 'var(--bg-elev-2)',
+          borderRadius: 'var(--radius)',
+          border: '1px solid var(--line)',
+        }}
+      >
+        <BrandMark size={40} className="brand-mark" />
+        <div style={{ minWidth: 0 }}>
+          <div style={{ fontWeight: 800, letterSpacing: '0.16em', fontSize: 16 }}>NHQB</div>
+          <div className="muted" style={{ fontSize: 12 }}>
+            New Homes Quality Code compliance, one plot at a time.
+          </div>
+        </div>
+      </div>
       <div className="stack" style={{ marginBottom: 16 }}>
         {STEPS.map((s, i) => (
           <div key={i} className="card" style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
