@@ -12,6 +12,7 @@ import { isPlotRetired } from '../lib/status'
 import { formatDate } from '../lib/dates'
 import type { Plot, Rag } from '../types'
 import { EditDevelopmentSheet } from './EditDevelopmentSheet'
+import { Icon } from './icons'
 
 const RAG_RANK: Record<Rag, number> = { red: 0, amber: 1, green: 2 }
 
@@ -79,9 +80,19 @@ export function DevelopmentScreen({
       </div>
 
       <div className="wrap-actions" style={{ marginTop: 12 }}>
-        <button className="btn btn-sm" onClick={() => setEditing(true)}>✏️ Edit</button>
+        <button className="btn btn-sm" onClick={() => setEditing(true)}>
+          <Icon name="edit" size={16} /> Edit
+        </button>
         <button className="btn btn-sm" onClick={toggleFinished}>
-          {dev.status === 'active' ? '✓ Mark finished' : '↩ Reopen'}
+          {dev.status === 'active' ? (
+            <>
+              <Icon name="check" size={16} /> Mark finished
+            </>
+          ) : (
+            <>
+              <Icon name="reopen" size={16} /> Reopen
+            </>
+          )}
         </button>
       </div>
 
@@ -107,7 +118,14 @@ export function DevelopmentScreen({
                   <span className="addr">{plot.address || 'Untitled plot'}</span>
                   <span className="cust">{plot.customerNames || 'No customer name'}</span>
                   <span className="headline">
-                    {status.hasEmergency && <strong style={{ color: 'var(--red)' }}>⚠ </strong>}
+                    {status.hasEmergency && (
+                      <Icon
+                        name="alert"
+                        size={13}
+                        strokeWidth={2.2}
+                        style={{ color: 'var(--red)', marginRight: 4, verticalAlign: '-2px' }}
+                      />
+                    )}
                     {status.headline}
                   </span>
                 </span>

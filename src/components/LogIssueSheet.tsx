@@ -8,20 +8,21 @@ import { useState } from 'react'
 import { DictationField, PhotoField, Sheet } from './ui'
 import { useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
+import { Icon, type IconName } from './icons'
 import type { IssueType } from '../types'
 
-const TYPES: { key: IssueType; label: string; ico: string; blurb: string }[] = [
-  { key: 'snag', label: 'Snag', ico: '🔧', blurb: `Starts a ${SNAG_PUT_RIGHT_DAYS}-day put-right clock (Code 3.3).` },
+const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] = [
+  { key: 'snag', label: 'Snag', ico: 'wrench', blurb: `Starts a ${SNAG_PUT_RIGHT_DAYS}-day put-right clock (Code 3.3).` },
   {
     key: 'complaint',
     label: 'Complaint',
-    ico: '📣',
+    ico: 'megaphone',
     blurb: 'Starts the formal complaints procedure: acknowledgement (5d), path to resolution (10d), assessment (30d), 8-week letter (56d).',
   },
   {
     key: 'emergency',
     label: 'Emergency',
-    ico: '🚨',
+    ico: 'alert',
     blurb: 'Health/safety/wellbeing risk. Flagged urgent — never queued behind routine snags.',
   },
 ]
@@ -64,7 +65,7 @@ export function LogIssueSheet({
             className={`type-opt ${t.key}${type === t.key ? ' active' : ''}`}
             onClick={() => setType(t.key)}
           >
-            <span className="ico">{t.ico}</span>
+            <span className="ico"><Icon name={t.ico} size={22} /></span>
             {t.label}
           </button>
         ))}

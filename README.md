@@ -1,4 +1,4 @@
-# NHQB — Quality Code Tracker
+# NHQB — Plot Tracker
 
 **Every property has a clock. This app tells you what's due, when, and gives you the paperwork to prove you did it — with almost no typing.**
 

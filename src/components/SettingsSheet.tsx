@@ -12,6 +12,7 @@ import { buildSeedState } from '../lib/seed'
 import { formatDate } from '../lib/dates'
 import { exportPlotPrintable } from '../lib/export'
 import { isPlotRetired } from '../lib/status'
+import { Icon } from './icons'
 
 export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (m: string) => void }) {
   const { state, dispatch } = useStore()
@@ -114,7 +115,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
                         className="btn btn-sm"
                         onClick={() => exportPlotPrintable(p, state.developerName)}
                       >
-                        📄 Export
+                        <Icon name="file" size={15} /> Export
                       </button>
                       <button className="btn btn-sm btn-danger" onClick={() => deletePlot(p.id, p.address)}>
                         Delete

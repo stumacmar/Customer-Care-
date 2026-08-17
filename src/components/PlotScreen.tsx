@@ -16,6 +16,7 @@ import { Timeline } from './Timeline'
 import { LogIssueSheet } from './LogIssueSheet'
 import { LetterSheet } from './LetterSheet'
 import { EditPlotSheet } from './EditPlotSheet'
+import { Icon } from './icons'
 import type { Issue, IssueType } from '../types'
 
 export function PlotScreen({
@@ -86,7 +87,7 @@ export function PlotScreen({
         </div>
         <div style={{ alignSelf: 'end' }}>
           <button className="btn btn-sm" onClick={() => setEditing(true)}>
-            ✏️ Edit details
+            <Icon name="edit" size={16} /> Edit details
           </button>
         </div>
       </div>
@@ -95,17 +96,17 @@ export function PlotScreen({
       <div className="section">
         <div className="log-buttons">
           <button className="log-btn snag" onClick={() => setLogType('snag')}>
-            <span className="ico">🔧</span>
+            <span className="ico"><Icon name="wrench" size={26} /></span>
             Snag
             <small>30-day clock</small>
           </button>
           <button className="log-btn complaint" onClick={() => setLogType('complaint')}>
-            <span className="ico">📣</span>
+            <span className="ico"><Icon name="megaphone" size={26} /></span>
             Complaint
             <small>5·10·30·56d</small>
           </button>
           <button className="log-btn emergency" onClick={() => setLogType('emergency')}>
-            <span className="ico">🚨</span>
+            <span className="ico"><Icon name="alert" size={26} /></span>
             Emergency
             <small>urgent</small>
           </button>
@@ -132,10 +133,10 @@ export function PlotScreen({
           </p>
           <div className="wrap-actions">
             <button className="btn btn-sm btn-primary" onClick={() => exportPlotPrintable(plot, state.developerName)}>
-              📄 Export PDF
+              <Icon name="file" size={16} /> Export PDF
             </button>
             <button className="btn btn-sm" onClick={() => exportPlotCSV(plot)}>
-              📊 Export CSV
+              <Icon name="chart" size={16} /> Export CSV
             </button>
           </div>
         </div>

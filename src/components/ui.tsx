@@ -6,6 +6,7 @@
 
 import { useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
+import { Icon } from './icons'
 
 export function Sheet({
   title,
@@ -89,7 +90,9 @@ export function PhotoField({
         </>
       ) : (
         <>
-          <div style={{ fontSize: 28 }}>📷</div>
+          <div style={{ color: 'var(--text-faint)' }}>
+            <Icon name="camera" size={28} strokeWidth={1.7} />
+          </div>
           <div>{busy ? 'Loading…' : 'Tap to take or choose a photo'}</div>
           <input
             className="hidden-input"
@@ -139,8 +142,9 @@ export function DictationField({
         onChange={(e) => onChange(e.target.value)}
       />
       {focused && !value && (
-        <div className="dictate-hint">
-          🎤 Prefer to talk? Tap the microphone on your keyboard to dictate.
+        <div className="dictate-hint" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Icon name="mic" size={14} />
+          Prefer to talk? Tap the microphone on your keyboard to dictate.
         </div>
       )}
     </div>

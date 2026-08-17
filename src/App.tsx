@@ -14,6 +14,7 @@ import { SettingsSheet } from './components/SettingsSheet'
 import { HelpSheet } from './components/HelpSheet'
 import { CodeSearch } from './components/CodeSearch'
 import { BrandMark } from './components/Brand'
+import { Icon } from './components/icons'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
 
@@ -73,17 +74,15 @@ export function App() {
             <BrandMark size={38} className="brand-mark" />
             <div className="brand-text">
               <span className="brand-name">NHQB</span>
-              <span className="brand-sub">
-                {state.developerName ? state.developerName : 'Quality Code Tracker'}
-              </span>
+              <span className="brand-sub">Plot Tracker</span>
             </div>
           </div>
         )}
         <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">
-          ❓
+          <Icon name="help" size={22} />
         </button>
         <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label="Settings">
-          ⚙️
+          <Icon name="settings" size={21} />
         </button>
       </header>
 
@@ -122,11 +121,11 @@ export function App() {
 
       <nav className="tabbar">
         <button className={`tab${tab === 'plots' ? ' active' : ''}`} onClick={() => setTab('plots')}>
-          <span className="tab-ico">🏠</span>
+          <span className="tab-ico"><Icon name="home" size={22} /></span>
           Plots
         </button>
         <button className={`tab${tab === 'code' ? ' active' : ''}`} onClick={() => setTab('code')}>
-          <span className="tab-ico">📖</span>
+          <span className="tab-ico"><Icon name="book" size={22} /></span>
           The Code
         </button>
       </nav>

@@ -7,6 +7,7 @@
 import { useRef, useState } from 'react'
 import { useStore } from '../state/store'
 import { formatDate } from '../lib/dates'
+import { Icon } from './icons'
 import type { DocumentItem, Plot } from '../types'
 
 export function DocumentChecklist({ plot }: { plot: Plot }) {
@@ -69,15 +70,24 @@ function DocRow({ plotId, doc }: { plotId: string; doc: DocumentItem }) {
         aria-pressed={doc.completed}
         aria-label={doc.completed ? `Mark "${doc.label}" not done` : `Mark "${doc.label}" done`}
       >
-        ✓
+        <Icon name="check" size={18} strokeWidth={2.6} />
       </button>
       <div className="doc-body">
         <div className="doc-label">{doc.label}</div>
         {doc.hint && <div className="doc-hint">{doc.hint}</div>}
 
         <div className="doc-meta">
-          {doc.completed && <span>✔ {formatDate(doc.completedDate)}</span>}
-          {doc.fileName && <span>📎 {doc.fileName}</span>}
+          {doc.completed && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Icon name="check" size={13} strokeWidth={2.4} style={{ color: 'var(--green)' }} />
+              {formatDate(doc.completedDate)}
+            </span>
+          )}
+          {doc.fileName && (
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+              <Icon name="paperclip" size={13} /> {doc.fileName}
+            </span>
+          )}
           <button className="linklike" onClick={() => fileRef.current?.click()}>
             {doc.fileName ? 'Replace file' : 'Attach file'}
           </button>

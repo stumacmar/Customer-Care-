@@ -16,6 +16,7 @@ import {
 import { describeCountdown, formatDate } from '../lib/dates'
 import { snagReminderText } from '../lib/letters'
 import { downloadCalendar } from '../lib/ics'
+import { Icon } from './icons'
 import type { Issue, Plot } from '../types'
 
 export function IssueSection({
@@ -157,16 +158,16 @@ function IssueCard({
               onToast('Calendar file downloaded — open it to add the reminders')
             }}
           >
-            🗓 Remind me
+            <Icon name="calendar" size={16} /> Remind me
           </button>
           {issue.type === 'snag' && (
             <button className="btn btn-sm" onClick={copyReminder}>
-              📋 Copy reminder
+              <Icon name="copy" size={16} /> Copy reminder
             </button>
           )}
           {issue.type === 'complaint' && (
             <button className="btn btn-sm" onClick={() => onDraftLetter(issue, 'closure')}>
-              ✉ Closure letter
+              <Icon name="mail" size={16} /> Closure letter
             </button>
           )}
         </div>
@@ -232,7 +233,7 @@ function ComplaintMilestones({
           {!m.completed &&
             (m.hasLetter ? (
               <button className="btn btn-sm btn-primary" onClick={() => onDraftLetter(issue, m.key)}>
-                ✉ Draft
+                <Icon name="mail" size={16} /> Draft
               </button>
             ) : (
               <button
@@ -250,7 +251,11 @@ function ComplaintMilestones({
                 Mark done
               </button>
             ))}
-          {m.completed && <span className="badge rag-green">✓</span>}
+          {m.completed && (
+            <span className="badge rag-green" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <Icon name="check" size={14} strokeWidth={2.4} />
+            </span>
+          )}
         </div>
       ))}
     </div>
