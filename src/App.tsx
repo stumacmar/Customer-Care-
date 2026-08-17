@@ -13,6 +13,7 @@ import { NewDevelopmentSheet } from './components/NewDevelopmentSheet'
 import { SettingsSheet } from './components/SettingsSheet'
 import { HelpSheet } from './components/HelpSheet'
 import { CodeSearch } from './components/CodeSearch'
+import { BrandMark } from './components/Brand'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
 
@@ -61,19 +62,23 @@ export function App() {
     <div className="app">
       <header className="topbar">
         {showBack ? (
-          <button className="backbtn" onClick={goBack} aria-label="Back">
-            {backLabel}
-          </button>
-        ) : (
           <>
-            <span className="dot-xl rag-green" style={{ width: 20, height: 20, boxShadow: 'none' }} />
-            <h1>
-              Plot Clock
-              <span className="sub"> · {state.developerName || 'Customer communications tracker'}</span>
-            </h1>
+            <button className="backbtn" onClick={goBack} aria-label="Back">
+              {backLabel}
+            </button>
+            <div style={{ flex: 1 }} />
           </>
+        ) : (
+          <div className="brand">
+            <BrandMark size={38} className="brand-mark" />
+            <div className="brand-text">
+              <span className="brand-name">NHQB</span>
+              <span className="brand-sub">
+                {state.developerName ? state.developerName : 'Quality Code Tracker'}
+              </span>
+            </div>
+          </div>
         )}
-        <div style={{ flex: 1 }} />
         <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">
           ❓
         </button>

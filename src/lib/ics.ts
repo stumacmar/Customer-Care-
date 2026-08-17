@@ -88,7 +88,7 @@ export function buildIssueCalendar(plot: Plot, issue: Issue): { filename: string
   const content = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Plot Clock//NHQB Compliance Tracker//EN',
+    'PRODID:-//NHQB//Quality Code Tracker//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...events.map(vevent),
@@ -96,7 +96,7 @@ export function buildIssueCalendar(plot: Plot, issue: Issue): { filename: string
   ].join('\r\n')
 
   const safe = (issue.reference || issue.type).toLowerCase().replace(/[^a-z0-9]+/g, '-')
-  return { filename: `plot-clock-deadlines-${safe}.ics`, content }
+  return { filename: `nhqb-deadlines-${safe}.ics`, content }
 }
 
 export function downloadCalendar(plot: Plot, issue: Issue): boolean {
