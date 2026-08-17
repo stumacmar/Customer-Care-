@@ -10,6 +10,7 @@ import { useMemo, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { LETTER_MENU, generateLetter } from '../lib/letters'
+import { Icon } from './icons'
 import type { Issue, Plot } from '../types'
 
 export function LetterSheet({
@@ -118,13 +119,13 @@ export function LetterSheet({
 
       <div className="wrap-actions" style={{ marginBottom: 12 }}>
         <button className="btn btn-sm btn-primary" onClick={email}>
-          ✉ Email to customer
+          <Icon name="mail" size={16} /> Email to customer
         </button>
         <button className="btn btn-sm" onClick={copy}>
-          📋 Copy
+          <Icon name="copy" size={16} /> Copy
         </button>
         <button className="btn btn-sm" onClick={print}>
-          🖨 Print / PDF
+          <Icon name="printer" size={16} /> Print / PDF
         </button>
       </div>
       {!plot.customerEmail && (

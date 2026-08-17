@@ -19,20 +19,20 @@ export function BrandMark({ size = 36, className }: { size?: number; className?:
     >
       <defs>
         <linearGradient id="nhqb-mark" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#4f8bff" />
-          <stop offset="1" stopColor="#1d4ed8" />
+          <stop offset="0" stopColor="#37485c" />
+          <stop offset="1" stopColor="#2c3a4c" />
         </linearGradient>
       </defs>
-      <rect width="512" height="512" rx="116" fill="#0b1220" />
+      <rect width="512" height="512" rx="116" fill="url(#nhqb-mark)" />
       <path
         d="M256 84 396 136 V266 c0 100 -62 164 -140 196 c-78 -32 -140 -96 -140 -196 V136 Z"
-        fill="url(#nhqb-mark)"
+        fill="#ffffff"
       />
       <path
         d="M200 262 244 306 320 214"
         fill="none"
-        stroke="#ffffff"
-        strokeWidth="30"
+        stroke="#e9473f"
+        strokeWidth="32"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

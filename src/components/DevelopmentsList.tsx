@@ -8,6 +8,7 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../state/store'
 import { developmentStatus } from '../lib/status'
+import { Icon } from './icons'
 import type { Rag } from '../types'
 
 const RAG_RANK: Record<Rag, number> = { red: 0, amber: 1, green: 2 }
@@ -41,7 +42,7 @@ export function DevelopmentsList({
 
       {state.developments.length === 0 ? (
         <div className="empty">
-          <div className="big">🏘️</div>
+          <div className="big"><Icon name="building" size={46} strokeWidth={1.6} /></div>
           <p>
             No developments yet.
             <br />

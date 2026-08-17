@@ -128,7 +128,7 @@ function buildHeadline(s: {
   docsTotal: number
 }): string {
   const parts: string[] = []
-  if (s.hasEmergency) parts.push('⚠ Emergency open')
+  if (s.hasEmergency) parts.push('Emergency open')
   if (s.overdue > 0) parts.push(`${s.overdue} overdue`)
   if (s.dueSoon > 0) parts.push(`${s.dueSoon} due soon`)
   if (s.openClocks === 0) parts.push('No open clocks')

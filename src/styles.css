@@ -1,34 +1,37 @@
 /* NHQB — New Homes Quality Code compliance tracker.
-   Mobile-first, scan-in-two-seconds UI on a considered corporate palette:
-   deep navy surfaces, one brand blue, functional RAG. Colour does the work. */
+   Mobile-first, scan-in-two-seconds UI on the NHQB house palette: an off-white
+   page, deep navy for text and primary actions, a coral signature accent, and
+   functional RAG traffic lights tuned for contrast on white. */
 
 :root {
-  --bg: #0a1020;
-  --bg-elev: #121a2e;
-  --bg-elev-2: #1a2440;
-  --line: #2a3654;
-  --text: #f2f6fc;
-  --text-dim: #97a6c2;
-  --text-faint: #647089;
+  --bg: #f4f6f8;
+  --bg-elev: #ffffff;
+  --bg-elev-2: #eef1f5;
+  --line: #dce2ea;
+  --text: #2c3a4c; /* NHQB navy */
+  --text-dim: #5b6b7b;
+  --text-faint: #8f9ba8; /* NHQB blue-grey */
 
-  --green: #22c55e;
-  --green-bg: #14351f;
-  --amber: #f59e0b;
-  --amber-bg: #3a2a0a;
-  --red: #ef4444;
-  --red-bg: #3a1414;
-  --blue: #4f8bff;
+  /* RAG — darkened for legibility on a light background. */
+  --green: #15843b;
+  --green-bg: #e5f4ea;
+  --amber: #c76e12;
+  --amber-bg: #fbeed7;
+  --red: #d92d20;
+  --red-bg: #fbe8e6;
+  --blue: #2563eb;
 
-  /* Brand: the NHQB blue and its gradient, used for the mark, primary
-     actions and focus. Distinct from the functional RAG blue (complaints). */
-  --brand: #4f8bff;
-  --brand-2: #1d4ed8;
-  --brand-grad: linear-gradient(135deg, #4f8bff 0%, #1d4ed8 100%);
-  --brand-ring: rgba(79, 139, 255, 0.35);
+  /* Brand: NHQB navy for the mark, primary actions and focus, with the
+     NHQB coral (#e9473f) as the signature accent, used sparingly. */
+  --brand: #2c3a4c;
+  --brand-2: #303e51;
+  --brand-grad: linear-gradient(135deg, #37485c 0%, #2c3a4c 100%);
+  --brand-ring: rgba(44, 58, 76, 0.2);
+  --accent: #e9473f;
 
-  --snag: #f59e0b;
-  --complaint: #4f8bff;
-  --emergency: #ef4444;
+  --snag: #c76e12;
+  --complaint: #2563eb;
+  --emergency: #d92d20;
 
   --radius: 14px;
   --tap: 48px;
@@ -98,7 +101,7 @@ select:focus {
   right: 0;
   z-index: 40;
   display: flex;
-  background: rgba(10, 16, 32, 0.96);
+  background: rgba(255, 255, 255, 0.94);
   backdrop-filter: blur(10px);
   border-top: 1px solid var(--line);
   padding-bottom: var(--safe-bottom);
@@ -115,15 +118,11 @@ select:focus {
   color: var(--text-faint);
 }
 .tabbar .tab .tab-ico {
-  font-size: 21px;
+  display: inline-flex;
   line-height: 1;
-  filter: grayscale(1) opacity(0.6);
 }
 .tabbar .tab.active {
-  color: var(--text);
-}
-.tabbar .tab.active .tab-ico {
-  filter: none;
+  color: var(--brand);
 }
 
 /* ---- Top bar ---- */
@@ -135,7 +134,7 @@ select:focus {
   align-items: center;
   gap: 12px;
   padding: 12px var(--pad);
-  background: linear-gradient(180deg, rgba(16, 24, 44, 0.96), rgba(10, 16, 32, 0.9));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(244, 246, 248, 0.9));
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--line);
 }
@@ -166,7 +165,7 @@ select:focus {
 .brand-mark {
   flex: 0 0 auto;
   border-radius: 11px;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.4), inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 8px rgba(44, 58, 76, 0.22);
 }
 .brand-text {
   display: flex;
@@ -199,10 +198,11 @@ select:focus {
   justify-content: center;
   border-radius: 10px;
   font-size: 20px;
-  background: var(--bg-elev);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--line);
 }
 .iconbtn:active {
-  background: var(--bg-elev-2);
+  background: #e2e7ee;
 }
 .backbtn {
   font-size: 15px;
@@ -521,8 +521,8 @@ select:focus {
   color: var(--amber);
 }
 .badge.complaint {
-  background: #12233f;
-  color: #60a5fa;
+  background: #e6effd;
+  color: #1d4ed8;
 }
 .badge.emergency {
   background: var(--red-bg);
@@ -835,7 +835,7 @@ select:focus {
 }
 .type-opt.active.complaint {
   border-color: var(--complaint);
-  background: #12233f;
+  background: #e6effd;
 }
 .type-opt.active.emergency {
   border-color: var(--emergency);
