@@ -1,13 +1,18 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#37485c"/>
-      <stop offset="1" stop-color="#2c3a4c"/>
-    </linearGradient>
-  </defs>
-  <rect width="512" height="512" rx="116" fill="url(#g)"/>
-  <!-- quality-assurance shield -->
-  <path d="M256 84 396 136 V266 c0 100 -62 164 -140 196 c-78 -32 -140 -96 -140 -196 V136 Z" fill="#ffffff"/>
-  <!-- verified check, NHQB coral -->
-  <path d="M200 262 244 306 320 214" fill="none" stroke="#e9473f" stroke-width="32" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="512" height="512" rx="116" fill="#2c3a4c"/>
+  <!-- The NHQB rooflines: two overlapping gables with a chimney, drawn white
+       on the Board's navy — matching the organisation's own mark. -->
+  <g fill="none" stroke="#ffffff" stroke-width="30" stroke-linecap="butt">
+    <!-- main gable -->
+    <path d="M62 350 L242 168 L422 350"/>
+    <!-- rear gable, peeking over the right slope -->
+    <path d="M300 226 L364 162 L468 268"/>
+    <!-- inner return under the rear-right slope -->
+    <path d="M368 230 L428 292"/>
+  </g>
+  <!-- chimney on the left slope -->
+  <g fill="#ffffff">
+    <rect x="130" y="196" width="42" height="86"/>
+    <rect x="120" y="176" width="62" height="22"/>
+  </g>
 </svg>
