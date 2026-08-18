@@ -8,7 +8,13 @@ import { useRef, useState } from 'react'
 import { useStore } from '../state/store'
 import { formatDate } from '../lib/dates'
 import { Icon } from './icons'
-import type { DocumentItem, Plot } from '../types'
+import type { DocumentItem, DocumentStage, Plot } from '../types'
+
+const STAGE_GROUPS: { stage: DocumentStage; title: string; clause: string }[] = [
+  { stage: 'reservation', title: 'At reservation', clause: 'Code 2.2 – 2.3' },
+  { stage: 'pre_contract', title: 'Pre-contract & exchange', clause: 'Code 2.6 – 2.7' },
+  { stage: 'completion', title: 'Completion & handover', clause: 'Code 2.8, 2.11 – 2.12, 3.1' },
+]
 
 export function DocumentChecklist({ plot }: { plot: Plot }) {
   const done = plot.documents.filter((d) => d.completed).length
@@ -23,11 +29,26 @@ export function DocumentChecklist({ plot }: { plot: Plot }) {
       <div className="doc-progress" aria-label={`${done} of ${total} documents complete`}>
         <div style={{ width: `${pct}%` }} />
       </div>
-      <div className="card">
-        {plot.documents.map((doc) => (
-          <DocRow key={doc.key} plotId={plot.id} doc={doc} />
-        ))}
-      </div>
+      {STAGE_GROUPS.map(({ stage, title, clause }) => {
+        const docs = plot.documents.filter((d) => d.stage === stage)
+        if (docs.length === 0) return null
+        const groupDone = docs.filter((d) => d.completed).length
+        return (
+          <div key={stage} style={{ marginBottom: 10 }}>
+            <div className="doc-stage-head">
+              <span>{title}</span>
+              <span className="muted">
+                {groupDone}/{docs.length} · {clause}
+              </span>
+            </div>
+            <div className="card">
+              {docs.map((doc) => (
+                <DocRow key={doc.key} plotId={plot.id} doc={doc} />
+              ))}
+            </div>
+          </div>
+        )
+      })}
     </div>
   )
 }

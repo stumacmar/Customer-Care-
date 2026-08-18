@@ -2,11 +2,12 @@
 
 **Every property has a clock. This app tells you what's due, when, and gives you the paperwork to prove you did it — with almost no typing.**
 
-A mobile-first tool for micro-developers (1–5 homes a year) who are registered NHQB developers with no customer-care team and no CRM. It is deliberately **not** a defect-management CRM. It does exactly three things the New Homes Quality Board (NHQB) Code actually requires of a small developer, and nothing else:
+A mobile-first tool for micro-developers (1–5 homes a year) who are registered NHQB developers with no customer-care team and no CRM. It is deliberately **not** a defect-management CRM. It covers the whole journey the New Homes Quality Code attaches to a plot — **from the day the Reservation Agreement is signed to the end of the two-year after-sales window** — and nothing else:
 
-1. **Starts and tracks the Code-mandated clocks** the moment an issue is logged.
-2. **Keeps the auditable document checklist** every plot must be able to evidence.
-3. **Produces the documents** — the five complaint letters and the full compliance record — you'd hand to an NHQB auditor or the New Homes Ombudsman.
+1. **Starts and tracks the Code-mandated clocks** — the 14-day cooling-off (2.3), the exchange-by date (2.2), major-change cancellation windows (2.9), refund deadlines after a cancellation (2.4/2.13), the completion notice period and pre-completion inspection (2.8), and the snag/complaint/emergency clocks after completion (3.3/3.4).
+2. **Keeps the auditable, stage-grouped document checklist** every plot must be able to evidence — reservation (2.2), pre-contract & exchange (2.6/2.7), completion & handover (2.11/2.12/3.1).
+3. **Keeps the evidence trail** — a Spec & changes log for every buyer choice, paid extra, developer change and delay, with photos, plus the immutable timeline.
+4. **Produces the documents** — the five complaint letters, the major-change notice, the delay update, and the full compliance record you'd hand to an NHQB auditor or the New Homes Ombudsman.
 
 Anything that smelled like enterprise CRM creep (sales pipelines, lead scoring, BI dashboards, permission trees, contractor modules) was intentionally left out.
 
@@ -26,6 +27,22 @@ One home screen, one row per plot. Colour does the work so it's readable standin
 
 Rows sort worst-first, so anything on fire is at the top.
 
+### The journey: reservation → completion → two years of after-sales
+
+A plot is added the day it is **reserved**. Its stage is derived from dates, never managed by hand: Reserved → Exchanged → Notice served → Completed (→ archived when the two-year Ombudsman window closes), or Cancelled at any point. Each stage carries its own Code clocks:
+
+| Stage | Clocks the app runs | Code |
+| --- | --- | --- |
+| Reserved | 14-day cooling-off; exchange-by date (defaults to the Code minimum of six weeks) | 2.3 / 2.2m |
+| Any pre-completion | Major change → the customer's 14-day cancellation window, during which notice to complete must not be served | 2.9 |
+| Cancelled | Refund of the reservation fee within 14 days, or the contract deposit within 28 days | 2.4 / 2.13 |
+| Notice served | Warns if the notice period is under 14 calendar days; reminds you to offer the pre-completion inspection | 2.8 |
+| Completed | The three log buttons below, for two years | 3.1–3.4 |
+
+### Spec & changes — the evidence trail
+
+Every buyer choice ("front door confirmed: Anthracite grey"), paid extra, developer change and delay is logged in seconds with an optional photo. Logging a **major change** starts the 14-day window automatically and drafts the written notice the Code requires; logging a **delay** offers a timetable-update letter.
+
 ### The three things that start a clock
 
 Three impossible-to-miss buttons. Logging any of them takes under 20 seconds — pick type → photo → one-line voice-to-text or typed description → done. The app calculates every downstream deadline itself; the user never needs to know a clause number or do date arithmetic.
@@ -36,18 +53,17 @@ Three impossible-to-miss buttons. Logging any of them takes under 20 seconds —
 | 📣 **Complaint** | Formal complaints procedure: acknowledgement (day 5), Path to Resolution (day 10), Assessment & Response (day 30), Eight-Week letter (day 56), then 28-day updates until closed | 3.4 |
 | 🚨 **Emergency** | No fixed clock, but flagged **urgent** and visually distinct so it never queues behind routine snags | — |
 
-### Document checklist (auto-generated per plot)
+### Document checklist (auto-generated per plot, grouped by stage)
 
-Created automatically the moment a plot is added, so nothing is forgotten (Code 2.11 / 3.1). Tick-and-upload, never free text:
+Created automatically the moment a plot is added, so nothing is forgotten. Tick-and-upload, never free text:
 
-- Schedule of Incomplete Work (Home) issued
-- Pre-completion inspection offered / carried out
-- Home demonstration completed
-- Warranty documentation provided
-- Complaints procedure copy given to customer
-- Health & safety file provided
-- Building regulation completion certificate (or a note explaining why not yet available)
-- After-sales service written statement given
+**At reservation (2.2–2.3)** — Reservation Agreement signed and copy given · Affordability Schedule provided
+
+**Pre-contract & exchange (2.6–2.7)** — Pre-contract information to the customer's legal adviser · expected completion date + plan · named contacts in writing · contract of sale terms confirmed (incl. two-year builders' liability and deposit protection)
+
+**Completion & handover (2.8, 2.11–2.12, 3.1)** — Pre-completion inspection offered · Schedule of Incomplete Work (Home) · Schedule of Incomplete Work (Development) · home demonstration · warranty documentation · complaints procedure copy · health & safety file · building regulation completion certificate · after-sales service written statement
+
+The traffic-light only counts documents due by the plot's current stage — a freshly reserved plot isn't "13 documents outstanding" on day one.
 
 ### Auto-generated letters
 
@@ -58,6 +74,8 @@ The Code specifies exact required content for five complaint letters. Each gener
 - Assessment & Response (day 30) — settled items, timescales, dispute-resolution route, Ombudsman referral
 - Eight-Week letter (day 56)
 - Closure
+- **Major change notice (2.9)** — the written notice with the customer's 14-day right to cancel
+- **Completion timetable update (2.6/2.8)** — the keep-the-customer-informed delay letter
 
 ### Audit export (the safety net)
 
@@ -109,7 +127,8 @@ Open **Settings → Load demo plots** to see the app populated with a green plot
 
 - **Phase 1 (done)** — dashboard, three log buttons, auto-calculated clocks, document checklist, timeline, browser storage, PWA.
 - **Phase 2 (done)** — the five letter generators, audit export (PDF + CSV).
-- **Phase 3 (if there's appetite)** — multi-developer accounts with isolated data and simple subscription billing. That's the point it becomes a real product decision rather than a personal tool.
+- **Phase 3 (done)** — the full journey back to reservation: journey stages and clocks (cooling-off, exchange, major changes, refunds, notice period, PCI), the Spec & changes evidence log, stage-grouped documents, the major-change and delay letters.
+- **Phase 4 (if there's appetite)** — a buyer-side view (the customer sees their own plot, raises issues into the same record), multi-developer accounts, and nominated-representative access for vulnerable customers. That's the point it becomes a real product decision rather than a personal tool.
 
 ## Compliance note
 

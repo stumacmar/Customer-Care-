@@ -6,11 +6,12 @@
  * else.
  */
 
-import type { AppState, Development, Plot } from '../types'
+import { DOCUMENT_TEMPLATE } from './code'
+import type { AppState, Development, DocumentItem, Plot } from '../types'
 
 const STORAGE_KEY = 'plot-clock-state-v1'
 
-export const CURRENT_VERSION = 2
+export const CURRENT_VERSION = 3
 
 export function emptyState(): AppState {
   return { version: CURRENT_VERSION, developerName: '', developments: [], plots: [] }
@@ -20,6 +21,9 @@ export function emptyState(): AppState {
  * Bring any older saved state up to the current shape without losing data.
  * v1 had a flat list of plots with no developments — migrate those into one
  * default development so existing users keep every plot, issue and letter.
+ * v2 → v3 extended plots back to the reservation stage: documents gained a
+ * journey stage (and new reservation/pre-contract items), and plots gained a
+ * spec-and-changes log.
  */
 function migrate(parsed: Partial<AppState>): AppState {
   const plots: Plot[] = Array.isArray(parsed.plots) ? (parsed.plots as Plot[]) : []
@@ -37,6 +41,20 @@ function migrate(parsed: Partial<AppState>): AppState {
     }
     developments = [defaultDev, ...developments.filter((d) => d.id !== 'dev_default')]
     for (const p of plots) if (!p.developmentId) p.developmentId = defaultDev.id
+  }
+
+  // v2 → v3: stage-tag existing documents, add the new checklist items in
+  // template order (preserving any ticks/files on items the user already had),
+  // and default the changes log.
+  for (const p of plots) {
+    if (!Array.isArray(p.changes)) p.changes = []
+    const existing = new Map<string, DocumentItem>((p.documents || []).map((d) => [d.key, d]))
+    p.documents = DOCUMENT_TEMPLATE.map((t) => {
+      const prior = existing.get(t.key)
+      return prior
+        ? { ...t, ...prior, stage: t.stage, label: t.label, hint: t.hint }
+        : { ...t, completed: false }
+    })
   }
 
   return {

@@ -515,4 +515,7 @@ export const QUICK_ANSWERS: { q: string; ref: string; a: string }[] = [
   { q: 'How much can I charge for early bird / plot reservation?', ref: '2.1', a: 'No more than £150, with clear refund terms (full refund if the customer withdraws within 24 hours of the plot being released, or a longer period you set).' },
   { q: 'How long is the cooling-off period?', ref: '2.3', a: 'At least 14 days, with a full refund of the reservation fee if the customer cancels for any reason during it.' },
   { q: 'When must I refund a deposit?', ref: '2.13', a: 'Within 28 days of the contract being cancelled.' },
+  { q: 'What must be in the Reservation Agreement?', ref: '2.2', a: 'Who they are buying from, the fee, the 14-day cooling-off, refund terms, the home’s details and price, warranty contact and summary, the exchange-by date (at least 6 weeks after reservation), tenure and costs — plus the Affordability Schedule.' },
+  { q: 'What happens if I make a major change?', ref: '2.9', a: 'Tell the customer in writing. They can cancel within 14 days of receiving the details for a full refund, and you cannot serve notice to complete during those 14 days. Recommend they take legal advice.' },
+  { q: 'How much notice of completion must I give?', ref: '2.8', a: 'The completion notice period is usually expected to be at least 14 calendar days, so there is time for the pre-completion inspection after notice is served.' },
 ]

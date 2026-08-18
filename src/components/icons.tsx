@@ -32,6 +32,9 @@ export type IconName =
   | 'building'
   | 'arrow-right'
   | 'trash'
+  | 'clock'
+  | 'clipboard'
+  | 'key'
 
 const PATHS: Record<IconName, ReactNode> = {
   help: (
@@ -184,6 +187,29 @@ const PATHS: Record<IconName, ReactNode> = {
       <path d="M6.5 6v13a2 2 0 0 0 2 2h7a2 2 0 0 0 2-2V6" />
       <path d="M10 11v6" />
       <path d="M14 11v6" />
+    </>
+  ),
+  clock: (
+    <>
+      <circle cx="12" cy="12" r="9.5" />
+      <path d="M12 6.5V12l3.5 2.5" />
+    </>
+  ),
+  clipboard: (
+    <>
+      <rect x="4.5" y="4" width="15" height="17.5" rx="2" />
+      <path d="M9 4a3 3 0 0 1 6 0" />
+      <path d="M8.5 10.5h7" />
+      <path d="M8.5 14h7" />
+      <path d="M8.5 17.5h4.5" />
+    </>
+  ),
+  key: (
+    <>
+      <circle cx="8" cy="15.5" r="4.5" />
+      <path d="M11.2 12.3 20.5 3" />
+      <path d="M16.5 7l3 3" />
+      <path d="M13.5 10l2.2 2.2" />
     </>
   ),
 }

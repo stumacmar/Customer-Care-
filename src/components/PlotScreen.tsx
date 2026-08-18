@@ -1,7 +1,9 @@
 /*
- * The one screen per plot. Everything lives here: the three impossible-to-miss
- * log buttons, the live clocks + issues, the document checklist, the timeline,
- * and the audit export. Nothing competes visually with the three buttons.
+ * The one screen per plot — the whole journey from reservation to the end of
+ * the two-year after-sales window. Top to bottom: the journey strip and its
+ * Code clocks, the three impossible-to-miss log buttons, the spec-and-changes
+ * evidence log, live issues, the stage-grouped document checklist, the
+ * timeline, and the audit export.
  */
 
 import { useState } from 'react'
@@ -12,6 +14,11 @@ import { exportPlotCSV, exportPlotPrintable } from '../lib/export'
 import { useStore } from '../state/store'
 import { DocumentChecklist } from './DocumentChecklist'
 import { IssueSection } from './IssueSection'
+import { JourneySection } from './JourneySection'
+import { ChangesSection } from './ChangesSection'
+import { LogChangeSheet } from './LogChangeSheet'
+import { ChangeLetterSheet } from './ChangeLetterSheet'
+import { ResolveChangeSheet } from './ResolveChangeSheet'
 import { Timeline } from './Timeline'
 import { LogIssueSheet } from './LogIssueSheet'
 import { LetterSheet } from './LetterSheet'
@@ -33,6 +40,9 @@ export function PlotScreen({
   const [logType, setLogType] = useState<IssueType | null>(null)
   const [letterFor, setLetterFor] = useState<{ issue: Issue; key?: string } | null>(null)
   const [editing, setEditing] = useState(false)
+  const [loggingChange, setLoggingChange] = useState(false)
+  const [changeLetterForId, setChangeLetterForId] = useState<string | null>(null)
+  const [resolvingChangeId, setResolvingChangeId] = useState<string | null>(null)
 
   if (!plot) {
     return (
@@ -46,6 +56,9 @@ export function PlotScreen({
   }
 
   const status = plotStatus(plot)
+  // Derived from ids so the sheets always see the freshest record.
+  const changeLetterFor = plot.changes.find((c) => c.id === changeLetterForId) || null
+  const resolvingChange = plot.changes.find((c) => c.id === resolvingChangeId) || null
 
   const remove = () => {
     if (confirm(`Delete "${plot.address}" and all its records? This cannot be undone.`)) {
@@ -65,7 +78,8 @@ export function PlotScreen({
             </h2>
           </div>
           <div className="muted" style={{ marginTop: 6, marginLeft: 36 }}>
-            {plot.customerNames || 'No customer name'} · <strong>{ragLabel(status.rag)}</strong>
+            {plot.customerNames || 'No customer name'} · {status.stageLabel} ·{' '}
+            <strong>{ragLabel(status.rag)}</strong>
           </div>
         </div>
       </div>
@@ -76,7 +90,19 @@ export function PlotScreen({
           <div className="v">{formatDate(plot.reservationDate)}</div>
         </div>
         <div>
-          <div className="k">Completed</div>
+          <div className="k">Exchange due</div>
+          <div className="v">{formatDate(plot.exchangeDeadline)}</div>
+        </div>
+        <div>
+          <div className="k">Exchanged</div>
+          <div className="v">{formatDate(plot.exchangeDate)}</div>
+        </div>
+        <div>
+          <div className="k">Notice to complete</div>
+          <div className="v">{formatDate(plot.noticeServedDate)}</div>
+        </div>
+        <div>
+          <div className="k">Completion</div>
           <div className="v">{formatDate(plot.completionDate)}</div>
         </div>
         <div>
@@ -85,14 +111,18 @@ export function PlotScreen({
             {plot.customerEmail || <span className="muted">not set</span>}
           </div>
         </div>
-        <div style={{ alignSelf: 'end' }}>
+        <div style={{ alignSelf: 'end', gridColumn: '1 / -1' }}>
           <button className="btn btn-sm" onClick={() => setEditing(true)}>
-            <Icon name="edit" size={16} /> Edit details
+            <Icon name="edit" size={16} /> Edit details &amp; dates
           </button>
         </div>
       </div>
 
-      {/* The three impossible-to-miss buttons. */}
+      <JourneySection plot={plot} onToast={onToast} onResolveMajorChange={setResolvingChangeId} />
+
+      {/* The three impossible-to-miss buttons. Snags cover pre-completion
+          inspection findings too (Code 2.8); complaints can arise at any stage
+          about Part 1 and Part 2 obligations (Code 3.4). */}
       <div className="section">
         <div className="log-buttons">
           <button className="log-btn snag" onClick={() => setLogType('snag')}>
@@ -112,6 +142,13 @@ export function PlotScreen({
           </button>
         </div>
       </div>
+
+      <ChangesSection
+        plot={plot}
+        onLogChange={() => setLoggingChange(true)}
+        onDraftLetter={(change) => setChangeLetterForId(change.id)}
+        onResolveMajorChange={setResolvingChangeId}
+      />
 
       <IssueSection
         plot={plot}
@@ -167,6 +204,38 @@ export function PlotScreen({
           initialKey={letterFor.key}
           onClose={() => setLetterFor(null)}
           onDone={onToast}
+        />
+      )}
+
+      {loggingChange && (
+        <LogChangeSheet
+          plotId={plot.id}
+          onClose={() => setLoggingChange(false)}
+          onLogged={(msg, kind, changeId) => {
+            setLoggingChange(false)
+            onToast(msg)
+            // A major change must be notified in writing (Code 2.9) — open the
+            // draft notice for the record that was just logged.
+            if (kind === 'major_change') setChangeLetterForId(changeId)
+          }}
+        />
+      )}
+
+      {changeLetterFor && (
+        <ChangeLetterSheet
+          plot={plot}
+          change={changeLetterFor}
+          onClose={() => setChangeLetterForId(null)}
+          onToast={onToast}
+        />
+      )}
+
+      {resolvingChange && (
+        <ResolveChangeSheet
+          plot={plot}
+          change={resolvingChange}
+          onClose={() => setResolvingChangeId(null)}
+          onToast={onToast}
         />
       )}
 

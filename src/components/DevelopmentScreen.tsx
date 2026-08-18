@@ -116,7 +116,10 @@ export function DevelopmentScreen({
                 <span className="rag-bar" />
                 <span className="body">
                   <span className="addr">{plot.address || 'Untitled plot'}</span>
-                  <span className="cust">{plot.customerNames || 'No customer name'}</span>
+                  <span className="cust">
+                    {plot.customerNames || 'No customer name'} ·{' '}
+                    <span className="stage-tag">{status.stageLabel}</span>
+                  </span>
                   <span className="headline">
                     {status.hasEmergency && (
                       <Icon
@@ -142,7 +145,7 @@ export function DevelopmentScreen({
             className="btn btn-sm btn-ghost btn-block"
             onClick={() => setShowRetired((s) => !s)}
           >
-            {showRetired ? 'Hide' : 'Show'} retired plots ({retired.length}) · 2-year window closed
+            {showRetired ? 'Hide' : 'Show'} archived plots ({retired.length})
           </button>
           {showRetired && (
             <div className="plot-list" style={{ marginTop: 10 }}>
@@ -157,10 +160,14 @@ export function DevelopmentScreen({
                   <span className="body">
                     <span className="addr">{plot.address}</span>
                     <span className="headline">
-                      Completed {formatDate(plot.completionDate)} · Ombudsman window closed
+                      {plot.cancellation
+                        ? `Cancelled ${formatDate(plot.cancellation.date)} · refund paid`
+                        : `Completed ${formatDate(plot.completionDate)} · Ombudsman window closed`}
                     </span>
                   </span>
-                  <span className="badge resolved" style={{ alignSelf: 'center' }}>retired</span>
+                  <span className="badge resolved" style={{ alignSelf: 'center' }}>
+                    {plot.cancellation ? 'cancelled' : 'retired'}
+                  </span>
                 </button>
               ))}
             </div>
