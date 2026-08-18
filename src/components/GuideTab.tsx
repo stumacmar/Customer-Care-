@@ -101,7 +101,7 @@ export function GuideTab() {
           aria-label="Demo video tour of the app"
         />
         <p className="muted" style={{ fontSize: 12.5, margin: '8px 4px 2px' }}>
-          The whole app in 90 seconds — silent, with captions.
+          The whole app in two minutes — narrated, with captions. Sound on.
         </p>
       </div>
 
