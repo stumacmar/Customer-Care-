@@ -29,6 +29,7 @@ import { emptyState, id, loadState, saveState } from '../lib/storage'
 
 type Action =
   | { type: 'SET_DEVELOPER_NAME'; name: string }
+  | { type: 'SET_DEVELOPER_EMAIL'; email: string }
   | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string }
   | {
       type: 'UPDATE_DEVELOPMENT'
@@ -180,6 +181,9 @@ function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {
     case 'SET_DEVELOPER_NAME':
       return { ...state, developerName: action.name }
+
+    case 'SET_DEVELOPER_EMAIL':
+      return { ...state, developerEmail: action.email.trim() || undefined }
 
     case 'ADD_DEVELOPMENT': {
       const dev: Development = {

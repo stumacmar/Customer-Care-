@@ -213,6 +213,8 @@ export interface Plot {
 export interface AppState {
   version: number
   developerName: string
+  /** Where buyer reports are emailed — included in shared buyer links. */
+  developerEmail?: string
   /** UI preferences. Compliance is built in; showing the clause numbers is opt-in. */
   showCodeRefs?: boolean
   /** ISO datetime of the last backup download — drives the weekly backup nag. */

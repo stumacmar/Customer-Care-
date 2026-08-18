@@ -31,18 +31,21 @@ const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] =
 export function LogIssueSheet({
   plotId,
   initialType,
+  initialDescription,
   onClose,
   onLogged,
 }: {
   plotId: string
   initialType: IssueType
+  /** Prefilled when the issue arrives as a buyer report. */
+  initialDescription?: string
   onClose: () => void
   onLogged: (msg: string) => void
 }) {
   const { dispatch } = useStore()
   const plot = usePlot(plotId)
   const [type, setType] = useState<IssueType>(initialType)
-  const [description, setDescription] = useState('')
+  const [description, setDescription] = useState(initialDescription || '')
   const [photo, setPhoto] = useState<string | undefined>(undefined)
   // Code 3.4: complaints can be combined into one, with the timetable running
   // from the first complaint received. null = start a separate complaint.
