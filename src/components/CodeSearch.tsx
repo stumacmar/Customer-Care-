@@ -73,7 +73,7 @@ export function CodeSearch({
                 >
                   <div style={{ fontWeight: 700, marginBottom: 4 }}>{qa.q}</div>
                   <div className="muted" style={{ fontSize: 13 }}>{qa.a}</div>
-                  <div className="ref" style={{ marginTop: 6, color: 'var(--blue)' }}>
+                  <div className="ref" style={{ marginTop: 6, color: 'var(--link)' }}>
                     Code {qa.ref} →
                   </div>
                 </button>
@@ -139,7 +139,7 @@ export function CodeSearch({
       <p className="muted" style={{ fontSize: 12, marginTop: 20 }}>
         Transcribed from the New Homes Quality Code {CODE_VERSION}. A navigation aid, not legal
         advice — always confirm against the{' '}
-        <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--blue)' }}>
+        <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
           official Code
         </a>
         .
@@ -177,7 +177,7 @@ function SectionDetail({ section, onBack }: { section: CodeSection; onBack: () =
       <p className="muted" style={{ fontSize: 12, marginTop: 16 }}>
         Reference: New Homes Quality Code {CODE_VERSION}, clause {refLabel(section.ref)}. Plain-English
         summary — read the{' '}
-        <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--blue)' }}>
+        <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
           official Code
         </a>{' '}
         for the full wording.

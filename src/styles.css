@@ -1,34 +1,42 @@
 /* NHQB Plot Tracker — design system.
  *
- * The look follows Apple's Human Interface Guidelines, translated to the web:
- *   – one soft grouped background; flat white cards with no borders, subtle
- *     lift, and hairline separators inside
- *   – a single restrained tint (the NHQB navy) plus functional RAG colours
- *   – native type stack (SF on Apple devices, Inter elsewhere), tight
- *     negative tracking on headings, tabular numerals on anything counting
+ * Apple-grade interaction design wearing the NHQB brand (nhqb.org.uk):
+ *   – the site's off-white ground (#f9f9f9) with flat white cards, hairline
+ *     separators, subtle lift
+ *   – the site's colour pairing: navy (#2c3a4c/#303e51) for structure, ink
+ *     and primary actions; coral (#e9473f) for links and accents; functional
+ *     RAG kept separate
+ *   – the site's type pairing: Cardo (serif) for headings, Inter for body
+ *     and controls; tabular numerals on anything counting
  *   – continuous-feeling corner radii, 4pt spacing rhythm, gentle motion
  */
 
 :root {
-  /* Surfaces */
-  --bg: #f2f2f7; /* iOS systemGroupedBackground */
+  /* Surfaces — the NHQB site's base palette: off-white ground, white cards. */
+  --bg: #f9f9f9;
   --bg-elev: #ffffff;
-  --bg-elev-2: rgba(116, 116, 128, 0.08); /* quaternary fill — inset controls */
-  --fill: rgba(116, 116, 128, 0.12); /* secondary buttons, chips */
-  --line: rgba(60, 60, 67, 0.1); /* borders where unavoidable */
-  --sep: rgba(60, 60, 67, 0.12); /* hairline separators */
+  --bg-elev-2: rgba(48, 62, 81, 0.06); /* inset controls, navy-tinged */
+  --fill: rgba(48, 62, 81, 0.09); /* secondary buttons, chips */
+  --line: rgba(48, 62, 81, 0.12); /* borders where unavoidable */
+  --sep: rgba(48, 62, 81, 0.14); /* hairline separators */
 
-  /* Ink */
-  --text: #1c2431;
-  --text-dim: rgba(44, 55, 70, 0.62);
-  --text-faint: rgba(44, 55, 70, 0.38);
+  /* Ink — the site's dark blue is its body colour, not black. */
+  --text: #303e51;
+  --text-dim: rgba(48, 62, 81, 0.66);
+  --text-faint: #8f9ba8; /* the site's blue-grey */
 
-  /* Brand — NHQB navy as the app tint, coral reserved for the mark */
+  /* Brand — NHQB navy for structure and primary actions; NHQB coral for
+     links and interactive accents, exactly as the site pairs them. */
   --brand: #2c3a4c;
-  --brand-2: #3d5065;
+  --brand-2: #303e51;
   --brand-grad: linear-gradient(135deg, #3d5065 0%, #2c3a4c 100%);
   --brand-ring: rgba(44, 58, 76, 0.18);
   --accent: #e9473f;
+  --link: #e9473f;
+
+  /* Type — Inter for UI (the site's body face); Cardo for headings, as on
+     nhqb.org.uk. */
+  --font-heading: 'Cardo', 'Iowan Old Style', Georgia, 'Times New Roman', serif;
 
   /* Functional colour (tuned for white surfaces) */
   --green: #1e8a41;
@@ -82,8 +90,13 @@ body {
   overscroll-behavior-y: none;
 }
 
+/* Headings carry the site's serif voice; labels and controls stay Inter. */
 h1,
-h2,
+h2 {
+  font-family: var(--font-heading);
+  letter-spacing: 0;
+  font-weight: 700;
+}
 h3 {
   letter-spacing: -0.02em;
 }
@@ -147,7 +160,7 @@ select:focus {
   right: 0;
   z-index: 40;
   display: flex;
-  background: rgba(249, 249, 251, 0.82);
+  background: rgba(249, 249, 249, 0.85);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 -0.5px 0 var(--sep);
@@ -183,7 +196,7 @@ select:focus {
   align-items: center;
   gap: 12px;
   padding: 10px var(--pad);
-  background: rgba(249, 249, 251, 0.82);
+  background: rgba(249, 249, 249, 0.85);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 0.5px 0 var(--sep);
@@ -216,7 +229,7 @@ select:focus {
 }
 .iconbtn:active {
   transform: scale(0.92);
-  background: rgba(116, 116, 128, 0.2);
+  background: rgba(48, 62, 81, 0.16);
 }
 .backbtn {
   font-size: 17px;
@@ -282,7 +295,6 @@ select:focus {
 .dash-head h2 {
   font-size: 28px;
   font-weight: 700;
-  letter-spacing: -0.025em;
   margin: 0;
 }
 .legend {
@@ -727,7 +739,7 @@ select:focus {
 .whylink {
   font-size: inherit;
   font-weight: 600;
-  color: var(--blue);
+  color: var(--link);
   background: none;
   padding: 0 2px;
 }
@@ -923,7 +935,7 @@ select:focus {
   font-variant-numeric: tabular-nums;
 }
 .linklike {
-  color: var(--blue);
+  color: var(--link);
   font-weight: 600;
   font-size: 13px;
   background: none;
@@ -1107,7 +1119,7 @@ select:focus {
   width: 36px;
   height: 5px;
   border-radius: 3px;
-  background: rgba(60, 60, 67, 0.25);
+  background: rgba(48, 62, 81, 0.25);
   margin: 6px auto 14px;
 }
 .sheet h2 {
@@ -1207,7 +1219,7 @@ select:focus {
 }
 
 .photo-drop {
-  border: 1.5px dashed rgba(60, 60, 67, 0.25);
+  border: 1.5px dashed rgba(48, 62, 81, 0.25);
   border-radius: var(--radius-sm);
   background: var(--bg-elev);
   padding: 20px;
