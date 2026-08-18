@@ -13,12 +13,13 @@ import { NewDevelopmentSheet } from './components/NewDevelopmentSheet'
 import { SettingsSheet } from './components/SettingsSheet'
 import { HelpSheet } from './components/HelpSheet'
 import { CodeSearch } from './components/CodeSearch'
+import { GuideTab } from './components/GuideTab'
 import { BrandMark } from './components/Brand'
 import { Icon } from './components/icons'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
 
-type Tab = 'plots' | 'code'
+type Tab = 'plots' | 'guide' | 'code'
 type View =
   | { name: 'developments' }
   | { name: 'development'; devId: string }
@@ -96,6 +97,8 @@ export function App() {
       <main className="tab-body">
         {tab === 'code' ? (
           <CodeSearch openRef={codeRef} onRefConsumed={() => setCodeRef(null)} />
+        ) : tab === 'guide' ? (
+          <GuideTab />
         ) : view.name === 'developments' ? (
           <DevelopmentsList
             onOpenDevelopment={openDevelopment}
@@ -132,6 +135,10 @@ export function App() {
           <span className="tab-ico"><Icon name="home" size={22} /></span>
           Plots
         </button>
+        <button className={`tab${tab === 'guide' ? ' active' : ''}`} onClick={() => setTab('guide')}>
+          <span className="tab-ico"><Icon name="help" size={22} /></span>
+          Guide
+        </button>
         <button className={`tab${tab === 'code' ? ' active' : ''}`} onClick={() => setTab('code')}>
           <span className="tab-ico"><Icon name="book" size={22} /></span>
           The Code
@@ -162,7 +169,15 @@ export function App() {
 
       {showSettings && <SettingsSheet onClose={() => setShowSettings(false)} onToast={show} />}
 
-      {showHelp && <HelpSheet onClose={() => setShowHelp(false)} />}
+      {showHelp && (
+        <HelpSheet
+          onClose={() => setShowHelp(false)}
+          onOpenGuide={() => {
+            setShowHelp(false)
+            setTab('guide')
+          }}
+        />
+      )}
 
       {toastNode}
     </div>

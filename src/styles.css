@@ -735,6 +735,58 @@ select:focus {
   opacity: 0.5;
 }
 
+/* ---- Guide tab ---- */
+.demo-video {
+  width: 100%;
+  border-radius: 10px;
+  display: block;
+  background: #000;
+  aspect-ratio: 402 / 880;
+  max-height: 70vh;
+  object-fit: contain;
+  margin: 0 auto;
+}
+.guide-item {
+  background: var(--bg-elev);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+.guide-item summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 14px 16px;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: -0.01em;
+  -webkit-tap-highlight-color: transparent;
+}
+.guide-item summary::-webkit-details-marker {
+  display: none;
+}
+.guide-item .guide-chev {
+  flex: 0 0 auto;
+  color: var(--text-faint);
+  transform: rotate(90deg);
+  transition: transform 0.2s var(--ease-out);
+}
+.guide-item[open] .guide-chev {
+  transform: rotate(-90deg);
+}
+.guide-item .guide-body {
+  padding: 0 16px 6px;
+}
+.guide-item .guide-body p {
+  margin: 0 0 12px;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text-dim);
+}
+
 /* ---- Backup nag ---- */
 .backup-banner {
   display: flex;

@@ -68,7 +68,7 @@ function StepIcon({ step }: { step: Step }) {
   )
 }
 
-export function HelpSheet({ onClose }: { onClose: () => void }) {
+export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpenGuide?: () => void }) {
   return (
     <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 8 lines." onClose={onClose}>
       <div
@@ -104,7 +104,12 @@ export function HelpSheet({ onClose }: { onClose: () => void }) {
         The golden rule: <strong>log it the moment it happens</strong>, on your phone, on site.
         Everything else — deadlines, letters, documentation — follows by itself.
       </p>
-      <button className="btn btn-block" onClick={onClose}>
+      {onOpenGuide && (
+        <button className="btn btn-block" style={{ marginBottom: 8 }} onClick={onOpenGuide}>
+          Full guide &amp; demo video
+        </button>
+      )}
+      <button className="btn btn-block btn-primary" onClick={onClose}>
         Got it
       </button>
     </Sheet>
