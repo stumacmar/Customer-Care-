@@ -58,6 +58,9 @@ export interface DocumentItem {
   key: string
   label: string
   hint?: string
+  /** The Code clause this item comes from — shown only when the developer
+   *  turns Code references on, and in the audit export. */
+  clause?: string
   /** Journey stage the document is due at (drives the grouped checklist). */
   stage: DocumentStage
   completed: boolean
@@ -210,6 +213,10 @@ export interface Plot {
 export interface AppState {
   version: number
   developerName: string
+  /** UI preferences. Compliance is built in; showing the clause numbers is opt-in. */
+  showCodeRefs?: boolean
+  /** ISO datetime of the last backup download — drives the weekly backup nag. */
+  lastBackupAt?: string
   developments: Development[]
   plots: Plot[]
 }

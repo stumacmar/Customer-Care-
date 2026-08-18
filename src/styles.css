@@ -695,6 +695,68 @@ select:focus {
   color: var(--text-dim);
 }
 
+/* ---- Next action banner ---- */
+.next-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius);
+  background: var(--rag-bg);
+  color: var(--rag);
+}
+.next-banner .next-k {
+  font-size: 10.5px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex: 0 0 auto;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.next-banner .next-label {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.4;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- "why?" — the quiet route into the Code tab ---- */
+.whylink {
+  font-size: inherit;
+  font-weight: 600;
+  color: var(--blue);
+  background: none;
+  padding: 0 2px;
+}
+.whylink:active {
+  opacity: 0.5;
+}
+
+/* ---- Backup nag ---- */
+.backup-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  padding: 13px 14px;
+  margin-bottom: 12px;
+}
+.backup-banner .bb-body {
+  flex: 1;
+  min-width: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+.backup-banner .bb-body strong {
+  color: var(--text);
+}
+
 .clause-ref {
   display: inline-block;
   font-size: 10.5px;

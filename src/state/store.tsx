@@ -83,6 +83,15 @@ type Action =
   | { type: 'DELETE_CHANGE'; plotId: string; changeId: string }
   | { type: 'RECORD_CANCELLATION'; plotId: string; kind: Cancellation['kind']; date: string }
   | { type: 'RECORD_REFUND'; plotId: string }
+  | { type: 'SET_CODE_REFS'; show: boolean }
+  | { type: 'RECORD_BACKUP' }
+  | {
+      type: 'APPEND_TO_COMPLAINT'
+      plotId: string
+      issueId: string
+      description: string
+      photoDataUrl?: string
+    }
   | {
       type: 'LOG_ISSUE'
       plotId: string
@@ -501,6 +510,36 @@ function reducer(state: AppState, action: Action): AppState {
         plot,
         events: [event('note', action.note.trim(), undefined, action.issueId)],
       }))
+
+    case 'SET_CODE_REFS':
+      return { ...state, showCodeRefs: action.show }
+
+    case 'RECORD_BACKUP':
+      return { ...state, lastBackupAt: nowISO() }
+
+    case 'APPEND_TO_COMPLAINT':
+      // Code 3.4: complaints can be combined into one, but the timetable runs
+      // from the date the FIRST complaint was received — so the new matter is
+      // added to the existing complaint rather than starting a fresh ladder.
+      return updatePlot(state, action.plotId, (plot) => {
+        let ref = ''
+        const issues = plot.issues.map((i) => {
+          if (i.id !== action.issueId) return i
+          ref = i.reference || i.id
+          return {
+            ...i,
+            description: `${i.description}\n+ ${formatDate(todayISO())}: ${action.description.trim()}`,
+            photoDataUrl: i.photoDataUrl || action.photoDataUrl,
+          }
+        })
+        const ev = event(
+          'complaint_logged',
+          `Added to complaint (${ref})`,
+          `${action.description.trim()}\nCombined with the existing complaint — the timetable continues from the first complaint's start date.`,
+          action.issueId
+        )
+        return { plot: { ...plot, issues }, events: [ev] }
+      })
 
     case 'REPLACE_STATE':
       return action.state

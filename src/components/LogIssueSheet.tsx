@@ -6,8 +6,9 @@
 
 import { useState } from 'react'
 import { DictationField, PhotoField, Sheet } from './ui'
-import { useStore } from '../state/store'
+import { usePlot, useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
+import { formatDate } from '../lib/dates'
 import { Icon, type IconName } from './icons'
 import type { IssueType } from '../types'
 
@@ -39,13 +40,32 @@ export function LogIssueSheet({
   onLogged: (msg: string) => void
 }) {
   const { dispatch } = useStore()
+  const plot = usePlot(plotId)
   const [type, setType] = useState<IssueType>(initialType)
   const [description, setDescription] = useState('')
   const [photo, setPhoto] = useState<string | undefined>(undefined)
+  // Code 3.4: complaints can be combined into one, with the timetable running
+  // from the first complaint received. null = start a separate complaint.
+  const [combineWith, setCombineWith] = useState<string | null>(null)
 
   const meta = TYPES.find((t) => t.key === type)!
+  const openComplaints = (plot?.issues || []).filter(
+    (i) => i.type === 'complaint' && i.status === 'open'
+  )
 
   const submit = () => {
+    if (type === 'complaint' && combineWith) {
+      const target = openComplaints.find((i) => i.id === combineWith)
+      dispatch({
+        type: 'APPEND_TO_COMPLAINT',
+        plotId,
+        issueId: combineWith,
+        description,
+        photoDataUrl: photo,
+      })
+      onLogged(`Added to complaint ${target?.reference || ''} — one timetable, from the first complaint`)
+      return
+    }
     dispatch({
       type: 'LOG_ISSUE',
       plotId,
@@ -88,6 +108,34 @@ export function LogIssueSheet({
       >
         {meta.blurb}
       </div>
+
+      {type === 'complaint' && openComplaints.length > 0 && (
+        <div className="field">
+          <label>Is this part of an existing complaint?</label>
+          <div className="stack" style={{ gap: 8 }}>
+            <button
+              className={`type-opt${combineWith === null ? ' active complaint' : ''}`}
+              style={{ alignItems: 'flex-start', textAlign: 'left', padding: '10px 12px' }}
+              onClick={() => setCombineWith(null)}
+            >
+              Start a separate complaint (its own timetable)
+            </button>
+            {openComplaints.map((c) => (
+              <button
+                key={c.id}
+                className={`type-opt${combineWith === c.id ? ' active complaint' : ''}`}
+                style={{ alignItems: 'flex-start', textAlign: 'left', padding: '10px 12px' }}
+                onClick={() => setCombineWith(c.id)}
+              >
+                Add to {c.reference} — started {formatDate(c.startedAt)}
+                <span className="muted" style={{ fontWeight: 400, fontSize: 12 }}>
+                  One combined timetable, running from the first complaint
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="field">
         <label>Photo (optional but recommended)</label>

@@ -31,17 +31,17 @@ export const CHANGE_KIND_META: Record<
   minor_change: {
     label: 'Change',
     badgeClass: 'complaint',
-    blurb: 'A change you are making that is NOT major. Code 2.9: keep the customer informed; they cannot cancel for this.',
+    blurb: 'A change you are making that is NOT major. Keep the customer informed; they cannot cancel for this.',
   },
   major_change: {
     label: 'Major change',
     badgeClass: 'snag',
-    blurb: 'Significantly affects size, appearance or value (incl. internal layout). Code 2.9: written notice required — the customer can cancel within 14 days for a full refund, and notice to complete cannot be served in that window.',
+    blurb: 'Significantly affects size, appearance or value (incl. internal layout). You must tell the customer in writing — they can cancel within 14 days for a full refund, and notice to complete cannot be served in that window.',
   },
   delay: {
     label: 'Delay',
     badgeClass: 'snag',
-    blurb: 'The expected completion timetable has moved. Code 2.6/2.8: keep the customer informed — update the expected completion date on this plot too.',
+    blurb: 'The expected completion timetable has moved. Keep the customer informed — and update the expected completion date on this plot too.',
   },
 }
 

@@ -60,9 +60,49 @@ function migrate(parsed: Partial<AppState>): AppState {
   return {
     version: CURRENT_VERSION,
     developerName: parsed.developerName || '',
+    showCodeRefs: parsed.showCodeRefs || false,
+    lastBackupAt: parsed.lastBackupAt,
     developments,
     plots,
   }
+}
+
+/**
+ * Parse a backup file's JSON into a valid AppState (running the normal
+ * migration so old backups restore cleanly). Returns null if it isn't a
+ * recognisable backup.
+ */
+export function parseBackup(json: string): AppState | null {
+  try {
+    const parsed = JSON.parse(json) as Partial<AppState>
+    if (!parsed || typeof parsed !== 'object' || !Array.isArray(parsed.plots)) return null
+    return migrate(parsed)
+  } catch {
+    return null
+  }
+}
+
+/** Serialise the state for a backup download. */
+export function serializeBackup(state: AppState): string {
+  return JSON.stringify(state, null, 1)
+}
+
+/**
+ * Download the whole dataset as a JSON backup file. Everything lives only in
+ * this browser, so this file (kept in email/Drive/iCloud) IS the disaster
+ * recovery plan — and the way to move data between phone and desktop.
+ */
+export function downloadBackup(state: AppState): void {
+  const stamp = new Date().toISOString().slice(0, 10)
+  const blob = new Blob([serializeBackup(state)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `nhqb-backup-${stamp}.json`
+  document.body.appendChild(a)
+  a.click()
+  document.body.removeChild(a)
+  URL.revokeObjectURL(url)
 }
 
 export function loadState(): AppState {

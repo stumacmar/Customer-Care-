@@ -71,93 +71,115 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'reservation_agreement',
     label: 'Reservation Agreement signed, copy given to customer',
-    hint: 'Code 2.2: signed by both parties; includes the reservation fee, the 14-day cooling-off period, cancellation and refund terms, warranty provider details, and the exchange-by date (at least 6 weeks after reservation).',
+    hint: 'Signed by both of you, and they keep a copy. It must include the fee, the 14-day cooling-off period, cancellation and refund terms, warranty provider details, and the exchange-by date (at least 6 weeks after reservation).',
+    clause: '2.2',
     stage: 'reservation',
   },
   {
     key: 'affordability_schedule',
     label: 'Affordability Schedule provided',
-    hint: 'Code 2.2: likely costs over the 5 years after sale — ground rent, management/event fees, service charges (incl. rises and sinking funds), maintenance of built-in equipment, and upkeep of the property.',
+    hint: 'The likely costs over the 5 years after the sale — ground rent, management and event fees, service charges (including rises and sinking funds), maintenance of built-in equipment, and upkeep of the property.',
+    clause: '2.2',
     stage: 'reservation',
   },
-  // ---- Pre-contract & exchange (Code 2.6 / 2.7) ----
+  // ---- Pre-contract & exchange (Code 2.5 / 2.6 / 2.7) ----
   {
     key: 'pre_contract_pack',
     label: 'Pre-contract information sent to customer’s legal adviser',
-    hint: 'Code 2.6: warranty cover summary + provider contact, tenure, planning consent reference, list of included contents, confirmation the spec is as advertised (incl. structural frame), build standards, any exceptional restrictions, services that transfer later, management services, and the indicative costs schedule.',
+    hint: 'Warranty cover summary and provider contact, tenure, planning consent reference, list of included contents, confirmation the spec is as advertised (including the structural frame), build standards, any unusual restrictions, services that transfer later, management services, and the indicative costs schedule.',
+    clause: '2.6',
     stage: 'pre_contract',
   },
   {
     key: 'expected_completion_info',
     label: 'Expected completion date + plan/brochure given',
-    hint: 'Code 2.6: if the home is not yet complete — the expected completion date and a plan showing size, spec, layout, plot position and facing direction, steep slopes, boundary finishes, outbuildings.',
+    hint: 'If the home is not yet complete: the expected completion date and a plan showing size, spec, layout, plot position and facing direction, steep slopes, boundary finishes and outbuildings.',
+    clause: '2.6',
     stage: 'pre_contract',
   },
   {
     key: 'contact_named',
     label: 'Named contacts for questions given in writing',
-    hint: 'Code 2.6: who to contact (names and numbers) with questions before ownership transfers, and how questions will be answered.',
+    hint: 'Who to contact (names and numbers) with questions before ownership transfers, and how their questions will be answered.',
+    clause: '2.6',
+    stage: 'pre_contract',
+  },
+  {
+    key: 'warranty_provider_notified',
+    label: 'Warranty provider given the buyer’s details',
+    hint: 'At the end of the reservation period, give the home warranty provider full details of the buyer and the reserved home, if the provider requires it.',
+    clause: '2.5',
     stage: 'pre_contract',
   },
   {
     key: 'contract_checked',
-    label: 'Contract of sale terms confirmed Code-compliant',
-    hint: 'Code 2.7: defines the completion notice period, when the customer can cancel, what happens on delay, how deposits are protected, and the two-year builders’ liability period. Spoken statements the customer relies on recorded in writing before exchange.',
+    label: 'Contract of sale terms confirmed compliant',
+    hint: 'The contract defines the completion notice period, when the customer can cancel, what happens on delay, how deposits are protected, and the two-year builders’ liability period. Any spoken statements the customer relies on are recorded in writing before exchange.',
+    clause: '2.7',
     stage: 'pre_contract',
   },
   // ---- Completion & handover (Code 2.8 / 2.11 / 2.12 / 3.1) ----
   {
     key: 'pre_completion_inspection',
     label: 'Pre-completion inspection offered / carried out',
-    hint: 'Code 2.8 / 2.11d: offered after notice to complete and before the completion date, using the NHQB Pre-Completion Inspection Checklist.',
+    hint: 'Offered after notice to complete and before the completion date, using the NHQB Pre-Completion Inspection Checklist.',
+    clause: '2.8',
     stage: 'completion',
   },
   {
     key: 'schedule_incomplete_work',
     label: 'Schedule of Incomplete Work (Home) issued',
-    hint: 'Code 2.11b: after your final quality-assurance inspection — anything not finished at legal completion, with a statement of timescales for putting it right and the access you will need.',
+    hint: 'After your final quality-assurance inspection — anything not finished at legal completion, with a statement of timescales for putting it right and the access you will need.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'schedule_incomplete_dev',
     label: 'Schedule of Incomplete Work (Development) issued',
-    hint: 'Code 2.12: best available information on future phases and estimated timescales, where known.',
+    hint: 'The best available information on future phases of the development and estimated timescales, where known.',
+    clause: '2.12',
     stage: 'completion',
   },
   {
     key: 'home_demonstration',
     label: 'Home demonstration completed',
-    hint: 'Code 2.11e: showed the customer how the home, its systems and appliances work (can be combined with the pre-completion inspection).',
+    hint: 'Show the customer how the home, its systems and appliances work — can be combined with the pre-completion inspection.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'warranty_docs',
     label: 'Warranty documentation provided',
-    hint: 'Code 2.11f–g: full details of guarantees/warranties, plus the cover note or policy with exceptions, exclusions, limits and excesses.',
+    hint: 'Full details of guarantees and warranties, plus the cover note or policy with exceptions, exclusions, limits and excesses.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'complaints_procedure',
     label: 'Complaints procedure copy given to customer',
-    hint: 'Code 2.11h: written copy of how to complain and the timescales.',
+    hint: 'A written copy of how to complain and the timescales.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'health_safety_file',
     label: 'Health & safety file provided',
-    hint: 'Code 2.11i: for apartments, given to the managing agent or management company.',
+    hint: 'For apartments, this goes to the managing agent or management company.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'building_reg_certificate',
     label: 'Building regulation completion certificate',
-    hint: 'Code 2.11k: or confirmation the local authority has inspected (Scotland) — or a note explaining when it will be available.',
+    hint: 'Or confirmation the local authority has inspected (Scotland) — or a note explaining when it will be available.',
+    clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'after_sales_statement',
     label: 'After-sales service written statement given',
-    hint: 'Code 3.1: procedures, timescales, contacts, the emergency process, and what counts as normal maintenance.',
+    hint: 'Your procedures and timescales, who to contact, the emergency process, and what counts as normal maintenance.',
+    clause: '3.1',
     stage: 'completion',
   },
 ]
@@ -248,17 +270,23 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
     }
   }
 
-  // Exchange-by date — 2.2m.
+  // Exchange-by date — 2.2m. A passed date is NOT a Code breach (the date can
+  // be renegotiated) and, more often, exchange simply happened at the
+  // solicitor's desk and wasn't recorded here — so overdue is amber with a
+  // record-it prompt, never a red alarm. Red must always mean "act now".
   if (stage === 'reserved' && plot.exchangeDeadline) {
     const daysRemaining = daysFromToday(plot.exchangeDeadline)
+    const passed = daysRemaining < 0
     out.push({
       kind: 'exchange',
       clause: '2.2',
-      label: 'Exchange of contracts due',
-      detail: 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.',
+      label: passed ? 'Exchange date passed — exchanged yet?' : 'Exchange of contracts due',
+      detail: passed
+        ? 'If contracts have exchanged, record the date under Edit details. If not, agree a new exchange-by date with the customer in writing.'
+        : 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.',
       dueDate: plot.exchangeDeadline,
       daysRemaining,
-      rag: ragForDeadline(daysRemaining),
+      rag: passed ? 'amber' : ragForDeadline(daysRemaining),
     })
   }
 
@@ -447,6 +475,59 @@ function ragFromDays(daysRemaining: number): Rag {
   if (daysRemaining < 0) return 'red'
   if (daysRemaining <= DUE_SOON_DAYS) return 'amber'
   return 'green'
+}
+
+// ---------------------------------------------------------------------------
+// Snag monthly updates — Code 3.3
+// ---------------------------------------------------------------------------
+
+/** Update cadence for a delayed snag — 3.3: "at least once a month". */
+export const SNAG_UPDATE_INTERVAL_DAYS = 30
+
+export interface SnagUpdate {
+  key: string // 'snag_update_N'
+  n: number
+  dueDate: string
+  daysRemaining: number
+  completed: boolean
+  completedDate?: string
+}
+
+/**
+ * The monthly-update schedule for a snag that is still open past its 30-day
+ * put-right window — the Code requires the customer to be updated at least
+ * once a month until it is settled. Update #n falls due 30·(n+1) days after
+ * the snag was reported; past updates plus the next upcoming one are listed.
+ */
+export function snagUpdateSchedule(issue: Issue, today = todayISO()): SnagUpdate[] {
+  if (issue.type !== 'snag' || issue.status !== 'open') return []
+  const daysOpen = diffDays(issue.startedAt, today)
+  if (daysOpen <= SNAG_PUT_RIGHT_DAYS) return []
+  const progress = issue.milestoneProgress || {}
+  const out: SnagUpdate[] = []
+  let n = 1
+  let offset = SNAG_PUT_RIGHT_DAYS + SNAG_UPDATE_INTERVAL_DAYS
+  while (offset <= daysOpen + SNAG_UPDATE_INTERVAL_DAYS) {
+    const key = `snag_update_${n}`
+    const p = progress[key]
+    const dueDate = addDays(issue.startedAt, offset)
+    out.push({
+      key,
+      n,
+      dueDate,
+      daysRemaining: daysFromToday(dueDate),
+      completed: !!p,
+      completedDate: p?.completedDate,
+    })
+    n += 1
+    offset += SNAG_UPDATE_INTERVAL_DAYS
+  }
+  return out
+}
+
+/** The next monthly update not yet sent for a delayed snag (null if none due). */
+export function nextSnagUpdate(issue: Issue, today = todayISO()): SnagUpdate | null {
+  return snagUpdateSchedule(issue, today).find((u) => !u.completed) || null
 }
 
 /**

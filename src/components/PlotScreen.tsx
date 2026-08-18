@@ -8,7 +8,7 @@
 
 import { useState } from 'react'
 import { usePlot } from '../state/store'
-import { plotStatus, ragLabel } from '../lib/status'
+import { describeAction, plotStatus } from '../lib/status'
 import { formatDate } from '../lib/dates'
 import { exportPlotCSV, exportPlotPrintable } from '../lib/export'
 import { useStore } from '../state/store'
@@ -30,10 +30,12 @@ export function PlotScreen({
   plotId,
   onBack,
   onToast,
+  onExplainCode,
 }: {
   plotId: string
   onBack: () => void
   onToast: (msg: string) => void
+  onExplainCode: (ref: string) => void
 }) {
   const plot = usePlot(plotId)
   const { state, dispatch } = useStore()
@@ -78,10 +80,15 @@ export function PlotScreen({
             </h2>
           </div>
           <div className="muted" style={{ marginTop: 6, marginLeft: 36 }}>
-            {plot.customerNames || 'No customer name'} · {status.stageLabel} ·{' '}
-            <strong>{ragLabel(status.rag)}</strong>
+            {plot.customerNames || 'No customer name'} · {status.stageLabel}
           </div>
         </div>
+      </div>
+
+      {/* The one thing to do next — everything else on this screen is detail. */}
+      <div className={`next-banner rag-${status.next.rag}`}>
+        <span className="next-k">Next</span>
+        <span className="next-label">{describeAction(status.next)}</span>
       </div>
 
       <div className="meta-grid card" style={{ marginTop: 10 }}>
@@ -118,7 +125,12 @@ export function PlotScreen({
         </div>
       </div>
 
-      <JourneySection plot={plot} onToast={onToast} onResolveMajorChange={setResolvingChangeId} />
+      <JourneySection
+        plot={plot}
+        onToast={onToast}
+        onResolveMajorChange={setResolvingChangeId}
+        onExplainCode={onExplainCode}
+      />
 
       {/* The three impossible-to-miss buttons. Snags cover pre-completion
           inspection findings too (Code 2.8); complaints can arise at any stage
@@ -156,7 +168,7 @@ export function PlotScreen({
         onDraftLetter={(issue, key) => setLetterFor({ issue, key })}
       />
 
-      <DocumentChecklist plot={plot} />
+      <DocumentChecklist plot={plot} onExplainCode={onExplainCode} />
 
       <Timeline plot={plot} />
 

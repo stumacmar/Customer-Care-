@@ -7,7 +7,7 @@
  * from the official Code; this screen is a fast index, not legal advice.
  */
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   CODE_SECTIONS,
   CODE_SOURCE_URL,
@@ -18,9 +18,23 @@ import {
 import { searchCode } from '../lib/codeSearch'
 import { DictationField } from './ui'
 
-export function CodeSearch() {
+export function CodeSearch({
+  openRef,
+  onRefConsumed,
+}: {
+  /** A clause ref (e.g. "2.9") to open directly — the "why?" deep link. */
+  openRef?: string | null
+  onRefConsumed?: () => void
+} = {}) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<CodeSection | null>(null)
+
+  useEffect(() => {
+    if (!openRef) return
+    const section = CODE_SECTIONS.find((s) => s.ref === openRef)
+    if (section) setOpen(section)
+    onRefConsumed?.()
+  }, [openRef, onRefConsumed])
 
   const hits = useMemo(() => searchCode(query), [query])
   const searching = query.trim().length > 0

@@ -5,19 +5,52 @@
  * team, one screen.
  */
 
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { buildSeedState } from '../lib/seed'
-import { formatDate } from '../lib/dates'
+import { formatDate, formatDateTime } from '../lib/dates'
 import { exportPlotPrintable } from '../lib/export'
 import { isPlotRetired } from '../lib/status'
+import { downloadBackup, parseBackup } from '../lib/storage'
 import { Icon } from './icons'
 
 export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (m: string) => void }) {
   const { state, dispatch } = useStore()
   const [name, setName] = useState(state.developerName)
   const [showGdpr, setShowGdpr] = useState(false)
+  const restoreRef = useRef<HTMLInputElement>(null)
+
+  const backup = () => {
+    downloadBackup(state)
+    dispatch({ type: 'RECORD_BACKUP' })
+    onToast('Backup downloaded — keep it in email, Drive or iCloud')
+  }
+
+  const onRestoreFile = (file?: File) => {
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      const restored = parseBackup(typeof reader.result === 'string' ? reader.result : '')
+      if (!restored) {
+        onToast('That file is not a recognisable backup')
+        return
+      }
+      const plots = restored.plots.length
+      if (
+        !confirm(
+          `Restore ${plots} plot${plots === 1 ? '' : 's'} from this backup? ` +
+            'Everything currently on this device will be REPLACED by the backup. ' +
+            'If in doubt, download a backup of the current data first.'
+        )
+      )
+        return
+      dispatch({ type: 'REPLACE_STATE', state: restored })
+      onToast('Backup restored')
+      onClose()
+    }
+    reader.readAsText(file)
+  }
 
   const saveName = (v: string) => {
     setName(v)
@@ -85,6 +118,58 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="section" style={{ marginTop: 8 }}>
+        <h3>Back up &amp; restore</h3>
+        <div className="card">
+          <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+            Everything lives only on this device. Download a backup weekly and keep it in your
+            email, Drive or iCloud — it is also how you move your records between phone and
+            computer.
+            {state.lastBackupAt
+              ? ` Last backup: ${formatDateTime(state.lastBackupAt)}.`
+              : ' No backup has been taken yet.'}
+          </p>
+          <div className="wrap-actions">
+            <button className="btn btn-sm btn-primary" onClick={backup}>
+              <Icon name="file" size={15} /> Download backup
+            </button>
+            <button className="btn btn-sm" onClick={() => restoreRef.current?.click()}>
+              Restore from backup…
+            </button>
+            <input
+              ref={restoreRef}
+              type="file"
+              accept="application/json,.json"
+              style={{ display: 'none' }}
+              onChange={(e) => onRestoreFile(e.target.files?.[0])}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="section">
+        <h3>Code references</h3>
+        <div className="card row-between">
+          <div style={{ minWidth: 0, paddingRight: 8 }}>
+            <div style={{ fontWeight: 600, fontSize: 15 }}>Show clause numbers</div>
+            <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
+              The Code is built into every clock and checklist either way. Turn this on to see
+              the clause numbers on screen — useful when demonstrating compliance. They always
+              appear in letters and exports.
+            </div>
+          </div>
+          <button
+            className={`btn btn-sm ${state.showCodeRefs ? 'btn-primary' : ''}`}
+            onClick={() => {
+              dispatch({ type: 'SET_CODE_REFS', show: !state.showCodeRefs })
+              onToast(state.showCodeRefs ? 'Clause numbers hidden' : 'Clause numbers shown')
+            }}
+          >
+            {state.showCodeRefs ? 'On' : 'Off'}
+          </button>
+        </div>
+      </div>
+
+      <div className="section">
         <h3>Data housekeeping</h3>
         <div className="card">
           {oldPlots.length === 0 ? (

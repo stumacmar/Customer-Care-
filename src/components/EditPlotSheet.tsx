@@ -89,11 +89,11 @@ export function EditPlotSheet({
       </div>
 
       <div className="field">
-        <label>Reservation date (starts the {COOLING_OFF_DAYS}-day cooling-off — Code 2.3)</label>
+        <label>Reservation date (starts the {COOLING_OFF_DAYS}-day cooling-off)</label>
         <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Exchange-by date from the Reservation Agreement (Code 2.2)</label>
+        <label>Exchange-by date from the Reservation Agreement</label>
         <input type="date" value={exchangeDeadline} onChange={(e) => setExchangeDeadline(e.target.value)} />
         {reservationDate && !exchangeDeadline && (
           <div className="dictate-hint">
@@ -113,7 +113,7 @@ export function EditPlotSheet({
         <input type="date" value={exchangeDate} onChange={(e) => setExchangeDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Notice to complete served (opens the inspection window — Code 2.8)</label>
+        <label>Notice to complete served (opens the inspection window)</label>
         <input type="date" value={noticeServedDate} onChange={(e) => setNoticeServedDate(e.target.value)} />
       </div>
       <div className="field">
@@ -136,8 +136,8 @@ export function EditPlotSheet({
           <div className="card">
             <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
               Recording a cancellation keeps the plot (and its evidence) and starts the refund
-              clock: reservation fee within 14 days (Code 2.4 — in full if still in cooling-off,
-              Code 2.3), or the contract deposit within 28 days (Code 2.13).
+              clock: the reservation fee within 14 days (in full if still in cooling-off), or
+              the contract deposit within 28 days.
             </p>
             <div className="wrap-actions">
               <button className="btn btn-sm btn-danger" onClick={() => recordCancellation('reservation')}>

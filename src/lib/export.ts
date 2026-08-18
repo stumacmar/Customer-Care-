@@ -80,7 +80,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
     .map(
       (d) => `<tr>
         <td>${d.completed ? '✔' : '—'}</td>
-        <td>${escapeHtml(d.label)}</td>
+        <td>${escapeHtml(d.label)}${d.clause ? ` <span class="muted">(Code ${escapeHtml(d.clause)})</span>` : ''}</td>
         <td>${escapeHtml(stageLabel[d.stage] || '')}</td>
         <td>${d.completed ? formatDate(d.completedDate) : 'Outstanding'}</td>
         <td>${escapeHtml(d.note || d.fileName || '')}</td>
