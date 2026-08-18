@@ -23,6 +23,8 @@ import { Timeline } from './Timeline'
 import { LogIssueSheet } from './LogIssueSheet'
 import { LetterSheet } from './LetterSheet'
 import { EditPlotSheet } from './EditPlotSheet'
+import { BuyerShareSheet } from './BuyerShareSheet'
+import { BuyerReportSheet } from './BuyerReportSheet'
 import { Icon } from './icons'
 import type { Issue, IssueType } from '../types'
 
@@ -40,8 +42,11 @@ export function PlotScreen({
   const plot = usePlot(plotId)
   const { state, dispatch } = useStore()
   const [logType, setLogType] = useState<IssueType | null>(null)
+  const [logDescription, setLogDescription] = useState<string | undefined>(undefined)
   const [letterFor, setLetterFor] = useState<{ issue: Issue; key?: string } | null>(null)
   const [editing, setEditing] = useState(false)
+  const [sharing, setSharing] = useState(false)
+  const [pastingReport, setPastingReport] = useState(false)
   const [loggingChange, setLoggingChange] = useState(false)
   const [changeLetterForId, setChangeLetterForId] = useState<string | null>(null)
   const [resolvingChangeId, setResolvingChangeId] = useState<string | null>(null)
@@ -118,9 +123,12 @@ export function PlotScreen({
             {plot.customerEmail || <span className="muted">not set</span>}
           </div>
         </div>
-        <div style={{ alignSelf: 'end', gridColumn: '1 / -1' }}>
+        <div style={{ alignSelf: 'end', gridColumn: '1 / -1' }} className="wrap-actions">
           <button className="btn btn-sm" onClick={() => setEditing(true)}>
             <Icon name="edit" size={16} /> Edit details &amp; dates
+          </button>
+          <button className="btn btn-sm" onClick={() => setSharing(true)}>
+            <Icon name="arrow-right" size={16} /> Share with buyer
           </button>
         </div>
       </div>
@@ -153,6 +161,13 @@ export function PlotScreen({
             <small>urgent</small>
           </button>
         </div>
+        <button
+          className="btn btn-sm btn-ghost"
+          style={{ marginTop: 8 }}
+          onClick={() => setPastingReport(true)}
+        >
+          <Icon name="clipboard" size={15} /> Paste a report from the buyer's app
+        </button>
       </div>
 
       <ChangesSection
@@ -201,10 +216,28 @@ export function PlotScreen({
         <LogIssueSheet
           plotId={plot.id}
           initialType={logType}
-          onClose={() => setLogType(null)}
+          initialDescription={logDescription}
+          onClose={() => {
+            setLogType(null)
+            setLogDescription(undefined)
+          }}
           onLogged={(msg) => {
             setLogType(null)
+            setLogDescription(undefined)
             onToast(msg)
+          }}
+        />
+      )}
+
+      {sharing && <BuyerShareSheet plot={plot} onClose={() => setSharing(false)} onToast={onToast} />}
+
+      {pastingReport && (
+        <BuyerReportSheet
+          onClose={() => setPastingReport(false)}
+          onDecoded={(type, description) => {
+            setPastingReport(false)
+            setLogDescription(description)
+            setLogType(type)
           }}
         />
       )}

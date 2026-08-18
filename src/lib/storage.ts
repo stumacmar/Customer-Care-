@@ -60,6 +60,7 @@ function migrate(parsed: Partial<AppState>): AppState {
   return {
     version: CURRENT_VERSION,
     developerName: parsed.developerName || '',
+    developerEmail: parsed.developerEmail || undefined,
     showCodeRefs: parsed.showCodeRefs || false,
     lastBackupAt: parsed.lastBackupAt,
     developments,

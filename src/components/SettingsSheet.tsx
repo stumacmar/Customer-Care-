@@ -18,8 +18,14 @@ import { Icon } from './icons'
 export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToast: (m: string) => void }) {
   const { state, dispatch } = useStore()
   const [name, setName] = useState(state.developerName)
+  const [email, setEmail] = useState(state.developerEmail || '')
   const [showGdpr, setShowGdpr] = useState(false)
   const restoreRef = useRef<HTMLInputElement>(null)
+
+  const saveEmail = (v: string) => {
+    setEmail(v)
+    dispatch({ type: 'SET_DEVELOPER_EMAIL', email: v })
+  }
 
   const backup = () => {
     downloadBackup(state)
@@ -114,6 +120,16 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
           value={name}
           onChange={(e) => saveName(e.target.value)}
           placeholder="e.g. Meadow Homes Ltd"
+        />
+      </div>
+
+      <div className="field">
+        <label>Your email (buyer reports from shared plot links arrive here)</label>
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => saveEmail(e.target.value)}
+          placeholder="e.g. you@yourcompany.co.uk"
         />
       </div>
 
