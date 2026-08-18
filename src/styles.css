@@ -792,6 +792,26 @@ select:focus {
 .guide-item .guide-body {
   padding: 0 16px 6px;
 }
+.watch-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  color: var(--link);
+  background: var(--red-bg);
+  border-radius: 20px;
+  padding: 6px 13px;
+  margin-bottom: 12px;
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.15s var(--ease-out), opacity 0.15s ease;
+}
+.watch-chip:active {
+  transform: scale(0.96);
+  opacity: 0.8;
+}
+
 .guide-item .guide-body p {
   margin: 0 0 12px;
   font-size: 14.5px;
