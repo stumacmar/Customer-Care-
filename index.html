@@ -9,9 +9,13 @@
     <meta name="theme-color" content="#f2f2f7" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Non-blocking font load: page renders on the system stack immediately;
+         Inter swaps in when (and if) the stylesheet arrives. -->
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
+      media="print"
+      onload="this.media='all'"
     />
     <meta name="description" content="NHQB — track New Homes Quality Code compliance for every plot. Know what's due, when, and prove you did it." />
     <link rel="manifest" href="./manifest.webmanifest" />
