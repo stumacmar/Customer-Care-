@@ -71,7 +71,21 @@ export function LogIssueSheet({
         ))}
       </div>
 
-      <div className={`badge ${type}`} style={{ marginBottom: 12 }}>
+      <div
+        className={`badge ${type}`}
+        style={{
+          marginBottom: 12,
+          whiteSpace: 'normal',
+          lineHeight: 1.5,
+          textTransform: 'none',
+          letterSpacing: '-0.005em',
+          fontWeight: 500,
+          fontSize: 13,
+          padding: '9px 12px',
+          borderRadius: 12,
+          display: 'block',
+        }}
+      >
         {meta.blurb}
       </div>
 
