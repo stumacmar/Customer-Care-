@@ -8,8 +8,17 @@
 import { useMemo, useState } from 'react'
 import { useStore } from '../state/store'
 import { developmentStatus } from '../lib/status'
+import { diffDays, todayISO } from '../lib/dates'
+import { downloadBackup } from '../lib/storage'
 import { Icon } from './icons'
 import type { Rag } from '../types'
+
+/** Nag for a backup when there is data and none has been taken for a week. */
+function backupDue(lastBackupAt: string | undefined, hasData: boolean): boolean {
+  if (!hasData) return false
+  if (!lastBackupAt) return true
+  return diffDays(lastBackupAt.slice(0, 10), todayISO()) >= 7
+}
 
 const RAG_RANK: Record<Rag, number> = { red: 0, amber: 1, green: 2 }
 
@@ -20,8 +29,14 @@ export function DevelopmentsList({
   onOpenDevelopment: (devId: string) => void
   onNewDevelopment: () => void
 }) {
-  const { state } = useStore()
+  const { state, dispatch } = useStore()
   const [showFinished, setShowFinished] = useState(false)
+  const [backupDismissed, setBackupDismissed] = useState(false)
+
+  const takeBackup = () => {
+    downloadBackup(state)
+    dispatch({ type: 'RECORD_BACKUP' })
+  }
 
   const rows = useMemo(
     () =>
@@ -39,6 +54,26 @@ export function DevelopmentsList({
         <h2>Developments</h2>
         <span className="muted" style={{ fontSize: 14 }}>{active.length} active</span>
       </div>
+
+      {!backupDismissed && backupDue(state.lastBackupAt, state.plots.length > 0) && (
+        <div className="backup-banner">
+          <div className="bb-body">
+            <strong>Back up your records.</strong> Your compliance evidence lives only on this
+            device — one lost phone loses it all.
+          </div>
+          <button className="btn btn-sm btn-primary" onClick={takeBackup}>
+            Back up
+          </button>
+          <button
+            className="iconbtn"
+            style={{ minWidth: 32, height: 32 }}
+            aria-label="Dismiss for now"
+            onClick={() => setBackupDismissed(true)}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {state.developments.length === 0 ? (
         <div className="empty">

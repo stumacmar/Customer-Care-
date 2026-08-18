@@ -12,6 +12,7 @@ import { useStore } from '../state/store'
 import {
   clockForIssue,
   computeComplaintMilestones,
+  snagUpdateSchedule,
 } from '../lib/code'
 import { describeCountdown, formatDate } from '../lib/dates'
 import { snagReminderText } from '../lib/letters'
@@ -133,6 +134,8 @@ function IssueCard({
         </div>
       )}
 
+      {issue.type === 'snag' && isOpen && <SnagUpdates plot={plot} issue={issue} />}
+
       {issue.type === 'complaint' && <ComplaintMilestones plot={plot} issue={issue} onDraftLetter={onDraftLetter} />}
 
       {!isOpen && issue.resolutionNote && (
@@ -202,6 +205,55 @@ function IssueCard({
           </button>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * Monthly-update reminders for a snag that has run past its 30-day put-right
+ * window — the Code requires the customer to be updated at least once a month
+ * until the matter is settled, and this is the row that makes sure it happens.
+ */
+function SnagUpdates({ plot, issue }: { plot: Plot; issue: Issue }) {
+  const { dispatch } = useStore()
+  const schedule = snagUpdateSchedule(issue)
+  if (schedule.length === 0) return null
+
+  return (
+    <div className="milestones">
+      {schedule.map((u) => (
+        <div key={u.key} className={`milestone rag-${u.completed ? 'green' : u.daysRemaining < 0 ? 'red' : u.daysRemaining <= 5 ? 'amber' : 'green'}${u.completed ? ' done' : ''}`}>
+          <div className="m-info">
+            <div className="m-label">Monthly update to customer #{u.n}</div>
+            <div className="m-due">
+              {u.completed
+                ? `Sent ${formatDate(u.completedDate)}`
+                : `Due ${formatDate(u.dueDate)} · ${describeCountdown(u.daysRemaining)}`}
+            </div>
+          </div>
+          {!u.completed && (
+            <button
+              className="btn btn-sm"
+              onClick={() =>
+                dispatch({
+                  type: 'COMPLETE_MILESTONE',
+                  plotId: plot.id,
+                  issueId: issue.id,
+                  milestoneKey: u.key,
+                  milestoneLabel: `Monthly update on delayed snag (${issue.reference || ''})`,
+                })
+              }
+            >
+              Update sent
+            </button>
+          )}
+          {u.completed && (
+            <span className="badge rag-green" style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <Icon name="check" size={14} strokeWidth={2.4} />
+            </span>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

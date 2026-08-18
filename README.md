@@ -128,7 +128,8 @@ Open **Settings → Load demo plots** to see the app populated with a green plot
 - **Phase 1 (done)** — dashboard, three log buttons, auto-calculated clocks, document checklist, timeline, browser storage, PWA.
 - **Phase 2 (done)** — the five letter generators, audit export (PDF + CSV).
 - **Phase 3 (done)** — the full journey back to reservation: journey stages and clocks (cooling-off, exchange, major changes, refunds, notice period, PCI), the Spec & changes evidence log, stage-grouped documents, the major-change and delay letters.
-- **Phase 4 (if there's appetite)** — a buyer-side view (the customer sees their own plot, raises issues into the same record), multi-developer accounts, and nominated-representative access for vulnerable customers. That's the point it becomes a real product decision rather than a personal tool.
+- **Phase 4 (done)** — built for the builder with no assistant: a single verb-first **next action** per plot; Code clause numbers hidden by default ("why?" opens the clause; a Settings toggle and the letters/exports keep them for audits); monthly-update reminders on snags delayed past 30 days (3.3); combining a new complaint into an existing one so the timetable runs from the first (3.4); the warranty-provider notification (2.5); calendar reminders for journey deadlines; and JSON backup/restore with a weekly nag — the data lives only on the device, so the backup file is the disaster plan and the way to move between phone and desktop.
+- **Phase 5 (if there's appetite)** — a buyer-side view (the customer sees their own plot, raises issues into the same record), multi-developer accounts with sync, push notifications, and nominated-representative access for vulnerable customers. That's the point it becomes a real product decision rather than a personal tool.
 
 ## Compliance note
 

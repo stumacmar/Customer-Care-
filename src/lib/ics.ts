@@ -8,8 +8,15 @@
  * nagging — which it is far better at than any web app could be.
  */
 
-import { addDays, todayISO } from './dates'
-import { SNAG_PUT_RIGHT_DAYS, computeComplaintMilestones } from './code'
+import { addDays, daysFromToday, todayISO } from './dates'
+import {
+  computeComplaintMilestones,
+  CONTRACT_REFUND_DAYS,
+  majorChangeCancelBy,
+  plotStage,
+  RESERVATION_REFUND_DAYS,
+  SNAG_PUT_RIGHT_DAYS,
+} from './code'
 import type { Issue, Plot } from '../types'
 
 function icsDate(iso: string): string {
@@ -99,8 +106,75 @@ export function buildIssueCalendar(plot: Plot, issue: Issue): { filename: string
   return { filename: `nhqb-deadlines-${safe}.ics`, content }
 }
 
-export function downloadCalendar(plot: Plot, issue: Issue): boolean {
-  const built = buildIssueCalendar(plot, issue)
+function wrap(events: CalEvent[], filename: string): { filename: string; content: string } | null {
+  if (events.length === 0) return null
+  const content = [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//NHQB//Quality Code Tracker//EN',
+    'CALSCALE:GREGORIAN',
+    'METHOD:PUBLISH',
+    ...events.map(vevent),
+    'END:VCALENDAR',
+  ].join('\r\n')
+  return { filename, content }
+}
+
+/**
+ * Build the .ics content for a plot's upcoming journey deadlines — the
+ * pre-completion dates the developer would otherwise have to keep in their
+ * head: exchange-by, open major-change windows, refunds after a cancellation,
+ * and the completion date itself.
+ */
+export function buildJourneyCalendar(plot: Plot): { filename: string; content: string } | null {
+  const events: CalEvent[] = []
+  const where = plot.address || 'plot'
+  const stage = plotStage(plot)
+
+  if (plot.cancellation && !plot.cancellation.refundedDate) {
+    const isContract = plot.cancellation.kind === 'contract'
+    events.push({
+      uid: `${plot.id}-refund`,
+      date: addDays(plot.cancellation.date, isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS),
+      summary: `Refund due — ${where}`,
+      description: isContract
+        ? 'Refund the contract deposit and any other amounts due (within 28 days of cancellation).'
+        : 'Refund the reservation fee, less any agreed deductions (within 14 days of the notice).',
+    })
+  }
+  if (stage === 'reserved' && plot.exchangeDeadline && daysFromToday(plot.exchangeDeadline) >= 0) {
+    events.push({
+      uid: `${plot.id}-exchange`,
+      date: plot.exchangeDeadline,
+      summary: `Exchange contracts by today — ${where}`,
+      description: 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.',
+    })
+  }
+  for (const c of plot.changes) {
+    if (c.kind !== 'major_change' || c.outcome) continue
+    const cancelBy = majorChangeCancelBy(c)
+    if (daysFromToday(cancelBy) < 0) continue
+    events.push({
+      uid: `${plot.id}-${c.id}-window`,
+      date: cancelBy,
+      summary: `Major-change window closes — ${where}`,
+      description: `Last day the customer can cancel over the major change (${c.description.slice(0, 80)}). Notice to complete cannot be served before this date. Record the outcome afterwards.`,
+    })
+  }
+  if (plot.completionDate && daysFromToday(plot.completionDate) >= 0 && stage !== 'cancelled') {
+    events.push({
+      uid: `${plot.id}-completion`,
+      date: plot.completionDate,
+      summary: `Completion — ${where}`,
+      description: 'Handover day: final quality check done, documents handed over, home demonstration booked, pre-completion inspection offered.',
+    })
+  }
+
+  const safe = (plot.address || 'plot').toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 40)
+  return wrap(events, `nhqb-journey-${safe}.ics`)
+}
+
+function downloadIcs(built: { filename: string; content: string } | null): boolean {
   if (!built) return false
   const blob = new Blob([built.content], { type: 'text/calendar;charset=utf-8' })
   const url = URL.createObjectURL(blob)
@@ -112,4 +186,12 @@ export function downloadCalendar(plot: Plot, issue: Issue): boolean {
   document.body.removeChild(a)
   URL.revokeObjectURL(url)
   return true
+}
+
+export function downloadCalendar(plot: Plot, issue: Issue): boolean {
+  return downloadIcs(buildIssueCalendar(plot, issue))
+}
+
+export function downloadJourneyCalendar(plot: Plot): boolean {
+  return downloadIcs(buildJourneyCalendar(plot))
 }

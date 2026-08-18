@@ -32,7 +32,14 @@ export function App() {
   const [showNewDev, setShowNewDev] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  // "Why?" affordances deep-link into the Code tab at the relevant clause.
+  const [codeRef, setCodeRef] = useState<string | null>(null)
   const { show, node: toastNode } = useToast()
+
+  const explainCode = (ref: string) => {
+    setCodeRef(ref)
+    setTab('code')
+  }
 
   // First-ever open: show the 7-line guide once. After that it lives behind ❓.
   useEffect(() => {
@@ -88,7 +95,7 @@ export function App() {
 
       <main className="tab-body">
         {tab === 'code' ? (
-          <CodeSearch />
+          <CodeSearch openRef={codeRef} onRefConsumed={() => setCodeRef(null)} />
         ) : view.name === 'developments' ? (
           <DevelopmentsList
             onOpenDevelopment={openDevelopment}
@@ -107,6 +114,7 @@ export function App() {
             plotId={view.plotId}
             onBack={() => setView({ name: 'development', devId: view.devId })}
             onToast={show}
+            onExplainCode={explainCode}
           />
         )}
       </main>

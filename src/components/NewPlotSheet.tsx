@@ -82,9 +82,9 @@ export function NewPlotSheet({
         <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} />
         {reservationDate && (
           <div className="dictate-hint">
-            Cooling-off runs to {formatDate(addDays(reservationDate, COOLING_OFF_DAYS))} (Code 2.3).
-            Exchange-by will default to {formatDate(addDays(reservationDate, EXCHANGE_MIN_DAYS))} —
-            the Code minimum of six weeks (2.2) — and can be edited on the plot.
+            Cooling-off runs to {formatDate(addDays(reservationDate, COOLING_OFF_DAYS))}. Exchange-by
+            will default to {formatDate(addDays(reservationDate, EXCHANGE_MIN_DAYS))} — the Code
+            minimum of six weeks — and can be edited on the plot.
           </div>
         )}
       </div>

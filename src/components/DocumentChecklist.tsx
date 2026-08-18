@@ -10,13 +10,21 @@ import { formatDate } from '../lib/dates'
 import { Icon } from './icons'
 import type { DocumentItem, DocumentStage, Plot } from '../types'
 
-const STAGE_GROUPS: { stage: DocumentStage; title: string; clause: string }[] = [
-  { stage: 'reservation', title: 'At reservation', clause: 'Code 2.2 – 2.3' },
-  { stage: 'pre_contract', title: 'Pre-contract & exchange', clause: 'Code 2.6 – 2.7' },
-  { stage: 'completion', title: 'Completion & handover', clause: 'Code 2.8, 2.11 – 2.12, 3.1' },
+const STAGE_GROUPS: { stage: DocumentStage; title: string; clause: string; whyRef: string }[] = [
+  { stage: 'reservation', title: 'At reservation', clause: 'Code 2.2 – 2.3', whyRef: '2.2' },
+  { stage: 'pre_contract', title: 'Pre-contract & exchange', clause: 'Code 2.5 – 2.7', whyRef: '2.6' },
+  { stage: 'completion', title: 'Completion & handover', clause: 'Code 2.8, 2.11 – 2.12, 3.1', whyRef: '2.11' },
 ]
 
-export function DocumentChecklist({ plot }: { plot: Plot }) {
+export function DocumentChecklist({
+  plot,
+  onExplainCode,
+}: {
+  plot: Plot
+  onExplainCode: (ref: string) => void
+}) {
+  const { state } = useStore()
+  const showRefs = !!state.showCodeRefs
   const done = plot.documents.filter((d) => d.completed).length
   const total = plot.documents.length
   const pct = total ? Math.round((done / total) * 100) : 0
@@ -29,21 +37,27 @@ export function DocumentChecklist({ plot }: { plot: Plot }) {
       <div className="doc-progress" aria-label={`${done} of ${total} documents complete`}>
         <div style={{ width: `${pct}%` }} />
       </div>
-      {STAGE_GROUPS.map(({ stage, title, clause }) => {
+      {STAGE_GROUPS.map(({ stage, title, clause, whyRef }) => {
         const docs = plot.documents.filter((d) => d.stage === stage)
         if (docs.length === 0) return null
         const groupDone = docs.filter((d) => d.completed).length
         return (
           <div key={stage} style={{ marginBottom: 10 }}>
             <div className="doc-stage-head">
-              <span>{title}</span>
+              <span>
+                {title}{' '}
+                <button className="whylink" onClick={() => onExplainCode(whyRef)}>
+                  why?
+                </button>
+              </span>
               <span className="muted">
-                {groupDone}/{docs.length} · {clause}
+                {groupDone}/{docs.length}
+                {showRefs && ` · ${clause}`}
               </span>
             </div>
             <div className="card">
               {docs.map((doc) => (
-                <DocRow key={doc.key} plotId={plot.id} doc={doc} />
+                <DocRow key={doc.key} plotId={plot.id} doc={doc} showRefs={showRefs} />
               ))}
             </div>
           </div>
@@ -53,7 +67,7 @@ export function DocumentChecklist({ plot }: { plot: Plot }) {
   )
 }
 
-function DocRow({ plotId, doc }: { plotId: string; doc: DocumentItem }) {
+function DocRow({ plotId, doc, showRefs }: { plotId: string; doc: DocumentItem; showRefs: boolean }) {
   const { dispatch } = useStore()
   const [showNote, setShowNote] = useState(false)
   const [note, setNote] = useState(doc.note || '')
@@ -94,7 +108,10 @@ function DocRow({ plotId, doc }: { plotId: string; doc: DocumentItem }) {
         <Icon name="check" size={18} strokeWidth={2.6} />
       </button>
       <div className="doc-body">
-        <div className="doc-label">{doc.label}</div>
+        <div className="doc-label">
+          {doc.label}
+          {showRefs && doc.clause && <span className="clause-ref">Code {doc.clause}</span>}
+        </div>
         {doc.hint && <div className="doc-hint">{doc.hint}</div>}
 
         <div className="doc-meta">

@@ -8,6 +8,7 @@
 
 import { journeyClocksForPlot, plotStage, STAGE_LABELS } from '../lib/code'
 import { describeCountdown, formatDate } from '../lib/dates'
+import { downloadJourneyCalendar } from '../lib/ics'
 import { useStore } from '../state/store'
 import { Icon } from './icons'
 import type { JourneyClock, Plot } from '../types'
@@ -23,12 +24,14 @@ export function JourneySection({
   plot,
   onToast,
   onResolveMajorChange,
+  onExplainCode,
 }: {
   plot: Plot
   onToast: (msg: string) => void
   onResolveMajorChange: (changeId: string) => void
+  onExplainCode: (ref: string) => void
 }) {
-  const { dispatch } = useStore()
+  const { state, dispatch } = useStore()
   const stage = plotStage(plot)
   const clocks = journeyClocksForPlot(plot)
   const reached = STEPS.findIndex((s) => s.key === stage)
@@ -36,6 +39,14 @@ export function JourneySection({
   const markRefunded = () => {
     dispatch({ type: 'RECORD_REFUND', plotId: plot.id })
     onToast('Refund recorded — plot moves to the archive')
+  }
+
+  const remindMe = () => {
+    if (downloadJourneyCalendar(plot)) {
+      onToast('Calendar file downloaded — open it to add the reminders')
+    } else {
+      onToast('No upcoming journey dates to remind about')
+    }
   }
 
   return (
@@ -82,11 +93,19 @@ export function JourneySection({
             <JourneyClockCard
               key={`${c.kind}-${c.changeId || ''}`}
               clock={c}
+              showRef={!!state.showCodeRefs}
+              onExplain={() => onExplainCode(c.clause)}
               onMarkRefunded={c.kind === 'refund' ? markRefunded : undefined}
               onResolve={c.kind === 'major_change' && c.changeId ? () => onResolveMajorChange(c.changeId!) : undefined}
             />
           ))}
         </div>
+      )}
+
+      {stage !== 'cancelled' && stage !== 'completed' && clocks.some((c) => c.dueDate) && (
+        <button className="btn btn-sm btn-ghost" style={{ marginTop: 8 }} onClick={remindMe}>
+          <Icon name="calendar" size={15} /> Remind me — add these dates to my calendar
+        </button>
       )}
     </div>
   )
@@ -94,10 +113,14 @@ export function JourneySection({
 
 function JourneyClockCard({
   clock,
+  showRef,
+  onExplain,
   onMarkRefunded,
   onResolve,
 }: {
   clock: JourneyClock
+  showRef: boolean
+  onExplain: () => void
   onMarkRefunded?: () => void
   onResolve?: () => void
 }) {
@@ -105,11 +128,15 @@ function JourneyClockCard({
     <div className={`card clock rag-${clock.rag}`}>
       <div className="info">
         <div className="label">
-          {clock.label} <span className="clause-ref">Code {clock.clause}</span>
+          {clock.label}
+          {showRef && <span className="clause-ref">Code {clock.clause}</span>}
         </div>
         {clock.detail && (
           <div className="when" style={{ marginTop: 2 }}>
-            {clock.detail}
+            {clock.detail}{' '}
+            <button className="whylink" onClick={onExplain}>
+              why?
+            </button>
           </div>
         )}
         {(onMarkRefunded || onResolve) && (
