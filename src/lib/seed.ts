@@ -8,7 +8,7 @@
 import { buildDocumentChecklist } from './code'
 import { addDays, nowISO, todayISO } from './dates'
 import { id } from './storage'
-import type { AppState, Development, Issue, Plot, TimelineEvent } from '../types'
+import type { AppState, ChangeRecord, Development, Issue, Plot, TimelineEvent } from '../types'
 
 function ev(type: TimelineEvent['type'], summary: string, detail?: string, issueId?: string): TimelineEvent {
   return { id: id('ev_'), timestamp: nowISO(), type, summary, detail, issueId }
@@ -24,12 +24,17 @@ function plot(
     reservationDate: undefined,
     completionDate: undefined,
     documents: buildDocumentChecklist(),
+    changes: [],
     issues: [],
     letters: [],
     timeline: [ev('plot_created', `Plot created: ${partial.address}`)],
     createdAt: nowISO(),
     ...partial,
   }
+}
+
+function change(partial: Partial<ChangeRecord> & Pick<ChangeRecord, 'kind' | 'description' | 'date'>): ChangeRecord {
+  return { id: id('chg_'), createdAt: nowISO(), ...partial }
 }
 
 export function buildSeedState(developerName: string): AppState {
@@ -51,11 +56,72 @@ export function buildSeedState(developerName: string): AppState {
   }
   const dev = meadow.id
 
+  // 0a. Freshly RESERVED plot — cooling-off live, reservation docs half done.
+  const reserved = plot(dev, {
+    address: 'Plot 9, Meadow View',
+    customerNames: 'Miss Grant',
+    reservationDate: addDays(today, -5),
+    exchangeDeadline: addDays(today, 37), // reservation + 42 (Code 2.2 minimum)
+  })
+  reserved.documents = reserved.documents.map((d) =>
+    d.key === 'reservation_agreement' ? { ...d, completed: true, completedDate: addDays(today, -5) } : d
+  )
+  reserved.changes = [
+    change({
+      kind: 'choice',
+      description: 'Front door confirmed: Anthracite grey, Suffolk style.',
+      date: addDays(today, -2),
+    }),
+  ]
+  reserved.timeline = [
+    ev('stage_recorded', `Reservation recorded — ${addDays(today, -5)}`, 'The 14-day cooling-off period runs from this date (Code 2.3).'),
+    ...reserved.timeline,
+  ]
+
+  // 0b. EXCHANGED plot mid-build — a live major-change window (amber), a
+  // delay on record, and an extra. Expected completion ~10 weeks out.
+  const exchanged = plot(dev, {
+    address: 'Plot 5, Meadow View',
+    customerNames: 'Mr Novak & Mr Reid',
+    customerEmail: 'novak.reid@example.com',
+    reservationDate: addDays(today, -70),
+    exchangeDeadline: addDays(today, -28),
+    exchangeDate: addDays(today, -30),
+    completionDate: addDays(today, 70),
+  })
+  exchanged.documents = exchanged.documents.map((d) =>
+    d.stage !== 'completion' ? { ...d, completed: true, completedDate: addDays(today, -30) } : d
+  )
+  exchanged.changes = [
+    change({
+      kind: 'major_change',
+      description: 'Kitchen/diner window moved to side elevation following drainage redesign.',
+      date: addDays(today, -4), // 10 days left in the 14-day window
+    }),
+    change({
+      kind: 'delay',
+      description: 'Completion moved back ~3 weeks — brickwork delays after supplier failure.',
+      date: addDays(today, -12),
+    }),
+    change({
+      kind: 'extra',
+      description: 'Quartz worktop upgrade ordered — £1,850 paid.',
+      date: addDays(today, -25),
+    }),
+  ]
+  exchanged.timeline = [
+    ev('change_logged', 'MAJOR change notified in writing: Kitchen/diner window moved…', undefined),
+    ev('stage_recorded', `Exchange of contracts recorded — ${addDays(today, -30)}`),
+    ...exchanged.timeline,
+  ]
+
   // 1. Green plot — all documents done, no open clocks.
   const green = plot(dev, {
     address: 'Plot 1, Meadow View',
     customerNames: 'Mr & Mrs Okafor',
     reservationDate: addDays(today, -180),
+    exchangeDate: addDays(today, -140),
+    noticeServedDate: addDays(today, -134),
     completionDate: addDays(today, -120),
   })
   green.documents = green.documents.map((d) => ({ ...d, completed: true, completedDate: addDays(today, -119) }))
@@ -133,9 +199,9 @@ export function buildSeedState(developerName: string): AppState {
   retired.documents = retired.documents.map((d) => ({ ...d, completed: true, completedDate: addDays(today, -899) }))
 
   return {
-    version: 2,
+    version: 3,
     developerName,
     developments: [meadow, brook],
-    plots: [red, amber, green, retired],
+    plots: [red, exchanged, reserved, amber, green, retired],
   }
 }

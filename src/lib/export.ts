@@ -11,9 +11,17 @@
  *   • Print — a clean printable page the user saves as PDF from the browser
  */
 
-import { clockForIssue } from './code'
+import { clockForIssue, majorChangeCancelBy } from './code'
 import { formatDate, formatDateTime } from './dates'
-import type { Plot } from '../types'
+import type { ChangeKind, Plot } from '../types'
+
+const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
+  choice: 'Choice confirmed',
+  extra: 'Extra ordered',
+  minor_change: 'Change (not major)',
+  major_change: 'MAJOR change',
+  delay: 'Delay notified',
+}
 
 function csvCell(value: unknown): string {
   const s = value == null ? '' : String(value)
@@ -67,15 +75,34 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
     return
   }
 
+  const stageLabel = { reservation: 'Reservation', pre_contract: 'Pre-contract', completion: 'Completion' }
   const docRows = plot.documents
     .map(
       (d) => `<tr>
         <td>${d.completed ? '✔' : '—'}</td>
         <td>${escapeHtml(d.label)}</td>
+        <td>${escapeHtml(stageLabel[d.stage] || '')}</td>
         <td>${d.completed ? formatDate(d.completedDate) : 'Outstanding'}</td>
         <td>${escapeHtml(d.note || d.fileName || '')}</td>
       </tr>`
     )
+    .join('')
+
+  const changeRows = plot.changes
+    .map((c) => {
+      const outcome =
+        c.kind === 'major_change'
+          ? c.outcome
+            ? `${c.outcome === 'accepted' ? 'Accepted' : 'Customer cancelled'} ${formatDate(c.outcomeDate)}`
+            : `Cancellation window to ${formatDate(majorChangeCancelBy(c))}`
+          : ''
+      return `<tr>
+        <td>${formatDate(c.date)}</td>
+        <td>${escapeHtml(CHANGE_KIND_LABEL[c.kind])}</td>
+        <td>${escapeHtml(c.description)}</td>
+        <td>${escapeHtml(outcome)}</td>
+      </tr>`
+    })
     .join('')
 
   const issueRows = plot.issues
@@ -134,13 +161,21 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
   <h1>Customer Communications Record</h1>
   <div class="meta"><strong>Property:</strong> ${escapeHtml(plot.address || '—')}</div>
   <div class="meta"><strong>Customer(s):</strong> ${escapeHtml(plot.customerNames || '—')}</div>
-  <div class="meta"><strong>Reservation:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Completion:</strong> ${formatDate(plot.completionDate)}</div>
+  <div class="meta"><strong>Reserved:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Exchanged:</strong> ${formatDate(plot.exchangeDate)} &nbsp; <strong>Notice to complete:</strong> ${formatDate(plot.noticeServedDate)} &nbsp; <strong>Completion:</strong> ${formatDate(plot.completionDate)}</div>
+  ${plot.cancellation ? `<div class="meta"><strong>Cancelled:</strong> ${escapeHtml(plot.cancellation.kind)} cancellation on ${formatDate(plot.cancellation.date)}${plot.cancellation.refundedDate ? ` — refund paid ${formatDate(plot.cancellation.refundedDate)}` : ' — refund outstanding'}</div>` : ''}
   <div class="meta"><strong>Developer:</strong> ${escapeHtml(developerName || '—')}</div>
   <div class="meta"><strong>Record generated:</strong> ${formatDateTime(new Date().toISOString())}</div>
 
   <h2>Document checklist (${docsDone}/${plot.documents.length} complete)</h2>
-  <table><thead><tr><th>Done</th><th>Document</th><th>Date</th><th>Note / file</th></tr></thead>
+  <table><thead><tr><th>Done</th><th>Document</th><th>Stage</th><th>Date</th><th>Note / file</th></tr></thead>
   <tbody>${docRows}</tbody></table>
+
+  <h2>Spec, changes &amp; delays (${plot.changes.length})</h2>
+  ${
+    plot.changes.length
+      ? `<table><thead><tr><th style="width:90px">Date</th><th>Kind</th><th>Detail</th><th>Outcome</th></tr></thead><tbody>${changeRows}</tbody></table>`
+      : '<p class="muted">No choices, extras, changes or delays recorded.</p>'
+  }
 
   <h2>Issues &amp; clocks (${plot.issues.length})</h2>
   ${

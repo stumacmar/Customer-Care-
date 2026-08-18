@@ -1,6 +1,6 @@
 /*
  * The dead-simple how-to guide. Toggled from the "?" button in the top bar.
- * Seven short lines — if it needs more than that, the app is too complicated.
+ * Eight short lines — if it needs more than that, the app is too complicated.
  */
 
 import { Sheet } from './ui'
@@ -10,11 +10,25 @@ import { Icon, type IconName } from './icons'
 type Step = { icon: IconName; tint: string; text: string } | { rag: true; text: string }
 
 const STEPS: Step[] = [
-  { icon: 'plus', tint: 'var(--brand)', text: 'Add your development, then add a plot as each sale nears completion.' },
+  {
+    icon: 'plus',
+    tint: 'var(--brand)',
+    text: 'Add your development, then add a plot the day its Reservation Agreement is signed. The cooling-off and exchange clocks start themselves.',
+  },
+  {
+    icon: 'key',
+    tint: 'var(--brand)',
+    text: 'Record each date as it happens — exchange, notice to complete, completion. The journey strip shows where every plot is, and the Code clocks follow.',
+  },
+  {
+    icon: 'clipboard',
+    tint: 'var(--green)',
+    text: 'Log every choice, extra, change and delay in Spec & changes. A major change starts the 14-day clock and drafts the written notice for you.',
+  },
   {
     icon: 'check-circle',
     tint: 'var(--green)',
-    text: 'Tick off each document as you give it to the customer. This builds your supporting documentation, ready if the customer ever raises a query in future.',
+    text: 'Tick off each document as you give it — grouped by stage, from the Reservation Agreement to the handover pack. That is your evidence trail.',
   },
   {
     icon: 'wrench',
@@ -28,17 +42,12 @@ const STEPS: Step[] = [
   {
     icon: 'mail',
     tint: 'var(--complaint)',
-    text: 'For a complaint, tap "Draft" at each step. The letter is written for you with the right dates — check it, fill the brackets, email it.',
-  },
-  {
-    icon: 'calendar',
-    tint: 'var(--brand)',
-    text: 'Tap "Remind me" on any issue to drop its deadlines into your phone calendar with alerts.',
+    text: 'Letters are drafted for you with the right dates — complaint letters, major-change notices, delay updates. Check, fill the brackets, email.',
   },
   {
     icon: 'file',
     tint: 'var(--text-dim)',
-    text: 'If a complaint is ever escalated to the Ombudsman, tap "Export" on the plot — it shows every document you supplied and the dates you did so, all in one file.',
+    text: 'If anything is ever escalated to the Ombudsman, tap "Export" — every date, document, change and letter in one file.',
   },
 ]
 
@@ -61,7 +70,7 @@ function StepIcon({ step }: { step: Step }) {
 
 export function HelpSheet({ onClose }: { onClose: () => void }) {
   return (
-    <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 7 lines." onClose={onClose}>
+    <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 8 lines." onClose={onClose}>
       <div
         style={{
           display: 'flex',

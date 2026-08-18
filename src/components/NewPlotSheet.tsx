@@ -1,13 +1,16 @@
 /*
- * Add a plot. Deliberately short — address and customer are all that's needed
- * to start the clock; dates are optional. Creating the plot auto-generates the
- * full document checklist (Code 2.11 / 3.1) so nothing is forgotten.
+ * Add a plot — now at the RESERVATION stage, where the Code's journey starts.
+ * Address, customer and the reservation date are enough: the cooling-off clock
+ * (2.3), the stage-grouped document checklist (2.2 → 3.1) and the suggested
+ * exchange-by date (2.2m) all come free.
  */
 
 import { useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { id } from '../lib/storage'
+import { addDays, formatDate, todayISO } from '../lib/dates'
+import { COOLING_OFF_DAYS, EXCHANGE_MIN_DAYS } from '../lib/code'
 
 export function NewPlotSheet({
   developmentId,
@@ -22,8 +25,7 @@ export function NewPlotSheet({
   const [address, setAddress] = useState('')
   const [customerNames, setCustomerNames] = useState('')
   const [customerEmail, setCustomerEmail] = useState('')
-  const [reservationDate, setReservationDate] = useState('')
-  const [completionDate, setCompletionDate] = useState('')
+  const [reservationDate, setReservationDate] = useState(todayISO())
 
   const submit = () => {
     if (!address.trim()) return
@@ -36,15 +38,17 @@ export function NewPlotSheet({
       customerNames,
       customerEmail: customerEmail || undefined,
       reservationDate: reservationDate || undefined,
-      completionDate: completionDate || undefined,
+      // The exchange-by date is part of the Reservation Agreement (2.2m) — the
+      // Code-minimum default so the clock exists from day one; editable later.
+      exchangeDeadline: reservationDate ? addDays(reservationDate, EXCHANGE_MIN_DAYS) : undefined,
     })
     onCreated(plotId)
   }
 
   return (
     <Sheet
-      title="New plot"
-      subtitle="Adds the document checklist automatically."
+      title="New plot — reserved"
+      subtitle="Add it the day the Reservation Agreement is signed."
       onClose={onClose}
     >
       <div className="field">
@@ -76,10 +80,13 @@ export function NewPlotSheet({
       <div className="field">
         <label>Reservation date</label>
         <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} />
-      </div>
-      <div className="field">
-        <label>Completion date</label>
-        <input type="date" value={completionDate} onChange={(e) => setCompletionDate(e.target.value)} />
+        {reservationDate && (
+          <div className="dictate-hint">
+            Cooling-off runs to {formatDate(addDays(reservationDate, COOLING_OFF_DAYS))} (Code 2.3).
+            Exchange-by will default to {formatDate(addDays(reservationDate, EXCHANGE_MIN_DAYS))} —
+            the Code minimum of six weeks (2.2) — and can be edited on the plot.
+          </div>
+        )}
       </div>
 
       <div className="sheet-actions">

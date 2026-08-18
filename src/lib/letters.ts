@@ -24,8 +24,8 @@
  */
 
 import { addDays, formatDate, todayISO } from './dates'
-import { SNAG_PUT_RIGHT_DAYS } from './code'
-import type { Issue, MilestoneKey, Plot } from '../types'
+import { majorChangeCancelBy, SNAG_PUT_RIGHT_DAYS } from './code'
+import type { ChangeRecord, Issue, MilestoneKey, Plot } from '../types'
 
 /** New Homes Ombudsman Service contact details (nhos.org.uk). */
 export const NHOS_CONTACT =
@@ -297,6 +297,119 @@ export function generateLetter(
 ): LetterDraft {
   const gen = GENERATORS[key] || GENERATORS.acknowledgement
   return gen({ developerName, plot, issue, today: todayISO() })
+}
+
+// ---------------------------------------------------------------------------
+// Journey letters — written notices the Code requires before completion
+// ---------------------------------------------------------------------------
+
+function journeyHeader(developerName: string, plot: Plot, today: string): string {
+  return [
+    developerName || '[Your company name]',
+    '',
+    `Date: ${formatDate(today)}`,
+    '',
+    'To:',
+    plot.customerNames || '[Customer name(s)]',
+    plot.address || '[Property address]',
+    '',
+  ].join('\n')
+}
+
+function journeySignOff(developerName: string): string {
+  return [
+    '',
+    'Yours sincerely,',
+    '',
+    '[Name]',
+    developerName || '[Your company name]',
+    '[Contact telephone] · [Contact email]',
+  ].join('\n')
+}
+
+/**
+ * Major change notice — Code 2.9. The Code requires the customer to be told in
+ * writing about a major change, their right to cancel within 14 days of
+ * receiving the written details (with a full refund), and to be recommended to
+ * take legal advice. The notice to complete cannot be served in that window.
+ */
+export function majorChangeLetter(
+  developerName: string,
+  plot: Plot,
+  change: ChangeRecord
+): { title: string; subject: string; body: string } {
+  const today = todayISO()
+  const cancelBy = majorChangeCancelBy(change)
+  const body = [
+    journeyHeader(developerName, plot, today),
+    `Dear ${plot.customerNames || '[Customer name]'},`,
+    '',
+    `Re: Notice of a major change to your new home at ${plot.address || '[address]'}`,
+    '',
+    'We are writing to tell you about a change to your new home that we consider to be a ' +
+      'major change — one that significantly and substantially affects the size, appearance ' +
+      'or value of the home compared with what you were shown when you reserved.',
+    '',
+    'The change:',
+    `   ${change.description || '[describe the change, and how it differs from what was shown]'}`,
+    '   [Add drawings/plans if helpful.]',
+    '',
+    'Your right to cancel:',
+    `   If you find this change unacceptable, you have the right to cancel your ` +
+      `Reservation Agreement or contract of sale within 14 days of receiving this ` +
+      `letter — that is, by ${formatDate(cancelBy)} — and receive a full refund of your ` +
+      'contract deposit, reservation fee and any other payments you have made.',
+    '',
+    'We recommend that you discuss this letter with your legal adviser before deciding.',
+    '',
+    'If we do not hear from you by the date above, we will assume you are content to ' +
+      'proceed. Please contact us with any questions in the meantime.',
+    journeySignOff(developerName),
+  ].join('\n')
+  return {
+    title: 'Major change notice (Code 2.9)',
+    subject: `Notice of a major change — ${plot.address}`,
+    body,
+  }
+}
+
+/**
+ * Delay / timetable update — Code 2.6 and 2.8: keep the customer informed
+ * about when the home is likely to be ready, with updates at appropriate times.
+ */
+export function delayUpdateLetter(
+  developerName: string,
+  plot: Plot,
+  change: ChangeRecord
+): { title: string; subject: string; body: string } {
+  const today = todayISO()
+  const body = [
+    journeyHeader(developerName, plot, today),
+    `Dear ${plot.customerNames || '[Customer name]'},`,
+    '',
+    `Re: Update on the completion timetable for ${plot.address || '[address]'}`,
+    '',
+    'We are writing to keep you informed about the timetable for your new home.',
+    '',
+    'What has changed:',
+    `   ${change.description || '[explain the delay and its cause]'}`,
+    '',
+    'Our current expectation:',
+    `   Expected completion: ${plot.completionDate ? formatDate(plot.completionDate) : '[updated expected completion date]'}`,
+    '   [Set out anything the customer should do, and when you will update them next.]',
+    '',
+    'Your contract of sale sets out what happens if the home is not ready by the date we ' +
+      'said it would be, including the circumstances in which you can cancel. If you have ' +
+      'any questions we recommend speaking to your legal adviser.',
+    '',
+    'We are sorry for the inconvenience and will keep you updated.',
+    journeySignOff(developerName),
+  ].join('\n')
+  return {
+    title: 'Completion timetable update (Code 2.6 / 2.8)',
+    subject: `Completion timetable update — ${plot.address}`,
+    body,
+  }
 }
 
 /** Reminder shown on a snag: the 30-day put-right note (not a Code letter). */

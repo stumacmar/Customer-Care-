@@ -11,6 +11,9 @@ import { createContext, useContext, useEffect, useMemo, useReducer } from 'react
 import type { ReactNode } from 'react'
 import type {
   AppState,
+  Cancellation,
+  ChangeKind,
+  ChangeRecord,
   Development,
   DocumentItem,
   Issue,
@@ -20,7 +23,7 @@ import type {
   TimelineEvent,
   TimelineEventType,
 } from '../types'
-import { buildDocumentChecklist } from '../lib/code'
+import { buildDocumentChecklist, majorChangeCancelBy } from '../lib/code'
 import { formatDate, nextBusinessDay, nowISO, todayISO } from '../lib/dates'
 import { emptyState, id, loadState, saveState } from '../lib/storage'
 
@@ -41,16 +44,45 @@ type Action =
       customerNames: string
       customerEmail?: string
       reservationDate?: string
+      exchangeDeadline?: string
       completionDate?: string
     }
   | {
       type: 'UPDATE_PLOT_DETAILS'
       plotId: string
       patch: Partial<
-        Pick<Plot, 'address' | 'customerNames' | 'customerEmail' | 'reservationDate' | 'completionDate'>
+        Pick<
+          Plot,
+          | 'address'
+          | 'customerNames'
+          | 'customerEmail'
+          | 'reservationDate'
+          | 'exchangeDeadline'
+          | 'exchangeDate'
+          | 'noticeServedDate'
+          | 'completionDate'
+        >
       >
     }
   | { type: 'DELETE_PLOT'; plotId: string }
+  | {
+      type: 'LOG_CHANGE'
+      plotId: string
+      changeId: string
+      kind: ChangeKind
+      description: string
+      date: string
+      photoDataUrl?: string
+    }
+  | {
+      type: 'RESOLVE_CHANGE'
+      plotId: string
+      changeId: string
+      outcome: 'accepted' | 'cancelled'
+    }
+  | { type: 'DELETE_CHANGE'; plotId: string; changeId: string }
+  | { type: 'RECORD_CANCELLATION'; plotId: string; kind: Cancellation['kind']; date: string }
+  | { type: 'RECORD_REFUND'; plotId: string }
   | {
       type: 'LOG_ISSUE'
       plotId: string
@@ -116,6 +148,10 @@ function updatePlot(
   }
 }
 
+function truncate(s: string, max = 60): string {
+  return s.length > max ? `${s.slice(0, max - 1)}…` : s
+}
+
 function nextReference(plot: Plot, issueType: IssueType): string {
   const prefix = issueType === 'complaint' ? 'C' : issueType === 'emergency' ? 'E' : 'S'
   const count = plot.issues.filter((i) => i.type === issueType).length + 1
@@ -168,6 +204,27 @@ function reducer(state: AppState, action: Action): AppState {
       }
 
     case 'ADD_PLOT': {
+      const events: TimelineEvent[] = [
+        event('plot_created', `Plot created: ${action.address.trim()}`),
+      ]
+      if (action.reservationDate) {
+        events.unshift(
+          event(
+            'stage_recorded',
+            `Reservation recorded — ${formatDate(action.reservationDate)}`,
+            'The 14-day cooling-off period runs from this date (Code 2.3).'
+          )
+        )
+      }
+      if (action.exchangeDeadline) {
+        events.unshift(
+          event(
+            'stage_recorded',
+            `Exchange-by date recorded — ${formatDate(action.exchangeDeadline)}`,
+            'Code 2.2: at least six weeks after reservation unless the customer asks for earlier.'
+          )
+        )
+      }
       const plot: Plot = {
         id: action.plotId,
         developmentId: action.developmentId,
@@ -175,11 +232,13 @@ function reducer(state: AppState, action: Action): AppState {
         customerNames: action.customerNames.trim(),
         customerEmail: action.customerEmail?.trim() || undefined,
         reservationDate: action.reservationDate,
+        exchangeDeadline: action.exchangeDeadline,
         completionDate: action.completionDate,
         documents: buildDocumentChecklist(),
+        changes: [],
         issues: [],
         letters: [],
-        timeline: [event('plot_created', `Plot created: ${action.address.trim()}`)],
+        timeline: events,
         createdAt: nowISO(),
       }
       return { ...state, plots: [plot, ...state.plots] }
@@ -192,9 +251,104 @@ function reducer(state: AppState, action: Action): AppState {
         if (patch.customerNames !== undefined) patch.customerNames = patch.customerNames.trim()
         if (patch.customerEmail !== undefined)
           patch.customerEmail = patch.customerEmail.trim() || undefined
+
+        // Journey dates get their own timeline entries when set or changed —
+        // the audit record should show when each stage was recorded.
+        const stamps: [keyof typeof patch, string, string?][] = [
+          ['reservationDate', 'Reservation recorded', 'The 14-day cooling-off period runs from this date (Code 2.3).'],
+          ['exchangeDeadline', 'Exchange-by date recorded', 'Code 2.2: at least six weeks after reservation unless the customer asks for earlier.'],
+          ['exchangeDate', 'Exchange of contracts recorded'],
+          ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
+          ['completionDate', 'Completion date recorded'],
+        ]
+        const events: TimelineEvent[] = []
+        for (const [key, label, detail] of stamps) {
+          const next = patch[key] as string | undefined
+          if (next !== undefined && next !== plot[key as keyof Plot] && next) {
+            events.push(event('stage_recorded', `${label} — ${formatDate(next)}`, detail))
+          }
+        }
+        if (events.length === 0) events.push(event('note', 'Plot details updated'))
+        return { plot: { ...plot, ...patch }, events }
+      })
+
+    case 'LOG_CHANGE':
+      return updatePlot(state, action.plotId, (plot) => {
+        const change: ChangeRecord = {
+          id: action.changeId,
+          kind: action.kind,
+          description: action.description.trim(),
+          date: action.date,
+          photoDataUrl: action.photoDataUrl,
+          createdAt: nowISO(),
+        }
+        const noun: Record<ChangeKind, string> = {
+          choice: 'Choice confirmed',
+          extra: 'Extra ordered',
+          minor_change: 'Change notified (not major)',
+          major_change: 'MAJOR change notified in writing',
+          delay: 'Delay notified',
+        }
+        const detail =
+          action.kind === 'major_change'
+            ? `${change.description}\nCustomer may cancel for a full refund until ${formatDate(majorChangeCancelBy(change))} (Code 2.9). Notice to complete must not be served during this window.`
+            : change.description
+        const ev = event('change_logged', `${noun[action.kind]}: ${truncate(change.description)}`, detail)
+        return { plot: { ...plot, changes: [change, ...plot.changes] }, events: [ev] }
+      })
+
+    case 'RESOLVE_CHANGE':
+      return updatePlot(state, action.plotId, (plot) => {
+        let desc = ''
+        const changes = plot.changes.map((c) => {
+          if (c.id !== action.changeId) return c
+          desc = c.description
+          return { ...c, outcome: action.outcome, outcomeDate: todayISO() }
+        })
+        const ev = event(
+          'change_logged',
+          action.outcome === 'accepted'
+            ? `Major change accepted by customer: ${truncate(desc)}`
+            : `Customer cancelled following major change: ${truncate(desc)}`,
+          action.outcome === 'cancelled'
+            ? 'Code 2.9: the customer is entitled to a full refund of the contract deposit, reservation fee and any other payments. Record the cancellation on this plot to start the refund clock.'
+            : undefined
+        )
+        return { plot: { ...plot, changes }, events: [ev] }
+      })
+
+    case 'DELETE_CHANGE':
+      return updatePlot(state, action.plotId, (plot) => {
+        const target = plot.changes.find((c) => c.id === action.changeId)
         return {
-          plot: { ...plot, ...patch },
-          events: [event('note', 'Plot details updated')],
+          plot: { ...plot, changes: plot.changes.filter((c) => c.id !== action.changeId) },
+          events: [event('note', `Spec & changes entry removed: ${truncate(target?.description || '')}`)],
+        }
+      })
+
+    case 'RECORD_CANCELLATION':
+      return updatePlot(state, action.plotId, (plot) => {
+        const isContract = action.kind === 'contract'
+        const ev = event(
+          'cancellation_recorded',
+          `${isContract ? 'Contract' : 'Reservation'} cancelled — ${formatDate(action.date)}`,
+          isContract
+            ? 'Code 2.13: refund the contract deposit and any other amounts due within 28 days.'
+            : 'Code 2.4: refund the reservation fee, less any deductions set out in the Reservation Agreement, within 14 days of the notice. Within the 14-day cooling-off period the refund must be in full (Code 2.3).'
+        )
+        return {
+          plot: { ...plot, cancellation: { kind: action.kind, date: action.date } },
+          events: [ev],
+        }
+      })
+
+    case 'RECORD_REFUND':
+      return updatePlot(state, action.plotId, (plot) => {
+        if (!plot.cancellation) return { plot, events: [] }
+        const ev = event('refund_recorded', 'Refund paid to customer', undefined)
+        return {
+          plot: { ...plot, cancellation: { ...plot.cancellation, refundedDate: todayISO() } },
+          events: [ev],
         }
       })
 
