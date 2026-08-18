@@ -78,9 +78,8 @@ export function HelpSheet({ onClose }: { onClose: () => void }) {
           gap: 12,
           margin: '2px 0 16px',
           padding: '12px 14px',
-          background: 'var(--bg-elev-2)',
+          background: 'var(--bg-elev)',
           borderRadius: 'var(--radius)',
-          border: '1px solid var(--line)',
         }}
       >
         <BrandMark size={40} className="brand-mark" />

@@ -40,7 +40,7 @@ export const CHANGE_KIND_META: Record<
   },
   delay: {
     label: 'Delay',
-    badgeClass: 'emergency',
+    badgeClass: 'snag',
     blurb: 'The expected completion timetable has moved. Code 2.6/2.8: keep the customer informed — update the expected completion date on this plot too.',
   },
 }
