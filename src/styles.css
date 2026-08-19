@@ -196,12 +196,21 @@ select:focus {
   align-items: center;
   gap: 12px;
   padding: 10px var(--pad);
-  background: rgba(249, 249, 249, 0.85);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  backdrop-filter: saturate(180%) blur(20px);
-  box-shadow: 0 0.5px 0 var(--sep);
-  /* The brand's coral keyline — the app reads as an extension of the site. */
+  /* The site's own header: white logo on the Board's navy, under the coral
+     keyline — the app reads as an extension of nhqb.org.uk. */
+  background: var(--brand);
+  box-shadow: 0 0.5px 0 rgba(0, 0, 0, 0.18);
   border-top: 3px solid var(--accent);
+}
+.topbar .iconbtn {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.14);
+}
+.topbar .iconbtn:active {
+  background: rgba(255, 255, 255, 0.24);
+}
+.topbar .backbtn {
+  color: #fff;
 }
 .topbar h1 {
   font-size: 17px;
@@ -259,6 +268,21 @@ select:focus {
   flex: 0 0 auto;
   border-radius: 9px;
   box-shadow: 0 1px 3px rgba(16, 24, 40, 0.18);
+}
+.brand-divider {
+  width: 1px;
+  height: 30px;
+  background: rgba(255, 255, 255, 0.28);
+  flex: 0 0 auto;
+}
+.brand-product {
+  font-size: 14.5px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .brand-text {
   display: flex;

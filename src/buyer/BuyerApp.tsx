@@ -11,7 +11,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
-import { BrandMark } from '../components/Brand'
+import { BrandLogo, BrandMark } from '../components/Brand'
 import { Icon } from '../components/icons'
 import { Sheet, useToast, DictationField } from '../components/ui'
 import {
@@ -158,11 +158,9 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
     <div className="app buyer-app">
       <header className="topbar">
         <div className="brand">
-          <BrandMark size={38} className="brand-mark" />
-          <div className="brand-text">
-            <span className="brand-name">MY NEW HOME</span>
-            <span className="brand-sub">{snap.address}</span>
-          </div>
+          <BrandLogo height={44} />
+          <span className="brand-divider" />
+          <span className="brand-product">My new home</span>
         </div>
       </header>
 
