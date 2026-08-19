@@ -414,6 +414,27 @@ select:focus {
   margin: 0 0 20px;
 }
 
+.empty-sell {
+  margin: 28px auto 0;
+  max-width: 340px;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+.sell-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+.sell-row svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--link);
+}
+
 /* ---- Buttons ---- */
 .btn {
   min-height: var(--tap);
