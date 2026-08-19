@@ -3,9 +3,9 @@
  * Apple-grade interaction design wearing the NHQB brand (nhqb.org.uk):
  *   – the site's off-white ground (#f9f9f9) with flat white cards, hairline
  *     separators, subtle lift
- *   – the site's colour pairing: navy (#2c3a4c/#303e51) for structure, ink
- *     and primary actions; coral (#e9473f) for links and accents; functional
- *     RAG kept separate
+ *   – the site's colour pairing: navy (#2c3a4c/#303e51) for structure and
+ *     ink; coral (#e9473f) for actions, links and the "you are here"
+ *     accents, as the site uses it; functional RAG kept separate
  *   – the site's type pairing: Cardo (serif) for headings, Inter for body
  *     and controls; tabular numerals on anything counting
  *   – continuous-feeling corner radii, 4pt spacing rhythm, gentle motion
@@ -102,7 +102,7 @@ h3 {
 }
 
 ::selection {
-  background: rgba(44, 58, 76, 0.14);
+  background: rgba(233, 71, 63, 0.16);
 }
 
 button {
@@ -184,7 +184,7 @@ select:focus {
   line-height: 1;
 }
 .tabbar .tab.active {
-  color: var(--brand);
+  color: var(--accent);
 }
 
 /* ---- Top bar ---- */
@@ -200,6 +200,8 @@ select:focus {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 0.5px 0 var(--sep);
+  /* The brand's coral keyline — the app reads as an extension of the site. */
+  border-top: 3px solid var(--accent);
 }
 .topbar h1 {
   font-size: 17px;
@@ -234,7 +236,7 @@ select:focus {
 .backbtn {
   font-size: 17px;
   font-weight: 500;
-  color: var(--brand);
+  color: var(--accent);
   padding: 8px 4px;
   display: inline-flex;
   align-items: center;
@@ -414,6 +416,27 @@ select:focus {
   margin: 0 0 20px;
 }
 
+.empty-sell {
+  margin: 28px auto 0;
+  max-width: 340px;
+  display: grid;
+  gap: 12px;
+  text-align: left;
+}
+.sell-row {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+.sell-row svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: var(--link);
+}
+
 /* ---- Buttons ---- */
 .btn {
   min-height: var(--tap);
@@ -435,7 +458,7 @@ select:focus {
   opacity: 0.75;
 }
 .btn-primary {
-  background: var(--brand);
+  background: var(--accent);
   color: #fff;
 }
 .btn-block {
@@ -463,7 +486,7 @@ select:focus {
   height: 52px;
   padding: 0 22px;
   border-radius: 26px;
-  background: var(--brand);
+  background: var(--accent);
   color: #fff;
   font-weight: 600;
   font-size: 16px;
@@ -691,7 +714,7 @@ select:focus {
   border-color: var(--brand);
 }
 .j-step.next .j-dot {
-  border-color: var(--brand);
+  border-color: var(--accent);
 }
 .j-step .j-label {
   font-size: 11.5px;

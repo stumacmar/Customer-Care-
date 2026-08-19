@@ -44,7 +44,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Choices, changes and delays',
-    watchAt: 49,
+    watchAt: 50,
     body: [
       '"Log a choice, extra, change or delay" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks: log it the day it happens and the evidence trail builds itself.',
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',

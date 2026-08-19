@@ -86,6 +86,24 @@ export function DevelopmentsList({
           <button className="btn btn-primary" onClick={onNewDevelopment}>
             + Add a development
           </button>
+          <div className="empty-sell">
+            <div className="sell-row">
+              <Icon name="clock" size={17} strokeWidth={1.8} />
+              <span>Every Quality Code deadline tracked for you — never work out a date again</span>
+            </div>
+            <div className="sell-row">
+              <Icon name="key" size={17} strokeWidth={1.8} />
+              <span>Buyers get their own app through a private link — no server, no accounts</span>
+            </div>
+            <div className="sell-row">
+              <Icon name="mail" size={17} strokeWidth={1.8} />
+              <span>Letters drafted with the right dates already filled in</span>
+            </div>
+            <div className="sell-row">
+              <Icon name="printer" size={17} strokeWidth={1.8} />
+              <span>One tap exports the whole evidence trail as a PDF</span>
+            </div>
+          </div>
         </div>
       ) : (
         <>

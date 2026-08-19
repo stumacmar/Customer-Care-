@@ -17,6 +17,10 @@ import {
 } from '../lib/codeContent'
 import { searchCode } from '../lib/codeSearch'
 import { DictationField } from './ui'
+import { Icon } from './icons'
+
+/** Quick answers shown before "More questions" is tapped. */
+const QUICK_SHOWN = 4
 
 export function CodeSearch({
   openRef,
@@ -28,6 +32,23 @@ export function CodeSearch({
 } = {}) {
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState<CodeSection | null>(null)
+  const [moreQuestions, setMoreQuestions] = useState(false)
+
+  // The browse list grouped by the Code's own parts, in document order —
+  // collapsed by default so the tab fits on a screen instead of scrolling
+  // through all thirty-odd sections.
+  const parts = useMemo(() => {
+    const order: string[] = []
+    const byPart = new Map<string, CodeSection[]>()
+    for (const s of CODE_SECTIONS) {
+      if (!byPart.has(s.part)) {
+        byPart.set(s.part, [])
+        order.push(s.part)
+      }
+      byPart.get(s.part)!.push(s)
+    }
+    return order.map((part) => ({ part, sections: byPart.get(part)! }))
+  }, [])
 
   useEffect(() => {
     if (!openRef) return
@@ -64,7 +85,7 @@ export function CodeSearch({
           <div className="section" style={{ marginTop: 4 }}>
             <h3>Common questions</h3>
             <div className="stack">
-              {QUICK_ANSWERS.map((qa) => (
+              {QUICK_ANSWERS.slice(0, moreQuestions ? undefined : QUICK_SHOWN).map((qa) => (
                 <button
                   key={qa.q}
                   className="card"
@@ -78,25 +99,45 @@ export function CodeSearch({
                   </div>
                 </button>
               ))}
+              {!moreQuestions && QUICK_ANSWERS.length > QUICK_SHOWN && (
+                <button
+                  className="btn btn-sm btn-ghost btn-block"
+                  onClick={() => setMoreQuestions(true)}
+                >
+                  More questions ({QUICK_ANSWERS.length - QUICK_SHOWN})
+                </button>
+              )}
             </div>
           </div>
 
           <div className="section">
-            <h3>Browse every section</h3>
+            <h3>Browse the Code</h3>
             <div className="stack">
-              {CODE_SECTIONS.map((s) => (
-                <button
-                  key={s.ref}
-                  className="card row-between"
-                  style={{ textAlign: 'left', width: '100%' }}
-                  onClick={() => setOpen(s)}
-                >
-                  <span style={{ minWidth: 0 }}>
-                    <span style={{ fontWeight: 700 }}>{s.title}</span>
-                    <span className="muted" style={{ display: 'block', fontSize: 12 }}>{s.part}</span>
-                  </span>
-                  <span className="ref" style={{ flex: '0 0 auto' }}>{refLabel(s.ref)}</span>
-                </button>
+              {parts.map(({ part, sections }) => (
+                <details key={part} className="guide-item">
+                  <summary>
+                    <span>
+                      {part}
+                      <span className="muted" style={{ fontWeight: 400 }}> · {sections.length}</span>
+                    </span>
+                    <Icon name="arrow-right" size={16} className="guide-chev" />
+                  </summary>
+                  <div className="guide-body">
+                    <div className="stack">
+                      {sections.map((s) => (
+                        <button
+                          key={s.ref}
+                          className="card row-between"
+                          style={{ textAlign: 'left', width: '100%' }}
+                          onClick={() => setOpen(s)}
+                        >
+                          <span style={{ fontWeight: 700, minWidth: 0 }}>{s.title}</span>
+                          <span className="ref" style={{ flex: '0 0 auto' }}>{refLabel(s.ref)}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </details>
               ))}
             </div>
           </div>
