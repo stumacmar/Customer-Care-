@@ -14,7 +14,7 @@ import { SettingsSheet } from './components/SettingsSheet'
 import { HelpSheet } from './components/HelpSheet'
 import { CodeSearch } from './components/CodeSearch'
 import { GuideTab } from './components/GuideTab'
-import { BrandMark } from './components/Brand'
+import { BrandLogo } from './components/Brand'
 import { Icon } from './components/icons'
 import { useToast } from './components/ui'
 import { useStore } from './state/store'
@@ -79,11 +79,9 @@ export function App() {
           </>
         ) : (
           <div className="brand">
-            <BrandMark size={38} className="brand-mark" />
-            <div className="brand-text">
-              <span className="brand-name">NHQB</span>
-              <span className="brand-sub">Plot Tracker</span>
-            </div>
+            <BrandLogo height={44} />
+            <span className="brand-divider" />
+            <span className="brand-product">Plot Tracker</span>
           </div>
         )}
         <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">

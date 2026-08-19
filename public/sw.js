@@ -6,8 +6,8 @@
  * we haven't seen. This is deliberately simple — the audience uses this
  * standing outside a house, often with no signal.
  */
-const CACHE = 'nhqb-v17'
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg']
+const CACHE = 'nhqb-v18'
+const SHELL = ['./', './index.html', './manifest.webmanifest', './icon.svg', './nhqb-logo.png']
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
