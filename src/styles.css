@@ -1390,3 +1390,80 @@ select:focus {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ---- Desktop & laptop ----
+ * The app stays a single comfortable column, but the pieces sized for a
+ * phone adapt themselves: the tab bar becomes a floating dock instead of a
+ * screen-wide strip, the portrait demo video stops ballooning, plot lists
+ * use the extra width, and pointer hover states appear. Nothing here
+ * affects phones — it all sits behind width/hover media queries.
+ */
+@media (min-width: 900px) {
+  .tabbar {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: 100%;
+    max-width: 520px;
+    bottom: 18px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.94);
+    box-shadow: var(--shadow-float);
+    padding-bottom: 0;
+    overflow: hidden;
+  }
+  .tabbar .tab {
+    padding: 12px 0 11px;
+  }
+  .app {
+    padding-bottom: 130px;
+  }
+  .fab {
+    bottom: 96px;
+  }
+  .demo-video {
+    max-width: 400px;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1100px) {
+  .plot-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .plot-card,
+  .btn,
+  .card,
+  .log-btn {
+    transition:
+      transform 0.18s var(--ease-out),
+      box-shadow 0.18s var(--ease-out),
+      opacity 0.15s ease,
+      background 0.15s ease;
+  }
+  .plot-card:hover,
+  .log-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-float);
+  }
+  .btn:hover {
+    filter: brightness(1.04);
+  }
+  .tabbar .tab:hover {
+    color: var(--text);
+  }
+  .tabbar .tab.active:hover {
+    color: var(--accent);
+  }
+  .iconbtn:hover {
+    background: rgba(48, 62, 81, 0.16);
+  }
+  .topbar .iconbtn:hover {
+    background: rgba(255, 255, 255, 0.24);
+  }
+}

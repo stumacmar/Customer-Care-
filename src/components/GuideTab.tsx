@@ -25,7 +25,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'The day a home is reserved',
-    watchAt: 45,
+    watchAt: 37,
     body: [
       'Add the development if it\'s new, then "+ Plot" — address, customer name and email, reservation date. That\'s all the typing.',
       'The app starts the 14-day cooling-off period itself, and sets the exchange-by date to the Code minimum of six weeks (edit it if your Reservation Agreement says different).',
@@ -34,7 +34,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Reading the screen',
-    watchAt: 15,
+    watchAt: 13,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you only glance at one thing, glance at that.',
       'Colours: green means on track, orange means act this week, red means act today. Anything red sorts to the top of every list.',
@@ -44,7 +44,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Choices, changes and delays',
-    watchAt: 54,
+    watchAt: 45,
     body: [
       '"Log a choice, extra, change or delay" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks: log it the day it happens and the evidence trail builds itself.',
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
@@ -61,7 +61,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'After they move in: snags, complaints, emergencies',
-    watchAt: 74,
+    watchAt: 62,
     body: [
       'The moment a customer reports anything, log it with one of the three big buttons. Never work out a date — the app does it.',
       'Snag: a 30-day put-right clock. If it can\'t be settled in 30 days, the app reminds you to update the customer at least monthly until it is.',
@@ -72,7 +72,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Sharing with your buyer',
-    watchAt: 98,
+    watchAt: 82,
     body: [
       '"Share with buyer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
       'The buyer sees their own app: where their home is up to, their rights in plain English, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',
@@ -134,7 +134,7 @@ export function GuideTab() {
           aria-label="Demo video tour of the app"
         />
         <p className="muted" style={{ fontSize: 12.5, margin: '8px 4px 2px' }}>
-          The whole app in two and a half minutes — narrated, with captions. Sound on.
+          The whole app in about two minutes — narrated, with captions. Sound on.
         </p>
       </div>
 
