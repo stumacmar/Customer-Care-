@@ -1,6 +1,6 @@
 # NHQB — Plot Tracker
 
-**Every property has a clock. This app tells you what's due, when, and gives you the paperwork to prove you did it — with almost no typing.**
+**Tracks each plot's progress, keeps your customers updated, and keeps you Code compliant — with almost no typing.**
 
 A mobile-first tool for micro-developers (1–5 homes a year) who are registered NHQB developers with no customer-care team and no CRM. It is deliberately **not** a defect-management CRM. It covers the whole journey the New Homes Quality Code attaches to a plot — **from the day the Reservation Agreement is signed to the end of the two-year after-sales window** — and nothing else:
 
