@@ -25,7 +25,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'The day a home is reserved',
-    watchAt: 41,
+    watchAt: 40,
     body: [
       'Add the development if it\'s new, then "+ Plot" — address, customer name and email, reservation date. That\'s all the typing.',
       'The app starts the 14-day cooling-off period itself, and sets the exchange-by date to the Code minimum of six weeks (edit it if your Reservation Agreement says different).',
@@ -44,7 +44,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Choices, changes and delays',
-    watchAt: 50,
+    watchAt: 49,
     body: [
       '"Log a choice, extra, change or delay" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks: log it the day it happens and the evidence trail builds itself.',
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
