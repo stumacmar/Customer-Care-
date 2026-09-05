@@ -50,6 +50,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
       'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. Attendance disputes are among the most common Code disputes, and this is the evidence that settles them.',
+      'Emails with the customer belong in the record too — "Log an email" on the plot takes a pasted email (to or from them, with its own date) so the export is complete without digging through your inbox later. On Android you can even share an email straight from your mail app to Plot Tracker.',
     ],
   },
   {

@@ -16,6 +16,7 @@ import { DocumentChecklist } from './DocumentChecklist'
 import { IssueSection } from './IssueSection'
 import { JourneySection } from './JourneySection'
 import { ChangesSection } from './ChangesSection'
+import { CorrespondenceSection, LogEmailSheet } from './CorrespondenceSection'
 import { LogChangeSheet } from './LogChangeSheet'
 import { ChangeLetterSheet } from './ChangeLetterSheet'
 import { ResolveChangeSheet } from './ResolveChangeSheet'
@@ -48,6 +49,7 @@ export function PlotScreen({
   const [sharing, setSharing] = useState(false)
   const [pastingReport, setPastingReport] = useState(false)
   const [loggingChange, setLoggingChange] = useState(false)
+  const [loggingEmail, setLoggingEmail] = useState(false)
   const [changeLetterForId, setChangeLetterForId] = useState<string | null>(null)
   const [resolvingChangeId, setResolvingChangeId] = useState<string | null>(null)
 
@@ -183,6 +185,8 @@ export function PlotScreen({
         onDraftLetter={(issue, key) => setLetterFor({ issue, key })}
       />
 
+      <CorrespondenceSection plot={plot} onLog={() => setLoggingEmail(true)} />
+
       <DocumentChecklist plot={plot} onExplainCode={onExplainCode} />
 
       <Timeline plot={plot} />
@@ -230,6 +234,14 @@ export function PlotScreen({
       )}
 
       {sharing && <BuyerShareSheet plot={plot} onClose={() => setSharing(false)} onToast={onToast} />}
+
+      {loggingEmail && (
+        <LogEmailSheet
+          plotId={plot.id}
+          onClose={() => setLoggingEmail(false)}
+          onLogged={onToast}
+        />
+      )}
 
       {pastingReport && (
         <BuyerReportSheet

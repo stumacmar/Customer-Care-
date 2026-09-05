@@ -16,7 +16,8 @@ import { CodeSearch } from './components/CodeSearch'
 import { GuideTab } from './components/GuideTab'
 import { BrandLogo } from './components/Brand'
 import { Icon } from './components/icons'
-import { useToast } from './components/ui'
+import { Sheet, useToast } from './components/ui'
+import { LogEmailSheet } from './components/CorrespondenceSection'
 import { useStore } from './state/store'
 
 type Tab = 'plots' | 'guide' | 'code'
@@ -35,7 +36,29 @@ export function App() {
   const [showHelp, setShowHelp] = useState(false)
   // "Why?" affordances deep-link into the Code tab at the relevant clause.
   const [codeRef, setCodeRef] = useState<string | null>(null)
+  // An email shared into the app from the mail client (Android Web Share
+  // Target): hold the text, ask which plot it belongs to, then pre-fill the
+  // Log an email sheet.
+  const [sharedEmail, setSharedEmail] = useState<{ text: string } | null>(() => {
+    try {
+      const q = new URLSearchParams(location.search)
+      const text = [q.get('share_title'), q.get('share_text'), q.get('share_url')]
+        .filter(Boolean)
+        .join('\n\n')
+      return text ? { text } : null
+    } catch {
+      return null
+    }
+  })
+  const [sharedEmailPlot, setSharedEmailPlot] = useState<string | null>(null)
   const { show, node: toastNode } = useToast()
+
+  // Drop the share payload from the address bar once captured.
+  useEffect(() => {
+    if (sharedEmail && location.search) {
+      history.replaceState(null, '', location.pathname + location.hash)
+    }
+  }, [sharedEmail])
 
   const explainCode = (ref: string) => {
     setCodeRef(ref)
@@ -174,6 +197,48 @@ export function App() {
             setShowHelp(false)
             setTab('guide')
           }}
+        />
+      )}
+
+      {sharedEmail && !sharedEmailPlot && (
+        <Sheet
+          title="Log a shared email"
+          subtitle="Which plot is this email about?"
+          onClose={() => setSharedEmail(null)}
+        >
+          <div className="stack" style={{ marginBottom: 10 }}>
+            {state.plots.length === 0 && (
+              <p className="muted" style={{ fontSize: 14 }}>
+                No plots yet — add a development and a plot first, then share the email again.
+              </p>
+            )}
+            {state.plots.map((p) => (
+              <button
+                key={p.id}
+                className="card"
+                style={{ textAlign: 'left', width: '100%' }}
+                onClick={() => setSharedEmailPlot(p.id)}
+              >
+                <div style={{ fontWeight: 700 }}>{p.address}</div>
+                <div className="muted" style={{ fontSize: 13 }}>{p.customerNames}</div>
+              </button>
+            ))}
+          </div>
+          <button className="btn btn-ghost btn-block" onClick={() => setSharedEmail(null)}>
+            Cancel
+          </button>
+        </Sheet>
+      )}
+
+      {sharedEmail && sharedEmailPlot && (
+        <LogEmailSheet
+          plotId={sharedEmailPlot}
+          initialBody={sharedEmail.text}
+          onClose={() => {
+            setSharedEmail(null)
+            setSharedEmailPlot(null)
+          }}
+          onLogged={show}
         />
       )}
 

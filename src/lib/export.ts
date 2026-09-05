@@ -106,6 +106,17 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
     })
     .join('')
 
+  const corrRows = (plot.correspondence || [])
+    .map(
+      (c) => `<tr>
+        <td>${formatDate(c.date)}</td>
+        <td>${c.direction === 'to_customer' ? 'To customer' : 'From customer'}</td>
+        <td>${escapeHtml(c.subject || '')}</td>
+        <td>${escapeHtml(c.body)}</td>
+      </tr>`
+    )
+    .join('')
+
   const issueRows = plot.issues
     .map((i) => {
       const clock = clockForIssue(i)
@@ -178,7 +189,14 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
       : '<p class="muted">No choices, extras, changes or delays recorded.</p>'
   }
 
-  <h2>Issues &amp; clocks (${plot.issues.length})</h2>
+  <h2>Correspondence with the customer (${(plot.correspondence || []).length})</h2>
+  ${
+    (plot.correspondence || []).length
+      ? `<table><tr><th>Date</th><th>Direction</th><th>Subject</th><th>Content</th></tr>${corrRows}</table>`
+      : '<p class="muted">No emails logged.</p>'
+  }
+
+  <h2>Issues &amp; deadlines (${plot.issues.length})</h2>
   ${
     plot.issues.length
       ? `<table><thead><tr><th>Ref</th><th>Type</th><th>Description</th><th>Started</th><th>Status</th></tr></thead><tbody>${issueRows}</tbody></table>`

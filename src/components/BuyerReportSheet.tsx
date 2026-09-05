@@ -90,7 +90,7 @@ export function BuyerReportSheet({
           Cancel
         </button>
         <button className="btn btn-primary" onClick={log} disabled={!report}>
-          Log it — start the clock
+          Log it — the deadline starts
         </button>
       </div>
     </Sheet>
