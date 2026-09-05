@@ -85,7 +85,7 @@ export interface DocumentItem {
  *  - delay         change to the expected completion timetable — Code 2.6/2.8:
  *                  keep the customer informed and updated
  */
-export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay'
+export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit'
 
 /** One entry in the spec-and-changes log. */
 export interface ChangeRecord {
@@ -128,6 +128,7 @@ export type TimelineEventType =
   | 'change_logged'
   | 'cancellation_recorded'
   | 'refund_recorded'
+  | 'correspondence_logged'
   | 'note'
 
 /**
@@ -177,6 +178,21 @@ export interface Development {
  */
 export type PlotStage = 'setup' | 'reserved' | 'exchanged' | 'notice_served' | 'completed' | 'cancelled'
 
+/**
+ * An email (or message) between developer and customer, pasted into the
+ * record so the evidence trail doesn't live in Outlook. Kept verbatim —
+ * this is a copy of what was said, not a summary.
+ */
+export interface Correspondence {
+  id: string
+  direction: 'to_customer' | 'from_customer'
+  /** The email's own date — when it was sent/received, not when pasted. */
+  date: string // ISO date
+  subject?: string
+  body: string
+  createdAt: string // ISO datetime
+}
+
 export interface Plot {
   id: string
   /** The development this plot belongs to. */
@@ -199,11 +215,19 @@ export interface Plot {
   noticeServedDate?: string // ISO date
   /** Expected completion date until it passes; then the actual completion date. */
   completionDate?: string // ISO date
+  /**
+   * Set when the home is sold on within the two-year after-sales period.
+   * The Code cover follows the home, so the new owner gets a reduced,
+   * post-completion-only buyer view.
+   */
+  ownershipTransferredOn?: string // ISO date
   /** Set if the purchase was cancelled — starts the refund clock (2.4 / 2.13). */
   cancellation?: Cancellation
   documents: DocumentItem[]
   /** Spec-and-changes log: choices, extras, changes, delays (2.6 / 2.9). */
   changes: ChangeRecord[]
+  /** Emails with the customer, pasted in — optional for states saved before it existed. */
+  correspondence?: Correspondence[]
   issues: Issue[]
   letters: SavedLetter[]
   timeline: TimelineEvent[]

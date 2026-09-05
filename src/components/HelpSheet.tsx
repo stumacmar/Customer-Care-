@@ -13,17 +13,17 @@ const STEPS: Step[] = [
   {
     icon: 'plus',
     tint: 'var(--brand)',
-    text: 'Add your development, then add a plot the day its Reservation Agreement is signed. The cooling-off and exchange clocks start themselves.',
+    text: 'Add your development, then add a plot the day its Reservation Agreement is signed. The 14-day cooling-off and exchange-by deadlines start themselves.',
   },
   {
     icon: 'key',
     tint: 'var(--brand)',
-    text: 'Record each date as it happens — exchange, notice to complete, completion. The journey strip shows where every plot is, and the Code clocks follow.',
+    text: 'Record each date as it happens — exchange, notice to complete, completion. The journey strip shows where every plot is, and the Code deadlines follow.',
   },
   {
     icon: 'clipboard',
     tint: 'var(--green)',
-    text: 'Log every choice, extra, change and delay in Spec & changes. A major change starts the 14-day clock and drafts the written notice for you.',
+    text: 'Log every choice, extra, change and delay in Spec & changes. A major change starts the customer\'s 14-day cancellation window and drafts the written notice for you.',
   },
   {
     icon: 'check-circle',
@@ -33,7 +33,7 @@ const STEPS: Step[] = [
   {
     icon: 'wrench',
     tint: 'var(--snag)',
-    text: 'The moment a customer reports anything, log it: Snag, Complaint or Emergency. The app starts the clock — you never work out a date.',
+    text: 'The moment a customer reports anything, log it: Snag, Complaint or Emergency. The app works out every Code deadline — you never calculate a date.',
   },
   {
     rag: true,

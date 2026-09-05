@@ -14,6 +14,7 @@ import type {
   Cancellation,
   ChangeKind,
   ChangeRecord,
+  Correspondence,
   Development,
   DocumentItem,
   Issue,
@@ -62,6 +63,7 @@ type Action =
           | 'exchangeDate'
           | 'noticeServedDate'
           | 'completionDate'
+          | 'ownershipTransferredOn'
         >
       >
     }
@@ -74,6 +76,14 @@ type Action =
       description: string
       date: string
       photoDataUrl?: string
+    }
+  | {
+      type: 'LOG_CORRESPONDENCE'
+      plotId: string
+      direction: 'to_customer' | 'from_customer'
+      date: string
+      subject?: string
+      body: string
     }
   | {
       type: 'RESOLVE_CHANGE'
@@ -273,6 +283,7 @@ function reducer(state: AppState, action: Action): AppState {
           ['exchangeDate', 'Exchange of contracts recorded'],
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
           ['completionDate', 'Completion date recorded'],
+          ['ownershipTransferredOn', 'Ownership transfer recorded', 'The home was sold on within the two-year after-sales period. Code cover follows the home — the new owner keeps the after-sales, complaints and Ombudsman rights until the period ends.'],
         ]
         const events: TimelineEvent[] = []
         for (const [key, label, detail] of stamps) {
@@ -301,6 +312,7 @@ function reducer(state: AppState, action: Action): AppState {
           minor_change: 'Change notified (not major)',
           major_change: 'MAJOR change notified in writing',
           delay: 'Delay notified',
+          visit: 'Site visit / appointment recorded',
         }
         const detail =
           action.kind === 'major_change'
@@ -308,6 +320,25 @@ function reducer(state: AppState, action: Action): AppState {
             : change.description
         const ev = event('change_logged', `${noun[action.kind]}: ${truncate(change.description)}`, detail)
         return { plot: { ...plot, changes: [change, ...plot.changes] }, events: [ev] }
+      })
+
+    case 'LOG_CORRESPONDENCE':
+      return updatePlot(state, action.plotId, (plot) => {
+        const rec: Correspondence = {
+          id: id('cor_'),
+          direction: action.direction,
+          date: action.date,
+          subject: action.subject?.trim() || undefined,
+          body: action.body.trim(),
+          createdAt: nowISO(),
+        }
+        const who = action.direction === 'to_customer' ? 'Email to customer' : 'Email from customer'
+        const ev = event(
+          'correspondence_logged',
+          `${who}${rec.subject ? `: ${truncate(rec.subject)}` : `: ${truncate(rec.body)}`}`,
+          rec.body
+        )
+        return { plot: { ...plot, correspondence: [rec, ...(plot.correspondence || [])] }, events: [ev] }
       })
 
     case 'RESOLVE_CHANGE':

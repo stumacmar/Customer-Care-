@@ -24,7 +24,7 @@ const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] =
     key: 'emergency',
     label: 'Emergency',
     ico: 'alert',
-    blurb: 'Health/safety/wellbeing risk. Flagged urgent — never queued behind routine snags.',
+    blurb: 'An immediate threat to safety, security, health or well-being. Flagged urgent — never queued behind routine snags.',
   },
 ]
 

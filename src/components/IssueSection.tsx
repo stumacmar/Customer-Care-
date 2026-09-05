@@ -35,7 +35,7 @@ export function IssueSection({
   return (
     <div className="section">
       <h3>
-        Issues &amp; clocks <span className="count-pill">{open.length} open</span>
+        Issues &amp; deadlines <span className="count-pill">{open.length} open</span>
       </h3>
 
       {plot.issues.length === 0 ? (
@@ -124,7 +124,7 @@ function IssueCard({
       )}
       {issue.type === 'complaint' && issue.receivedAt && issue.receivedAt !== issue.startedAt && (
         <div className="muted" style={{ fontSize: 12, marginBottom: 8 }}>
-          Received {formatDate(issue.receivedAt)} · clock runs from {formatDate(issue.startedAt)} (first
+          Received {formatDate(issue.receivedAt)} · timescale runs from {formatDate(issue.startedAt)} (first
           business day after receipt, per the Code)
         </div>
       )}

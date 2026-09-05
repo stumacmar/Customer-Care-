@@ -59,6 +59,12 @@ export interface BuyerSnapshot {
   issues: SnapshotIssue[]
   /** ISO date the developer generated this link. */
   sharedOn: string
+  /**
+   * Set when the home has been sold on within the two-year after-sales
+   * period. Code cover follows the home, but the purchase journey belonged
+   * to the first owner — a second owner gets the post-completion view only.
+   */
+  secondOwner?: boolean
 }
 
 /** What travels back when the buyer reports a problem. */
@@ -115,6 +121,7 @@ export function buildSnapshot(
       done: i.milestoneProgress ? Object.keys(i.milestoneProgress) : undefined,
     })),
     sharedOn: today,
+    secondOwner: plot.ownershipTransferredOn ? true : undefined,
   }
 }
 

@@ -43,6 +43,11 @@ export const CHANGE_KIND_META: Record<
     badgeClass: 'snag',
     blurb: 'The expected completion timetable has moved. Keep the customer informed — and update the expected completion date on this plot too.',
   },
+  visit: {
+    label: 'Site visit',
+    badgeClass: 'complaint',
+    blurb: 'A trade or inspection appointment at the home. Record who, when, and the outcome — attended, no access, or turned away — with a photo of the job sheet if there is one. Attendance disputes are common; this is your evidence.',
+  },
 }
 
 export function ChangesSection({
@@ -99,7 +104,7 @@ export function ChangesSection({
       )}
 
       <button className="btn btn-block" style={{ marginTop: 10 }} onClick={onLogChange}>
-        <Icon name="plus" size={17} /> Log a choice, extra, change or delay
+        <Icon name="plus" size={17} /> Log a choice, change, delay or visit
       </button>
     </div>
   )
