@@ -56,13 +56,13 @@ export function EditPlotSheet({
     const what = kind === 'contract' ? 'contract' : 'reservation'
     if (
       !confirm(
-        `Record that the customer cancelled the ${what}? This starts the Code's refund clock ` +
+        `Record that the customer cancelled the ${what}? This starts the Code's refund deadline ` +
           `(${kind === 'contract' ? '28 days — Code 2.13' : '14 days — Code 2.4'}).`
       )
     )
       return
     dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO() })
-    onSaved('Cancellation recorded — refund clock running')
+    onSaved('Cancellation recorded — refund deadline running')
     onClose()
   }
 
@@ -130,13 +130,50 @@ export function EditPlotSheet({
         </button>
       </div>
 
+      {plot.completionDate && !plot.cancellation && (
+        <div className="section">
+          <h3>If the home is sold on</h3>
+          <div className="card">
+            {plot.ownershipTransferredOn ? (
+              <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+                Ownership transfer recorded on {formatDate(plot.ownershipTransferredOn)}. Update
+                the customer name and email above to the new owner, then share a fresh buyer
+                link — they will see the after-sales view only.
+              </p>
+            ) : (
+              <>
+                <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+                  If the home changes hands within the two-year after-sales period, the Code
+                  cover follows the home. Record the transfer, update the customer name and
+                  email above to the new owner, and share a fresh buyer link — the new owner
+                  gets an after-sales-only view (no purchase history).
+                </p>
+                <button
+                  className="btn btn-sm"
+                  onClick={() => {
+                    dispatch({
+                      type: 'UPDATE_PLOT_DETAILS',
+                      plotId: plot.id,
+                      patch: { ownershipTransferredOn: todayISO() },
+                    })
+                    onSaved('Ownership transfer recorded — now update the owner details and re-share')
+                  }}
+                >
+                  Record ownership transfer
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {!plot.cancellation && (
         <div className="section">
           <h3>If the customer pulls out</h3>
           <div className="card">
             <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
               Recording a cancellation keeps the plot (and its evidence) and starts the refund
-              clock: the reservation fee within 14 days (in full if still in cooling-off), or
+              deadline: the reservation fee within 14 days (in full if still in cooling-off), or
               the contract deposit within 28 days.
             </p>
             <div className="wrap-actions">

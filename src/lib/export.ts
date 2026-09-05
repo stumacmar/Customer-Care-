@@ -21,6 +21,7 @@ const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
   minor_change: 'Change (not major)',
   major_change: 'MAJOR change',
   delay: 'Delay notified',
+  visit: 'Site visit / appointment',
 }
 
 function csvCell(value: unknown): string {

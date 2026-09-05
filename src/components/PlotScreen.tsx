@@ -148,7 +148,7 @@ export function PlotScreen({
           <button className="log-btn snag" onClick={() => setLogType('snag')}>
             <span className="ico"><Icon name="wrench" size={26} /></span>
             Snag
-            <small>30-day clock</small>
+            <small>fix in 30 days</small>
           </button>
           <button className="log-btn complaint" onClick={() => setLogType('complaint')}>
             <span className="ico"><Icon name="megaphone" size={26} /></span>

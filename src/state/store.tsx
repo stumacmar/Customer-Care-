@@ -62,6 +62,7 @@ type Action =
           | 'exchangeDate'
           | 'noticeServedDate'
           | 'completionDate'
+          | 'ownershipTransferredOn'
         >
       >
     }
@@ -273,6 +274,7 @@ function reducer(state: AppState, action: Action): AppState {
           ['exchangeDate', 'Exchange of contracts recorded'],
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
           ['completionDate', 'Completion date recorded'],
+          ['ownershipTransferredOn', 'Ownership transfer recorded', 'The home was sold on within the two-year after-sales period. Code cover follows the home — the new owner keeps the after-sales, complaints and Ombudsman rights until the period ends.'],
         ]
         const events: TimelineEvent[] = []
         for (const [key, label, detail] of stamps) {
@@ -301,6 +303,7 @@ function reducer(state: AppState, action: Action): AppState {
           minor_change: 'Change notified (not major)',
           major_change: 'MAJOR change notified in writing',
           delay: 'Delay notified',
+          visit: 'Site visit / appointment recorded',
         }
         const detail =
           action.kind === 'major_change'

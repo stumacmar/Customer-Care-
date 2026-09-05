@@ -88,7 +88,7 @@ export function BuyerShareSheet({
         <p className="muted" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55 }}>
           The link contains a snapshot for <strong>{plot.customerNames || 'the buyer'}</strong>:
           journey dates, documents received, choices and changes, issue status, and how to report
-          a problem (which arrives back here ready to log with the right clock).
+          a problem (which arrives back here ready to log with the right Code timescale).
           Photos are not included. The data lives inside the link itself — send it only to the
           buyer. Share a fresh link after changes.
         </p>

@@ -38,17 +38,18 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
     body: [
       'Every plot leads with one line — the next thing to do and when. If you only glance at one thing, glance at that.',
       'Colours: green means on track, orange means act this week, red means act today. Anything red sorts to the top of every list.',
-      'The journey strip shows where the plot is: Reserved → Exchanged → Notice → Completed. Record each date as it happens via "Edit details & dates" — the right clocks follow automatically.',
-      'Tap "why?" on any clock or checklist group to see the exact Code rule behind it, quoted. (Clause numbers stay out of your way otherwise — turn them on in Settings if you want them visible.)',
+      'The journey strip shows where the plot is: Reserved → Exchanged → Notice → Completed. Record each date as it happens via "Edit details & dates" — the right deadlines follow automatically.',
+      'Tap "why?" on any deadline or checklist group to see the exact Code rule behind it, quoted. (Clause numbers stay out of your way otherwise — turn them on in Settings if you want them visible.)',
     ],
   },
   {
     title: 'Choices, changes and delays',
     watchAt: 45,
     body: [
-      '"Log a choice, extra, change or delay" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks: log it the day it happens and the evidence trail builds itself.',
+      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
+      'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. Attendance disputes are among the most common Code disputes, and this is the evidence that settles them.',
     ],
   },
   {
@@ -64,9 +65,10 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
     watchAt: 62,
     body: [
       'The moment a customer reports anything, log it with one of the three big buttons. Never work out a date — the app does it.',
-      'Snag: a 30-day put-right clock. If it can\'t be settled in 30 days, the app reminds you to update the customer at least monthly until it is.',
+      'Snag: a 30-day put-right deadline. If it can\'t be settled in 30 days, the app reminds you to update the customer at least monthly until it is.',
       'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution by day 10, Assessment & Response by day 30, Eight-Week letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, fill the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
-      'Emergency: anything that\'s an immediate risk to safety, security or health. It\'s flagged urgent and never queues behind routine work.',
+      'Emergency: an immediate threat to safety, security, health or well-being. It\'s flagged urgent and never queues behind routine work.',
+      'If the home is sold on within the two years, record the ownership transfer under "Edit details & dates" — the Code cover follows the home, and a fresh buyer link shows the new owner an after-sales-only view.',
       '"Remind me" on any issue (or on the journey) drops its deadlines into your phone calendar with alerts.',
     ],
   },
@@ -75,20 +77,20 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
     watchAt: 82,
     body: [
       '"Share with buyer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
-      'The buyer sees their own app: where their home is up to, their rights in plain English, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',
-      'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the buyer\'s app" under the three log buttons, paste the email, and it logs with the correct clock — their words and date preserved. Their app keeps their own record of what they sent and when.',
+      'The buyer sees their own app: where their home is up to, their rights under the Code, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',
+      'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the buyer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
       'Share a fresh link whenever there\'s an update worth showing — each new link replaces their snapshot.',
     ],
   },
   {
     title: 'If the sale falls through',
     body: [
-      'Record it under "Edit details & dates" → "If the customer pulls out". The refund clock starts: the reservation fee within 14 days (in full if they\'re still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
+      'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee within 14 days (in full if they\'re still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
       'Mark the refund paid when it\'s done — the plot then archives itself with its evidence intact.',
     ],
   },
   {
-    title: 'If it ever goes to the Ombudsman',
+    title: 'Formal complaints to the Ombudsman',
     body: [
       'Tap "Export PDF" on the plot: every date, document, change, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman, or your insurer.',
       'Plots archive themselves two years after completion, when the Ombudsman window closes. Settings → Data housekeeping then prompts you to export a copy and delete the personal data (that\'s the GDPR-friendly habit).',
@@ -137,6 +139,16 @@ export function GuideTab() {
           The whole app in about two minutes — narrated, with captions. Sound on.
         </p>
       </div>
+
+      <a
+        className="btn btn-block"
+        style={{ marginBottom: 4, textDecoration: 'none' }}
+        href="./guide.pdf"
+        target="_blank"
+        rel="noreferrer"
+      >
+        <Icon name="printer" size={17} /> Step-by-step picture guide (PDF)
+      </a>
 
       <div className="section">
         <h3>The manual</h3>

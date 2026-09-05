@@ -85,7 +85,7 @@ export interface DocumentItem {
  *  - delay         change to the expected completion timetable — Code 2.6/2.8:
  *                  keep the customer informed and updated
  */
-export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay'
+export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit'
 
 /** One entry in the spec-and-changes log. */
 export interface ChangeRecord {
@@ -199,6 +199,12 @@ export interface Plot {
   noticeServedDate?: string // ISO date
   /** Expected completion date until it passes; then the actual completion date. */
   completionDate?: string // ISO date
+  /**
+   * Set when the home is sold on within the two-year after-sales period.
+   * The Code cover follows the home, so the new owner gets a reduced,
+   * post-completion-only buyer view.
+   */
+  ownershipTransferredOn?: string // ISO date
   /** Set if the purchase was cancelled — starts the refund clock (2.4 / 2.13). */
   cancellation?: Cancellation
   documents: DocumentItem[]

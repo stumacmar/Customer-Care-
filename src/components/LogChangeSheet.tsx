@@ -12,7 +12,7 @@ import { id } from '../lib/storage'
 import { CHANGE_KIND_META } from './ChangesSection'
 import type { ChangeKind } from '../types'
 
-const KINDS: ChangeKind[] = ['choice', 'extra', 'minor_change', 'major_change', 'delay']
+const KINDS: ChangeKind[] = ['choice', 'extra', 'minor_change', 'major_change', 'delay', 'visit']
 
 const PLACEHOLDERS: Record<ChangeKind, string> = {
   choice: 'e.g. Front door confirmed: Anthracite grey, Suffolk style',
@@ -20,6 +20,7 @@ const PLACEHOLDERS: Record<ChangeKind, string> = {
   minor_change: 'e.g. Bathroom tiles switched to equivalent range (supplier discontinued)',
   major_change: 'e.g. Kitchen/diner layout revised — window moved to side elevation',
   delay: 'e.g. Completion moved from June to August — brickwork delays',
+  visit: 'e.g. Plumber attended 8:30–11:00, fixed S-001 — or: electrician 9am, no access, card left',
 }
 
 export function LogChangeSheet({
@@ -63,10 +64,10 @@ export function LogChangeSheet({
   return (
     <Sheet
       title="Log to Spec & changes"
-      subtitle="Choices, extras, changes and delays — the evidence trail."
+      subtitle="Choices, extras, changes, delays and site visits — the evidence trail."
       onClose={onClose}
     >
-      <div className="type-picker" style={{ gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr' }}>
+      <div className="type-picker" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
         {KINDS.map((k) => (
           <button
             key={k}
@@ -98,13 +99,13 @@ export function LogChangeSheet({
 
       <div className="field">
         <label>
-          {kind === 'delay' ? 'Date the customer was told' : kind.endsWith('change') ? 'Date notified to the customer' : 'Date agreed / confirmed'}
+          {kind === 'delay' ? 'Date the customer was told' : kind === 'visit' ? 'Date of the visit / appointment' : kind.endsWith('change') ? 'Date notified to the customer' : 'Date agreed / confirmed'}
         </label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
 
       <div className="field">
-        <label>What exactly? One clear line.</label>
+        <label>{kind === 'visit' ? 'Who came, when, and the outcome — attended, no access, or turned away.' : 'What exactly? One clear line.'}</label>
         <DictationField
           value={description}
           onChange={setDescription}
