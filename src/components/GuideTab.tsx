@@ -63,7 +63,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'After they move in: snags, complaints, emergencies',
-    watchAt: 62,
+    watchAt: 63,
     body: [
       'The moment a customer reports anything, log it with one of the three big buttons. Never work out a date — the app does it.',
       'Snag: a 30-day put-right deadline. If it can\'t be settled in 30 days, the app reminds you to update the customer at least monthly until it is.',
@@ -75,7 +75,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
   },
   {
     title: 'Sharing with your buyer',
-    watchAt: 82,
+    watchAt: 91,
     body: [
       '"Share with buyer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
       'The buyer sees their own app: where their home is up to, their rights under the Code, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',

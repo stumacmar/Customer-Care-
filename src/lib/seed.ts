@@ -8,7 +8,15 @@
 import { buildDocumentChecklist } from './code'
 import { addDays, nowISO, todayISO } from './dates'
 import { id } from './storage'
-import type { AppState, ChangeRecord, Development, Issue, Plot, TimelineEvent } from '../types'
+import type {
+  AppState,
+  ChangeRecord,
+  Correspondence,
+  Development,
+  Issue,
+  Plot,
+  TimelineEvent,
+} from '../types'
 
 function ev(type: TimelineEvent['type'], summary: string, detail?: string, issueId?: string): TimelineEvent {
   return { id: id('ev_'), timestamp: nowISO(), type, summary, detail, issueId }
@@ -180,7 +188,32 @@ export function buildSeedState(developerName: string): AppState {
     createdAt: nowISO(),
   }
   red.issues = [emergency, complaint]
+  // Emails pasted in as they happened — the trail that would otherwise be
+  // stranded in Outlook when the complaint is escalated.
+  const fromCustomer: Correspondence = {
+    id: id('cor_'),
+    direction: 'from_customer',
+    date: addDays(today, -12),
+    subject: 'Re: damp patch — still there',
+    body:
+      'Morning — the damp patch in the main bedroom is no better after the last visit. ' +
+      'It looks worse after the rain at the weekend. Can someone come and look again please? Ali',
+    createdAt: nowISO(),
+  }
+  const toCustomer: Correspondence = {
+    id: id('cor_'),
+    direction: 'to_customer',
+    date: addDays(today, -11),
+    subject: 'Re: damp patch — still there',
+    body:
+      'Thanks Ali. I have asked our damp specialist to attend and will confirm a date by Friday. ' +
+      'We will also check the external pointing while they are on site.',
+    createdAt: nowISO(),
+  }
+  red.correspondence = [toCustomer, fromCustomer]
   red.timeline = [
+    ev('correspondence_logged', 'Email to customer: Re: damp patch — still there', toCustomer.body),
+    ev('correspondence_logged', 'Email from customer: Re: damp patch — still there', fromCustomer.body),
     ev('emergency_logged', 'Emergency issue logged (E-001)', emergency.description, emergency.id),
     ev('milestone_completed', 'Milestone actioned: Path to Resolution letter', undefined, complaintId),
     ev('milestone_completed', 'Milestone actioned: Written acknowledgement', undefined, complaintId),
