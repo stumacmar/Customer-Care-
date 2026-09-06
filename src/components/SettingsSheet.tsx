@@ -234,7 +234,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <h3>Data protection (GDPR)</h3>
         <div className="card">
           <button className="linklike" onClick={() => setShowGdpr((s) => !s)}>
-            {showGdpr ? 'Hide' : 'Show'} the plain-English version
+            {showGdpr ? 'Hide' : 'Show'} the summary
           </button>
           {showGdpr && (
             <div className="muted" style={{ fontSize: 14, marginTop: 8 }}>

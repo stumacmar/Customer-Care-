@@ -1,6 +1,6 @@
 /*
  * The dead-simple how-to guide. Toggled from the "?" button in the top bar.
- * Eight short lines — if it needs more than that, the app is too complicated.
+ * Nine short lines — if it needs more than that, the app is too complicated.
  */
 
 import { Sheet } from './ui'
@@ -23,7 +23,7 @@ const STEPS: Step[] = [
   {
     icon: 'clipboard',
     tint: 'var(--green)',
-    text: 'Log every choice, extra, change and delay in Spec & changes. A major change starts the customer\'s 14-day cancellation window and drafts the written notice for you.',
+    text: 'Log every choice, extra, change, delay and site visit in Spec & changes. A major change starts the customer\'s 14-day cancellation window and drafts the written notice for you.',
   },
   {
     icon: 'check-circle',
@@ -40,14 +40,19 @@ const STEPS: Step[] = [
     text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = relax.',
   },
   {
-    icon: 'mail',
+    icon: 'edit',
     tint: 'var(--complaint)',
     text: 'Letters are drafted for you with the right dates — complaint letters, major-change notices, delay updates. Check, fill the brackets, email.',
   },
   {
+    icon: 'mail',
+    tint: 'var(--complaint)',
+    text: 'Paste emails to and from the customer into the plot as they happen, so the trail is in the app and not stranded in your inbox.',
+  },
+  {
     icon: 'file',
     tint: 'var(--text-dim)',
-    text: 'If anything is ever escalated to the Ombudsman, tap "Export" — every date, document, change and letter in one file.',
+    text: 'If anything is ever escalated to the Ombudsman, tap "Export" — every date, document, change, email and letter in one file.',
   },
 ]
 
@@ -70,7 +75,7 @@ function StepIcon({ step }: { step: Step }) {
 
 export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpenGuide?: () => void }) {
   return (
-    <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 8 lines." onClose={onClose}>
+    <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 9 lines." onClose={onClose}>
       <div
         style={{
           display: 'flex',

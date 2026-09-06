@@ -1,5 +1,5 @@
 /*
- * The Guide tab — the full instruction manual, in plain English, with the
+ * The Guide tab — the full instruction manual, with the
  * demo video at the top. The "?" button's quick sheet covers the first five
  * minutes; this covers everything, grouped by the moments in a plot's life
  * when you'd reach for the app.
@@ -50,7 +50,16 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
       'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
       'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. Attendance disputes are among the most common Code disputes, and this is the evidence that settles them.',
-      'Emails with the customer belong in the record too — "Log an email" on the plot takes a pasted email (to or from them, with its own date) so the export is complete without digging through your inbox later. On Android you can even share an email straight from your mail app to Plot Tracker.',
+    ],
+  },
+  {
+    title: 'Emails with the customer',
+    watchAt: 82,
+    body: [
+      'The evidence trail is only complete if the emails are in it — and at dispute time nobody wants to be dragging messages out of Outlook. "Log an email" on the plot takes a pasted email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
+      'It joins the timeline and both exports, so the file you hand the Ombudsman carries the correspondence alongside the dates, documents and letters.',
+      'On Android you can skip the copying: share an email straight from your mail app to Plot Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
+      'Log it the day it happens, like everything else. A one-line "chasing the plumber again" is worth more six months later than a perfect memory of what you think you sent.',
     ],
   },
   {
@@ -80,6 +89,7 @@ const SECTIONS: { title: string; watchAt?: number; body: string[] }[] = [
       '"Share with buyer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
       'The buyer sees their own app: where their home is up to, their rights under the Code, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',
       'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the buyer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
+      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Worth knowing: before completion everything arrives as a formal complaint, because under the Code snags only exist after completion; and the emergency option only appears to them once they have moved in. So do not be surprised by a "complaint" for something you would call a snag — that is the Code\'s classification, and its timetable applies.',
       'Share a fresh link whenever there\'s an update worth showing — each new link replaces their snapshot.',
     ],
   },
@@ -137,7 +147,7 @@ export function GuideTab() {
           aria-label="Demo video tour of the app"
         />
         <p className="muted" style={{ fontSize: 12.5, margin: '8px 4px 2px' }}>
-          The whole app in about two minutes — narrated, with captions. Sound on.
+          The whole app in under two and a half minutes — narrated, with captions. Sound on.
         </p>
       </div>
 
