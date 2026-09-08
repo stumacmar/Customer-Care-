@@ -62,6 +62,7 @@ type Action =
           | 'exchangeDeadline'
           | 'exchangeDate'
           | 'noticeServedDate'
+          | 'expectedCompletionDate'
           | 'completionDate'
           | 'ownershipTransferredOn'
         >
@@ -109,6 +110,8 @@ type Action =
       issueType: IssueType
       description: string
       photoDataUrl?: string
+      /** ISO date the customer reported it / it was received. Defaults to today. */
+      receivedOn?: string
     }
   | { type: 'RESOLVE_ISSUE'; plotId: string; issueId: string; note: string }
   | { type: 'REOPEN_ISSUE'; plotId: string; issueId: string }
@@ -282,7 +285,8 @@ function reducer(state: AppState, action: Action): AppState {
           ['exchangeDeadline', 'Exchange-by date recorded', 'Code 2.2: at least six weeks after reservation unless the customer asks for earlier.'],
           ['exchangeDate', 'Exchange of contracts recorded'],
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
-          ['completionDate', 'Completion date recorded'],
+          ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6: keep the customer informed of the expected completion date and of any change to it.'],
+          ['completionDate', 'Legal completion recorded', 'Code 3.1: the two-year after-sales service runs from this date.'],
           ['ownershipTransferredOn', 'Ownership transfer recorded', 'The home was sold on within the two-year after-sales period. Code cover follows the home — the new owner keeps the after-sales, complaints and Ombudsman rights until the period ends.'],
         ]
         const events: TimelineEvent[] = []
@@ -380,6 +384,11 @@ function reducer(state: AppState, action: Action): AppState {
             ? 'Code 2.13: refund the contract deposit and any other amounts due within 28 days.'
             : 'Code 2.4: refund the reservation fee, less any deductions set out in the Reservation Agreement, within 14 days of the notice. Within the 14-day cooling-off period the refund must be in full (Code 2.3).'
         )
+        // A cancellation already on record (possibly refunded) is never
+        // overwritten — that would restart a refund deadline already met.
+        if (plot.cancellation) {
+          return { plot, events: [event('note', 'Cancellation already on record — not changed')] }
+        }
         return {
           plot: { ...plot, cancellation: { kind: action.kind, date: action.date } },
           events: [ev],
@@ -402,9 +411,11 @@ function reducer(state: AppState, action: Action): AppState {
     case 'LOG_ISSUE':
       return updatePlot(state, action.plotId, (plot) => {
         const meta = ISSUE_META[action.issueType]
+        if (!meta) return { plot, events: [] } // malformed pasted report
         const reference = nextReference(plot, action.issueType)
-        const received = todayISO()
-        // Per the Code, a complaint's clock runs from the "complaint start
+        const today = todayISO()
+        const received = action.receivedOn && action.receivedOn <= today ? action.receivedOn : today
+        // Per the Code, a complaint's timescale runs from the "complaint start
         // date" — the first business day AFTER it is received. Snags run from
         // the day they are reported.
         const isComplaint = action.issueType === 'complaint'

@@ -21,7 +21,7 @@ type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 139
+const TOUR_DURATION = 136
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -45,7 +45,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Set up once (two minutes)',
     videos: ['setup'],
     body: [
-      'Open Settings (the gear, top right). Enter your company name — it appears on every letter and export — and your email, which is where buyer reports arrive when you share a plot link.',
+      'Open Settings (the gear, top right). Enter your company name — it appears on every letter and export — and your email, which is where customer reports arrive when you share a plot link.',
       'Take your first backup from Settings too. Everything lives only on this device, so the backup file (kept in your email, Drive or iCloud) is your safety net — and how you move your records between phone and computer.',
       'On your phone, open plotclock.co.uk in the browser and choose "Add to Home Screen" — the app then works like any other app, including with no signal on site.',
     ],
@@ -54,16 +54,16 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'The day a home is reserved',
     videos: ['reservation'],
     body: [
-      'Add the development if it\'s new, then "+ Plot" — address, customer name and email, reservation date. That\'s all the typing.',
-      'The app starts the 14-day cooling-off period itself, and sets the exchange-by date to the Code minimum of six weeks (edit it if your Reservation Agreement says different).',
-      'Tick off the reservation documents as you hand them over: the signed Reservation Agreement and the Affordability Schedule. The checklist only ever asks for what\'s due at the stage you\'ve reached.',
+      'Add the development if it is new, then "+ Plot" — address, customer name and email, reservation date. That is all the typing.',
+      'The app starts the 14-day cooling-off period itself, and sets the exchange-by date to the Code minimum of six weeks (edit it if your Reservation Agreement says otherwise).',
+      'Tick off the reservation documents as you hand them over: the signed Reservation Agreement and the Affordability Schedule. The checklist only ever asks for what is due at the stage you have reached.',
     ],
   },
   {
     title: 'Reading the screen',
     watchAt: 13,
     body: [
-      'Every plot leads with one line — the next thing to do and when. If you only glance at one thing, glance at that.',
+      'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
       'Colours: green means on track, orange means act this week, red means act today. Anything red sorts to the top of every list.',
       'The journey strip shows where the plot is: Reserved → Exchanged → Notice → Completed. Record each date as it happens via "Edit details & dates" — the right deadlines follow automatically.',
       'Tap "why?" on any deadline or checklist group to see the exact Code rule behind it, quoted. (Clause numbers stay out of your way otherwise — turn them on in Settings if you want them visible.)',
@@ -73,8 +73,8 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Exchange of contracts',
     videos: ['exchange'],
     body: [
-      'Before exchange, the checklist asks for the pre-contract information — sent to the buyer\'s solicitor or conveyancer — and for the contract terms to be confirmed compliant. Exchange must happen by the agreed exchange-by date, which the Code sets at no less than six weeks from reservation unless the buyer asks for earlier.',
-      'When contracts exchange, record the date under "Edit details & dates". The journey moves on, the checklist moves to the next stage, and the buyer\'s app shows them where they are.',
+      'Before exchange, the checklist asks for the pre-contract information — sent to the customer\'s solicitor or conveyancer — and for the contract terms to be confirmed compliant. Exchange must happen by the agreed exchange-by date, which the Code sets at no less than six weeks from reservation unless the customer asks for earlier.',
+      'When contracts exchange, record the date under "Edit details & dates". The journey moves on, the checklist moves to the next stage, and the customer\'s app shows them where they are.',
     ],
   },
   {
@@ -91,29 +91,29 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Emails with the customer',
     videos: ['emails'],
     body: [
-      'The evidence trail is only complete if the emails are in it — and at dispute time nobody wants to be dragging messages out of Outlook. "Log an email" on the plot takes a pasted email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
+      'The evidence trail is only complete if the emails are in it. If a dispute arises, the correspondence needs to be in the record, not only in your inbox. "Log an email" on the plot takes a pasted email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
       'It joins the timeline and both exports, so the file you hand the Ombudsman carries the correspondence alongside the dates, documents and letters.',
       'On Android you can skip the copying: share an email straight from your mail app to Plot Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
-      'Log it the day it happens, like everything else. A one-line "chasing the plumber again" is worth more six months later than a perfect memory of what you think you sent.',
+      'Log it the day it happens, like everything else. A one-line note made at the time carries more weight than a recollection six months later.',
     ],
   },
   {
     title: 'Notice, inspection and completion',
     videos: ['notice-inspection', 'completion'],
     body: [
-      'When you serve notice to complete, record the date. The app checks you\'ve left at least 14 calendar days before completion and chases you to offer the pre-completion inspection — the buyer can attend themselves or send a professional, using the NHQB checklist.',
-      'Anything the inspection finds that breaches warranty standards: log it as a snag — fix ideally before completion, or within 30 days.',
-      'At completion, work down the handover group of the checklist: schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regs certificate, after-sales statement. Attach files as you go.',
+      'When you serve notice to complete, record the date. The app checks you have left at least 14 calendar days before completion and prompts you to offer the pre-completion inspection — the customer can attend themselves or appoint a suitably qualified professional, using the NHQB checklist.',
+      'Anything the inspection finds that falls short of warranty standards: log it as a snag or defect — put right before completion where possible, or within 30 days.',
+      'At legal completion, work down the handover group of the checklist: schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regulations certificate, after-sales statement. Attach files as you go.',
     ],
   },
   {
     title: 'After they move in: snags, complaints, emergencies',
     videos: ['snag', 'complaint', 'emergency'],
     body: [
-      'The moment a customer reports anything, log it with one of the three big buttons. Never work out a date — the app does it.',
-      'Snag: a 30-day put-right deadline. If it can\'t be settled in 30 days, the app reminds you to update the customer at least monthly until it is.',
-      'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution by day 10, Assessment & Response by day 30, Eight-Week letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, fill the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
-      'Emergency: an immediate threat to safety, security, health or well-being. It\'s flagged urgent and never queues behind routine work.',
+      'The moment a customer reports anything, log it with one of the three big buttons. You never work out a date — the app does it.',
+      'Snag or defect: a 30-day put-right deadline. A snag is a minor or cosmetic issue; a defect affects how part of the home works. Both carry the same duty. If it cannot be put right in 30 days, the app reminds you to update the customer at least monthly, with the reason for the delay, until it is.',
+      'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution by day 10, Assessment & Response by day 30, Eight-Week letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, complete the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
+      'Emergency: an immediate threat to safety, security, health or well-being — for example external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
       '"Remind me" on any issue (or on the journey) drops its deadlines into your phone calendar with alerts.',
     ],
   },
@@ -121,35 +121,35 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'If the home is sold on',
     videos: ['second-owner'],
     body: [
-      'If the home changes hands within the two years, the Code\'s after-sales cover follows the home. Record the ownership transfer under "Edit details & dates", update the customer name and email to the new owner, and share a fresh buyer link.',
-      'The new owner\'s app is an after-sales-only view — no purchase history, which belonged to the first buyer — with their cover date, the guided report flow, and their rights under the Code.',
+      'If the home changes hands within the two years, the Code\'s after-sales cover follows the home. Record the ownership transfer under "Edit details & dates", update the customer name and email to the new owner, and share a fresh link.',
+      'The new owner\'s app is an after-sales-only view — no purchase history, which belonged to the first owner — with their cover date, the guided report flow, and their rights under the Code.',
     ],
   },
   {
-    title: 'Sharing with your buyer',
-    watchAt: 91,
+    title: 'Sharing with your customer',
+    watchAt: 87,
     body: [
-      '"Share with buyer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
-      'The buyer sees their own app: where their home is up to, their rights under the Code, the documents they\'ve received, their choices, and any issues with the response deadlines they\'re entitled to. They can add it to their home screen.',
-      'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the buyer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
-      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Worth knowing: before completion everything arrives as a formal complaint, because under the Code snags only exist after completion; and the emergency option only appears to them once they have moved in. So do not be surprised by a "complaint" for something you would call a snag — that is the Code\'s classification, and its timetable applies.',
-      'Share a fresh link whenever there\'s an update worth showing — each new link replaces their snapshot.',
+      '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
+      'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
+      'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the customer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
+      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Note that before completion every report arrives as a formal complaint, because under the Code snags exist only after completion, and the emergency option appears only once they have moved in. A pre-completion report you would call a snag is therefore a complaint under the Code, and its timetable applies.',
+      'Share a fresh link whenever there is an update worth showing — each new link replaces their snapshot.',
     ],
   },
   {
     title: 'If the sale falls through',
     videos: ['cooling-off-cancellation'],
     body: [
-      'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee within 14 days (in full if they\'re still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
-      'Mark the refund paid when it\'s done — the plot then archives itself with its evidence intact.',
+      'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee within 14 days (in full if they are still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
+      'Mark the refund paid when it is done — the plot then archives itself with its evidence intact.',
     ],
   },
   {
     title: 'Formal complaints to the Ombudsman',
     videos: ['ombudsman'],
     body: [
-      'Tap "Export PDF" on the plot: every date, document, change, email, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman, or your insurer.',
-      'Plots archive themselves two years after completion, when the Ombudsman window closes. Settings → Data housekeeping then prompts you to export a copy and delete the personal data (that\'s the GDPR-friendly habit).',
+      'Tap "Export PDF" on the plot: every date, document, change, email, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman Service, or your insurer.',
+      'Plots archive themselves two years after legal completion, when the Ombudsman window closes. Settings → Data housekeeping then prompts you to export a copy and delete the personal data (good practice under data protection law).',
     ],
   },
 ]
@@ -225,7 +225,7 @@ function Theatre({
     ? playing.at !== undefined
       ? `From ${formatStamp(playing.at)} — the moment this section is about.`
       : `The whole app in ${formatStamp(TOUR_DURATION)}.`
-    : `${meta!.code} · ${formatStamp(meta!.duration)} · what you do, then what your buyer sees`
+    : `${meta!.code} · ${formatStamp(meta!.duration)} · what you do, then what your customer sees`
 
   useEffect(() => {
     const v = ref.current
@@ -362,7 +362,7 @@ export function GuideTab() {
             </div>
           ))}
           <p className="muted" style={{ fontSize: 12, marginTop: 18, lineHeight: 1.55 }}>
-            One video per moment in a plot's life — what you do, then what your buyer sees, then
+            One video per moment in a plot's life — what you do, then what your customer sees, then
             what the Code says. Each is under a minute and a half.
           </p>
         </>

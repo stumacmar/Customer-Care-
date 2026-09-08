@@ -34,7 +34,12 @@ export function ResolveChangeSheet({
     // Starting the refund clock needs the cancellation recorded on the plot:
     // deposit within 28 days if contracts were exchanged, reservation fee
     // within 14 days otherwise (Code 2.13 / 2.4).
-    const kind = plotStage(plot) === 'exchanged' || plot.exchangeDate ? 'contract' : 'reservation'
+    if (plot.cancellation) {
+      onToast('Recorded — the cancellation already on this plot stands')
+      onClose()
+      return
+    }
+    const kind = plotStage(plot) === 'reserved' ? 'reservation' : 'contract'
     dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO() })
     onToast('Cancellation recorded — the refund deadline is running')
     onClose()

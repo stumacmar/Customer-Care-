@@ -173,7 +173,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
   <h1>Customer Communications Record</h1>
   <div class="meta"><strong>Property:</strong> ${escapeHtml(plot.address || '—')}</div>
   <div class="meta"><strong>Customer(s):</strong> ${escapeHtml(plot.customerNames || '—')}</div>
-  <div class="meta"><strong>Reserved:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Exchanged:</strong> ${formatDate(plot.exchangeDate)} &nbsp; <strong>Notice to complete:</strong> ${formatDate(plot.noticeServedDate)} &nbsp; <strong>Completion:</strong> ${formatDate(plot.completionDate)}</div>
+  <div class="meta"><strong>Reserved:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Exchanged:</strong> ${formatDate(plot.exchangeDate)} &nbsp; <strong>Notice to complete:</strong> ${formatDate(plot.noticeServedDate)} &nbsp; <strong>Expected completion:</strong> ${formatDate(plot.expectedCompletionDate)} &nbsp; <strong>Legal completion:</strong> ${formatDate(plot.completionDate)}</div>
   ${plot.cancellation ? `<div class="meta"><strong>Cancelled:</strong> ${escapeHtml(plot.cancellation.kind)} cancellation on ${formatDate(plot.cancellation.date)}${plot.cancellation.refundedDate ? ` — refund paid ${formatDate(plot.cancellation.refundedDate)}` : ' — refund outstanding'}</div>` : ''}
   <div class="meta"><strong>Developer:</strong> ${escapeHtml(developerName || '—')}</div>
   <div class="meta"><strong>Record generated:</strong> ${formatDateTime(new Date().toISOString())}</div>

@@ -11,11 +11,11 @@
 import { addDays, daysFromToday, todayISO } from './dates'
 import {
   computeComplaintMilestones,
-  CONTRACT_REFUND_DAYS,
   majorChangeCancelBy,
   plotStage,
-  RESERVATION_REFUND_DAYS,
-  SNAG_PUT_RIGHT_DAYS,
+  refundDueDate,
+  snagPutRightDate,
+  targetCompletion,
 } from './code'
 import type { Issue, Plot } from '../types'
 
@@ -49,7 +49,7 @@ function vevent(e: CalEvent): string {
     `DESCRIPTION:${esc(`3 days left: ${e.summary}`)}`,
     'END:VALARM',
     'BEGIN:VALARM',
-    'TRIGGER:-PT15H',
+    'TRIGGER:PT9H', // 09:00 on the day (all-day events start at midnight)
     'ACTION:DISPLAY',
     `DESCRIPTION:${esc(`Due today: ${e.summary}`)}`,
     'END:VALARM',
@@ -63,7 +63,7 @@ export function buildIssueCalendar(plot: Plot, issue: Issue): { filename: string
   const where = plot.address || 'plot'
 
   if (issue.type === 'snag') {
-    const due = addDays(issue.startedAt, SNAG_PUT_RIGHT_DAYS)
+    const due = snagPutRightDate(issue)
     events.push({
       uid: `${issue.id}-snag`,
       date: due,
@@ -90,20 +90,8 @@ export function buildIssueCalendar(plot: Plot, issue: Issue): { filename: string
     })
   }
 
-  if (events.length === 0) return null
-
-  const content = [
-    'BEGIN:VCALENDAR',
-    'VERSION:2.0',
-    'PRODID:-//NHQB//Quality Code Tracker//EN',
-    'CALSCALE:GREGORIAN',
-    'METHOD:PUBLISH',
-    ...events.map(vevent),
-    'END:VCALENDAR',
-  ].join('\r\n')
-
   const safe = (issue.reference || issue.type).toLowerCase().replace(/[^a-z0-9]+/g, '-')
-  return { filename: `nhqb-deadlines-${safe}.ics`, content }
+  return wrap(events, `nhqb-deadlines-${safe}.ics`)
 }
 
 function wrap(events: CalEvent[], filename: string): { filename: string; content: string } | null {
@@ -111,7 +99,7 @@ function wrap(events: CalEvent[], filename: string): { filename: string; content
   const content = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//NHQB//Quality Code Tracker//EN',
+    'PRODID:-//NHQB//Plot Tracker//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...events.map(vevent),
@@ -135,7 +123,7 @@ export function buildJourneyCalendar(plot: Plot): { filename: string; content: s
     const isContract = plot.cancellation.kind === 'contract'
     events.push({
       uid: `${plot.id}-refund`,
-      date: addDays(plot.cancellation.date, isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS),
+      date: refundDueDate(plot.cancellation),
       summary: `Refund due — ${where}`,
       description: isContract
         ? 'Refund the contract deposit and any other amounts due (within 28 days of cancellation).'
@@ -161,10 +149,11 @@ export function buildJourneyCalendar(plot: Plot): { filename: string; content: s
       description: `Last day the customer can cancel over the major change (${c.description.slice(0, 80)}). Notice to complete cannot be served before this date. Record the outcome afterwards.`,
     })
   }
-  if (plot.completionDate && daysFromToday(plot.completionDate) >= 0 && stage !== 'cancelled') {
+  const completionTarget = targetCompletion(plot)
+  if (completionTarget && daysFromToday(completionTarget) >= 0 && stage !== 'cancelled') {
     events.push({
       uid: `${plot.id}-completion`,
-      date: plot.completionDate,
+      date: completionTarget,
       summary: `Completion — ${where}`,
       description: 'Handover day: final quality check done, documents handed over, home demonstration booked, pre-completion inspection offered.',
     })

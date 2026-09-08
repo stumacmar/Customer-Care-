@@ -8,12 +8,12 @@ import { useState } from 'react'
 import { DictationField, PhotoField, Sheet } from './ui'
 import { usePlot, useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
-import { formatDate } from '../lib/dates'
+import { formatDate, todayISO } from '../lib/dates'
 import { Icon, type IconName } from './icons'
 import type { IssueType } from '../types'
 
 const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] = [
-  { key: 'snag', label: 'Snag', ico: 'wrench', blurb: `Starts a ${SNAG_PUT_RIGHT_DAYS}-day put-right clock (Code 3.3).` },
+  { key: 'snag', label: 'Snag', ico: 'wrench', blurb: `A snag or defect. Starts the ${SNAG_PUT_RIGHT_DAYS}-day put-right deadline (Code 3.3).` },
   {
     key: 'complaint',
     label: 'Complaint',
@@ -32,13 +32,16 @@ export function LogIssueSheet({
   plotId,
   initialType,
   initialDescription,
+  initialReceivedOn,
   onClose,
   onLogged,
 }: {
   plotId: string
   initialType: IssueType
-  /** Prefilled when the issue arrives as a buyer report. */
+  /** Prefilled when the issue arrives as a customer report. */
   initialDescription?: string
+  /** The date the customer sent it, when it arrives as a report — the Code timescale runs from receipt, not from the paste. */
+  initialReceivedOn?: string
   onClose: () => void
   onLogged: (msg: string) => void
 }) {
@@ -46,6 +49,7 @@ export function LogIssueSheet({
   const plot = usePlot(plotId)
   const [type, setType] = useState<IssueType>(initialType)
   const [description, setDescription] = useState(initialDescription || '')
+  const [receivedOn, setReceivedOn] = useState(initialReceivedOn && initialReceivedOn <= todayISO() ? initialReceivedOn : todayISO())
   const [photo, setPhoto] = useState<string | undefined>(undefined)
   // Code 3.4: complaints can be combined into one, with the timetable running
   // from the first complaint received. null = start a separate complaint.
@@ -75,8 +79,9 @@ export function LogIssueSheet({
       issueType: type,
       description,
       photoDataUrl: photo,
+      receivedOn: receivedOn || undefined,
     })
-    onLogged(`${meta.label} logged — clock started`)
+    onLogged(`${meta.label} logged — the Code timescale is running`)
   }
 
   return (
@@ -143,6 +148,14 @@ export function LogIssueSheet({
       <div className="field">
         <label>Photo (optional but recommended)</label>
         <PhotoField value={photo} onChange={setPhoto} />
+      </div>
+
+      <div className="field">
+        <label>Date the customer reported it</label>
+        <input type="date" value={receivedOn} max={todayISO()} onChange={(e) => setReceivedOn(e.target.value)} />
+        {type === 'complaint' && (
+          <div className="dictate-hint">The Code timescale runs from the first business day after this date.</div>
+        )}
       </div>
 
       <div className="field">
