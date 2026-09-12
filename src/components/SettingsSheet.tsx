@@ -323,7 +323,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
             See the app with a realistic development — a snag due in three days, a live complaint
-            mid-procedure, an emergency, plus a finished development with a retired plot.
+            mid-procedure, an emergency, plus a finished development with an archived plot.
           </p>
           <button className="btn btn-sm btn-primary" onClick={loadDemo}>
             Load demo data

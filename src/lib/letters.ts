@@ -232,7 +232,7 @@ function eightWeek(ctx: LetterContext): LetterDraft {
   ].join('\n')
   return {
     milestoneKey: 'eight_week',
-    title: 'Eight-Week letter (Day 56)',
+    title: 'Eight-Week Letter (Day 56)',
     subject: `Eight-Week Letter update — your complaint (${ref}) — ${ctx.plot.address}`,
     body,
   }
@@ -285,7 +285,7 @@ const GENERATORS: Record<string, (ctx: LetterContext) => LetterDraft> = {
 export const LETTER_MENU: { key: string; label: string }[] = [
   { key: 'acknowledgement', label: 'Acknowledgement (Day 5)' },
   { key: 'path_to_resolution', label: 'Path to Resolution (Day 10)' },
-  { key: 'assessment_response', label: 'Assessment & Response (Day 30)' },
+  { key: 'assessment_response', label: 'Complaint Assessment and Response (Day 30)' },
   { key: 'eight_week', label: 'Eight-Week Letter (Day 56)' },
   { key: 'closure', label: 'Closure' },
 ]

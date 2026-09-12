@@ -132,7 +132,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Sharing with your customer',
-    watchAt: 90,
+    watchAt: 92,
     body: [
       '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
