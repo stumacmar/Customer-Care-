@@ -35,6 +35,13 @@ export function addDays(iso: string, days: number): string {
   return toISODate(d)
 }
 
+/** Same calendar day `years` on — so a two-year window ends on the anniversary, leap years included. */
+export function addYears(iso: string, years: number): string {
+  const d = parseISODate(iso)
+  d.setFullYear(d.getFullYear() + years)
+  return toISODate(d)
+}
+
 /** Whole days from `fromIso` to `toIso`. Positive if `toIso` is later. */
 export function diffDays(fromIso: string, toIso: string): number {
   const a = parseISODate(fromIso).getTime()

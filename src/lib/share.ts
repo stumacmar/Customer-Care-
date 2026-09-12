@@ -53,6 +53,9 @@ export interface BuyerSnapshot {
   reservationDate?: string
   exchangeDate?: string
   noticeServedDate?: string
+  /** Expected completion, while the home is still being built. */
+  expectedCompletionDate?: string
+  /** Legal completion — only present once it has happened. */
   completionDate?: string
   docs: SnapshotDoc[]
   changes: SnapshotChange[]
@@ -95,6 +98,7 @@ export function buildSnapshot(
     reservationDate: plot.reservationDate,
     exchangeDate: plot.exchangeDate,
     noticeServedDate: plot.noticeServedDate,
+    expectedCompletionDate: plot.expectedCompletionDate,
     completionDate: plot.completionDate,
     // Only buyer-facing items — internal compliance checks (contract terms
     // review, notifying the warranty provider) are not "documents received".
@@ -111,7 +115,11 @@ export function buildSnapshot(
       description: c.description,
       outcome: c.outcome,
     })),
-    issues: plot.issues.map((i) => ({
+    // A second owner sees only matters raised since the home changed hands —
+    // the first owner's complaints are their personal data.
+    issues: plot.issues
+      .filter((i) => !plot.ownershipTransferredOn || i.startedAt >= plot.ownershipTransferredOn)
+      .map((i) => ({
       reference: i.reference,
       type: i.type,
       status: i.status,
@@ -181,11 +189,31 @@ export async function decodeShare(code: string): Promise<SharePayload | null> {
       return null
     }
     const parsed = JSON.parse(json) as SharePayload
-    if (parsed && (parsed.k === 'snapshot' || parsed.k === 'report')) return parsed
-    return null
+    return isValidPayload(parsed) ? parsed : null
   } catch {
     return null
   }
+}
+
+const ISSUE_TYPES = new Set(['snag', 'complaint', 'emergency'])
+
+/** Shape check, so a hand-edited or truncated link can never crash a render or a reducer. */
+export function isValidPayload(p: unknown): p is SharePayload {
+  if (!p || typeof p !== 'object') return false
+  const o = p as Record<string, unknown>
+  if (o.k === 'snapshot') {
+    return (
+      typeof o.address === 'string' &&
+      Array.isArray(o.docs) &&
+      Array.isArray(o.changes) &&
+      Array.isArray(o.issues) &&
+      typeof o.sharedOn === 'string'
+    )
+  }
+  if (o.k === 'report') {
+    return typeof o.type === 'string' && ISSUE_TYPES.has(o.type) && typeof o.description === 'string'
+  }
+  return false
 }
 
 /** The buyer link for a payload — the data rides in the fragment. */

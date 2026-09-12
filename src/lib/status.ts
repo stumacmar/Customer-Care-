@@ -9,20 +9,24 @@
  */
 
 import {
+  AFTER_SALES_YEARS,
   clocksForPlot,
   computeComplaintMilestones,
+  coolingOffEnd,
+  DUE_STAGES,
   journeyClocksForPlot,
   majorChangeCancelBy,
+  majorChangeWindowsCovering,
   nextSnagUpdate,
   plotStage,
-  SNAG_PUT_RIGHT_DAYS,
+  ragForDeadline,
+  refundDueDate,
+  snagPutRightDate,
   STAGE_LABELS,
+  targetCompletion,
 } from './code'
-import { addDays, daysFromToday, describeCountdown, formatDate } from './dates'
+import { addYears, daysFromToday, describeCountdown, formatDate, todayISO } from './dates'
 import type { Development, Plot, PlotStage, Rag } from '../types'
-
-/** The Ombudsman window: two years from completion (Code 3.1 / 3.2). */
-export const RETENTION_DAYS = 365 * 2
 
 /**
  * A plot auto-retires once its completion date is more than two years ago —
@@ -31,11 +35,13 @@ export const RETENTION_DAYS = 365 * 2
  * until the developer chooses to export and remove it). A cancelled plot
  * retires once its refund has been paid — nothing is left to track.
  */
-export function isPlotRetired(plot: Plot, today?: string): boolean {
-  void today
-  if (plot.cancellation) return !!plot.cancellation.refundedDate
+export function isPlotRetired(plot: Plot, today = todayISO()): boolean {
+  const openIssues = plot.issues.some((i) => i.status === 'open')
+  // A cancelled plot retires once refunded — unless a complaint is still
+  // running (the customer keeps the right to complain after cancellation).
+  if (plot.cancellation) return !!plot.cancellation.refundedDate && !openIssues
   if (!plot.completionDate) return false
-  return daysFromToday(plot.completionDate) < -RETENTION_DAYS
+  return addYears(plot.completionDate, AFTER_SALES_YEARS) < today && !openIssues
 }
 
 /** Roll a development's plots up into one status for the developments list. */
@@ -57,9 +63,10 @@ export function developmentStatus(dev: Development, plots: Plot[]): DevelopmentS
   const needAction = statuses.filter((s) => s.rag === 'red').length
   const dueSoon = statuses.filter((s) => s.rag === 'amber').length
 
+  // A finished development still goes red if a plot on it needs action —
+  // marking it finished tucks it away, it does not switch the Code off.
   let rag: Rag = 'green'
-  if (dev.status === 'finished') rag = 'green'
-  else if (needAction > 0) rag = 'red'
+  if (needAction > 0) rag = 'red'
   else if (dueSoon > 0) rag = 'amber'
 
   const parts: string[] = []
@@ -115,7 +122,7 @@ function candidateFromDeadline(
   opts: { floorRag?: Rag; priorityBias?: number } = {}
 ): Candidate {
   const daysRemaining = daysFromToday(dueDate)
-  let rag: Rag = daysRemaining < 0 ? 'red' : daysRemaining <= 5 ? 'amber' : 'green'
+  let rag: Rag = ragForDeadline(daysRemaining)
   // floorRag guarantees AT LEAST this urgency (green → amber); it never
   // softens an overdue red.
   if (opts.floorRag && PRIORITY_RANK[rag] > PRIORITY_RANK[opts.floorRag]) rag = opts.floorRag
@@ -147,13 +154,15 @@ export function nextAction(plot: Plot): NextAction {
         candidates.push(candidateFromDeadline(verb, next.dueDate))
       }
     } else {
+      // Within 30 days: put it right. Past 30 days (3.3): explain the delay,
+      // then update at least monthly — the next unsent update is the action.
+      const putRight = snagPutRightDate(issue)
       const update = nextSnagUpdate(issue)
-      if (update) {
-        candidates.push(
-          candidateFromDeadline(`Send this month's update on the delayed snag (${ref})`, update.dueDate, { floorRag: 'amber' })
-        )
+      if (daysFromToday(putRight) >= 0 || !update) {
+        candidates.push(candidateFromDeadline(`Put the snag right (${ref})`, putRight))
       } else {
-        candidates.push(candidateFromDeadline(`Put the snag right (${ref})`, addDays(issue.startedAt, SNAG_PUT_RIGHT_DAYS)))
+        const verb = update.n === 1 ? `Snag overdue — put it right, or update the customer with the reason (${ref})` : `Send this month's update on the delayed snag (${ref})`
+        candidates.push(candidateFromDeadline(verb, update.dueDate, { floorRag: 'amber' }))
       }
     }
   }
@@ -161,13 +170,13 @@ export function nextAction(plot: Plot): NextAction {
   // Journey obligations
   if (plot.cancellation && !plot.cancellation.refundedDate) {
     const isContract = plot.cancellation.kind === 'contract'
-    const due = addDays(plot.cancellation.date, isContract ? 28 : 14)
     candidates.push(
-      candidateFromDeadline(isContract ? 'Refund the contract deposit' : 'Refund the reservation fee', due, { floorRag: 'amber' })
+      candidateFromDeadline(isContract ? 'Refund the contract deposit' : 'Refund the reservation fee', refundDueDate(plot.cancellation), { floorRag: 'amber' })
     )
   }
+  const journeyLive = stage !== 'completed' && stage !== 'cancelled'
   for (const c of plot.changes) {
-    if (c.kind !== 'major_change' || c.outcome) continue
+    if (!journeyLive || c.kind !== 'major_change' || c.outcome) continue
     const cancelBy = majorChangeCancelBy(c)
     if (daysFromToday(cancelBy) >= 0) {
       candidates.push({
@@ -189,23 +198,22 @@ export function nextAction(plot: Plot): NextAction {
       candidates.push({ ...candidateFromDeadline('Exchange contracts', plot.exchangeDeadline), priority: 3.5 })
     }
   }
-  if (stage === 'notice_served' && plot.completionDate) {
+  const completionTarget = targetCompletion(plot)
+  if (stage === 'notice_served' && completionTarget) {
     const pciDone = plot.documents.some((d) => d.key === 'pre_completion_inspection' && d.completed)
     if (!pciDone) {
-      candidates.push(candidateFromDeadline('Offer the pre-completion inspection', plot.completionDate))
+      candidates.push(candidateFromDeadline('Offer the pre-completion inspection', completionTarget))
     }
+  }
+  if (journeyLive && plot.noticeServedDate && majorChangeWindowsCovering(plot, plot.noticeServedDate).length > 0) {
+    candidates.push({ label: 'Notice to complete was served inside a major-change window — check the dates (Code 2.9)', rag: 'amber', priority: 2 })
+  }
+  if (journeyLive && plot.expectedCompletionDate && !plot.completionDate && daysFromToday(plot.expectedCompletionDate) < 0) {
+    candidates.push({ label: 'Expected completion date passed — record legal completion, or log the delay and update the date', rag: 'amber', priority: 2.5 })
   }
 
   // Paperwork for the current stage
-  const dueStages: Record<PlotStage, string[]> = {
-    setup: [],
-    reserved: ['reservation'],
-    exchanged: ['reservation', 'pre_contract'],
-    notice_served: ['reservation', 'pre_contract', 'completion'],
-    completed: ['reservation', 'pre_contract', 'completion'],
-    cancelled: [],
-  }
-  const outstanding = plot.documents.filter((d) => dueStages[stage].includes(d.stage) && !d.completed)
+  const outstanding = plot.documents.filter((d) => DUE_STAGES[stage].includes(d.stage) && !d.completed)
   if (outstanding.length > 0) {
     candidates.push({
       label: `Tick off ${outstanding.length} document${outstanding.length === 1 ? '' : 's'}`,
@@ -223,7 +231,7 @@ export function nextAction(plot: Plot): NextAction {
 
   // Nothing to do.
   if (stage === 'reserved' && plot.reservationDate) {
-    const coolingEnd = addDays(plot.reservationDate, 14)
+    const coolingEnd = coolingOffEnd(plot.reservationDate)
     if (daysFromToday(coolingEnd) >= 0) {
       return { label: `Nothing due — cooling-off until ${formatDate(coolingEnd)}`, rag: 'green' }
     }
@@ -250,15 +258,7 @@ export function plotStatus(plot: Plot): PlotStatus {
   // Before completion only the stages reached so far can have outstanding
   // documents; count against the documents due by the current stage so a
   // freshly reserved plot is not "13 documents outstanding" on day one.
-  const dueStages: Record<PlotStage, string[]> = {
-    setup: [],
-    reserved: ['reservation'],
-    exchanged: ['reservation', 'pre_contract'],
-    notice_served: ['reservation', 'pre_contract', 'completion'],
-    completed: ['reservation', 'pre_contract', 'completion'],
-    cancelled: [],
-  }
-  const dueDocs = plot.documents.filter((d) => dueStages[stage].includes(d.stage))
+  const dueDocs = plot.documents.filter((d) => DUE_STAGES[stage].includes(d.stage))
   const docsTotal = dueDocs.length
   const docsComplete = dueDocs.filter((d) => d.completed).length
 

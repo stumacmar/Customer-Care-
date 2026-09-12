@@ -124,7 +124,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="field">
-        <label>Your email (buyer reports from shared plot links arrive here)</label>
+        <label>Your email (customer reports from shared plot links arrive here)</label>
         <input
           type="email"
           value={email}
@@ -168,7 +168,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
           <div style={{ minWidth: 0, paddingRight: 8 }}>
             <div style={{ fontWeight: 600, fontSize: 15 }}>Show clause numbers</div>
             <div className="muted" style={{ fontSize: 12.5, marginTop: 2 }}>
-              The Code is built into every clock and checklist either way. Turn this on to see
+              The Code is built into every deadline and checklist either way. Turn this on to see
               the clause numbers on screen — useful when demonstrating compliance. They always
               appear in letters and exports.
             </div>

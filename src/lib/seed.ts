@@ -95,7 +95,7 @@ export function buildSeedState(developerName: string): AppState {
     reservationDate: addDays(today, -70),
     exchangeDeadline: addDays(today, -28),
     exchangeDate: addDays(today, -30),
-    completionDate: addDays(today, 70),
+    expectedCompletionDate: addDays(today, 70),
   })
   exchanged.documents = exchanged.documents.map((d) =>
     d.stage !== 'completion' ? { ...d, completed: true, completedDate: addDays(today, -30) } : d

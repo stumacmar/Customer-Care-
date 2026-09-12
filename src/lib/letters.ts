@@ -24,7 +24,7 @@
  */
 
 import { addDays, formatDate, todayISO } from './dates'
-import { majorChangeCancelBy, SNAG_PUT_RIGHT_DAYS } from './code'
+import { majorChangeCancelBy, milestoneDue, SNAG_PUT_RIGHT_DAYS, UPDATE_INTERVAL_DAYS } from './code'
 import type { ChangeRecord, Issue, MilestoneKey, Plot } from '../types'
 
 /** New Homes Ombudsman Service contact details (nhos.org.uk). */
@@ -100,9 +100,9 @@ function acknowledgement(ctx: LetterContext): LetterDraft {
     `  • Summary: ${ctx.issue.description || '[summary of the complaint]'}`,
     '',
     'What happens next:',
-    `  • By ${formatDate(addDays(ctx.issue.startedAt, 10))} we will send you our written ` +
+    `  • By ${formatDate(milestoneDue(ctx.issue, 'path_to_resolution'))} we will send you our written ` +
       "'path to resolution', setting out how we will investigate your complaint.",
-    `  • By ${formatDate(addDays(ctx.issue.startedAt, 30))} we will send you our full ` +
+    `  • By ${formatDate(milestoneDue(ctx.issue, 'assessment_response'))} we will send you our full ` +
       'Complaint Assessment and Response letter.',
     '',
     'Your point of contact for this complaint is [name], who can be reached on ' +
@@ -144,7 +144,7 @@ function pathToResolution(ctx: LetterContext): LetterDraft {
       'or "We do not consider this complaint falls within the warranty provider\'s scheme."]',
     '',
     `We will send you our full Complaint Assessment and Response letter by ` +
-      `${formatDate(addDays(ctx.issue.startedAt, 30))}. If anything delays this, we will ` +
+      `${formatDate(milestoneDue(ctx.issue, 'assessment_response'))}. If anything delays this, we will ` +
       'tell you why and keep you updated at least once every 28 days.',
     signOff(ctx),
   ].join('\n')
@@ -187,7 +187,7 @@ function assessmentResponse(ctx: LetterContext): LetterDraft {
     ombudsmanBlock(),
     '',
     `If your complaint remains unresolved, we will write to you again by ` +
-      `${formatDate(addDays(ctx.issue.startedAt, 56))} (our Eight-Week Letter).`,
+      `${formatDate(milestoneDue(ctx.issue, 'eight_week'))} (our Eight-Week Letter).`,
     signOff(ctx),
   ].join('\n')
   return {
@@ -221,7 +221,7 @@ function eightWeek(ctx: LetterContext): LetterDraft {
     '   [Give your realistic expected timescale / target date.]',
     '',
     `We will continue to update you at least once every 28 days (next update by ` +
-      `${formatDate(addDays(ctx.issue.startedAt, 84))}) until your complaint is closed.`,
+      `${formatDate(addDays(milestoneDue(ctx.issue, 'eight_week'), UPDATE_INTERVAL_DAYS))}) until your complaint is closed.`,
     '',
     ombudsmanBlock(),
     '',
@@ -395,7 +395,7 @@ export function delayUpdateLetter(
     `   ${change.description || '[explain the delay and its cause]'}`,
     '',
     'Our current expectation:',
-    `   Expected completion: ${plot.completionDate ? formatDate(plot.completionDate) : '[updated expected completion date]'}`,
+    `   Expected completion: ${plot.expectedCompletionDate ? formatDate(plot.expectedCompletionDate) : '[updated expected completion date]'}`,
     '   [Set out anything the customer should do, and when you will update them next.]',
     '',
     'Your contract of sale sets out what happens if the home is not ready by the date we ' +

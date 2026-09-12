@@ -1,8 +1,8 @@
 /*
- * Share a plot with its buyer. Generates the private buyer link — the plot's
+ * Share a plot with its customer. Generates the private link — the plot's
  * details travel inside the link fragment itself (never through a server) —
  * ready to send by email, WhatsApp or text. Sharing is recorded on the
- * timeline so the audit trail shows the buyer was kept informed.
+ * timeline so the audit trail shows the customer was kept informed.
  */
 
 import { useEffect, useState } from 'react'
@@ -41,7 +41,7 @@ export function BuyerShareSheet({
     dispatch({
       type: 'ADD_NOTE',
       plotId: plot.id,
-      note: 'Buyer link shared — plot progress, documents and issues as of today',
+      note: 'Private link shared with the customer — plot progress, documents and issues as of today',
     })
   }
 
@@ -50,7 +50,7 @@ export function BuyerShareSheet({
     try {
       await navigator.clipboard.writeText(link)
       record()
-      onToast('Link copied — send it to the buyer')
+      onToast('Link copied — send it to the customer')
       onClose()
     } catch {
       onToast('Could not copy — long-press the link to copy it')
@@ -80,24 +80,24 @@ export function BuyerShareSheet({
 
   return (
     <Sheet
-      title="Share with the buyer"
+      title="Share with the customer"
       subtitle="A private link showing their home's progress — nothing is uploaded anywhere."
       onClose={onClose}
     >
       <div className="card" style={{ marginBottom: 12 }}>
         <p className="muted" style={{ margin: 0, fontSize: 13.5, lineHeight: 1.55 }}>
-          The link contains a snapshot for <strong>{plot.customerNames || 'the buyer'}</strong>:
+          The link contains a snapshot for <strong>{plot.customerNames || 'the customer'}</strong>:
           journey dates, documents received, choices and changes, issue status, and how to report
           a problem (which arrives back here ready to log with the right Code timescale).
           Photos are not included. The data lives inside the link itself — send it only to the
-          buyer. Share a fresh link after changes.
+          customer. Share a fresh link after changes.
         </p>
       </div>
 
       {!state.developerEmail && (
         <div className="card" style={{ marginBottom: 12 }}>
           <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-            Tip: add your email in Settings first — buyer reports will then arrive pre-addressed
+            Tip: add your email in Settings first — customer reports will then arrive pre-addressed
             to you.
           </p>
         </div>
@@ -108,7 +108,7 @@ export function BuyerShareSheet({
           <Icon name="copy" size={16} /> Copy link {link ? '' : '(preparing…)'}
         </button>
         <button className="btn btn-block" onClick={email} disabled={!link}>
-          <Icon name="mail" size={16} /> Email it to {plot.customerNames || 'the buyer'}
+          <Icon name="mail" size={16} /> Email it to {plot.customerNames || 'the customer'}
         </button>
         <button className="btn btn-ghost btn-block" onClick={preview} disabled={!link}>
           Preview what they will see

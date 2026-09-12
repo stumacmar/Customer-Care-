@@ -11,6 +11,7 @@ import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { addDays, formatDate, todayISO } from '../lib/dates'
 import { COOLING_OFF_DAYS, EXCHANGE_MIN_DAYS } from '../lib/code'
+import { Icon } from './icons'
 import type { Plot } from '../types'
 
 export function EditPlotSheet({
@@ -30,7 +31,9 @@ export function EditPlotSheet({
   const [exchangeDeadline, setExchangeDeadline] = useState(plot.exchangeDeadline || '')
   const [exchangeDate, setExchangeDate] = useState(plot.exchangeDate || '')
   const [noticeServedDate, setNoticeServedDate] = useState(plot.noticeServedDate || '')
+  const [expectedCompletionDate, setExpectedCompletionDate] = useState(plot.expectedCompletionDate || '')
   const [completionDate, setCompletionDate] = useState(plot.completionDate || '')
+  const [cancelDate, setCancelDate] = useState(todayISO())
 
   const save = () => {
     if (!address.trim()) return
@@ -45,6 +48,7 @@ export function EditPlotSheet({
         exchangeDeadline: exchangeDeadline || undefined,
         exchangeDate: exchangeDate || undefined,
         noticeServedDate: noticeServedDate || undefined,
+        expectedCompletionDate: expectedCompletionDate || undefined,
         completionDate: completionDate || undefined,
       },
     })
@@ -61,12 +65,19 @@ export function EditPlotSheet({
       )
     )
       return
-    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO() })
+    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: cancelDate || todayISO() })
     onSaved('Cancellation recorded — refund deadline running')
     onClose()
   }
 
   const suggestedExchange = reservationDate ? addDays(reservationDate, EXCHANGE_MIN_DAYS) : ''
+  const exchangeTooEarly = !!reservationDate && !!exchangeDeadline && exchangeDeadline < suggestedExchange
+  // Journey dates must run in order; a slip here quietly picks the wrong stage.
+  const orderProblems: string[] = []
+  if (reservationDate && exchangeDate && exchangeDate < reservationDate) orderProblems.push('exchange is before reservation')
+  if (exchangeDate && noticeServedDate && noticeServedDate < exchangeDate) orderProblems.push('notice to complete is before exchange')
+  if (noticeServedDate && completionDate && completionDate < noticeServedDate) orderProblems.push('legal completion is before notice')
+  if (completionDate && completionDate > todayISO()) orderProblems.push('legal completion is in the future — use the expected date until it happens')
 
   return (
     <Sheet title="Edit plot details" onClose={onClose}>
@@ -107,6 +118,13 @@ export function EditPlotSheet({
             </button>
           </div>
         )}
+        {exchangeTooEarly && (
+          <div className="dictate-hint" style={{ color: 'var(--amber)' }}>
+            Earlier than the Code minimum of six weeks ({formatDate(suggestedExchange)}). Code 2.2
+            allows this only where the customer asked for an earlier date — keep their request
+            in writing.
+          </div>
+        )}
       </div>
       <div className="field">
         <label>Exchange of contracts — actual date</label>
@@ -117,9 +135,18 @@ export function EditPlotSheet({
         <input type="date" value={noticeServedDate} onChange={(e) => setNoticeServedDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Completion date (expected until it happens; actual once it has)</label>
-        <input type="date" value={completionDate} onChange={(e) => setCompletionDate(e.target.value)} />
+        <label>Expected completion date (update it when a delay is notified)</label>
+        <input type="date" value={expectedCompletionDate} onChange={(e) => setExpectedCompletionDate(e.target.value)} />
       </div>
+      <div className="field">
+        <label>Legal completion — actual date (starts the two-year after-sales period)</label>
+        <input type="date" value={completionDate} max={todayISO()} onChange={(e) => setCompletionDate(e.target.value)} />
+      </div>
+      {orderProblems.length > 0 && (
+        <div className="dictate-hint" style={{ color: 'var(--amber)', marginBottom: 10 }}>
+          <Icon name="alert" size={14} /> Check the dates: {orderProblems.join('; ')}.
+        </div>
+      )}
 
       <div className="sheet-actions">
         <button className="btn btn-ghost" onClick={onClose}>
@@ -137,7 +164,7 @@ export function EditPlotSheet({
             {plot.ownershipTransferredOn ? (
               <p className="muted" style={{ margin: 0, fontSize: 13 }}>
                 Ownership transfer recorded on {formatDate(plot.ownershipTransferredOn)}. Update
-                the customer name and email above to the new owner, then share a fresh buyer
+                the customer name and email above to the new owner, then share a fresh
                 link — they will see the after-sales view only.
               </p>
             ) : (
@@ -145,7 +172,7 @@ export function EditPlotSheet({
                 <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
                   If the home changes hands within the two-year after-sales period, the Code
                   cover follows the home. Record the transfer, update the customer name and
-                  email above to the new owner, and share a fresh buyer link — the new owner
+                  email above to the new owner, and share a fresh link — the new owner
                   gets an after-sales-only view (no purchase history).
                 </p>
                 <button
@@ -176,11 +203,15 @@ export function EditPlotSheet({
               deadline: the reservation fee within 14 days (in full if still in cooling-off), or
               the contract deposit within 28 days.
             </p>
+            <div className="field" style={{ marginBottom: 10 }}>
+              <label>Date the customer's notice was received</label>
+              <input type="date" value={cancelDate} max={todayISO()} onChange={(e) => setCancelDate(e.target.value)} />
+            </div>
             <div className="wrap-actions">
               <button className="btn btn-sm btn-danger" onClick={() => recordCancellation('reservation')}>
                 Reservation cancelled
               </button>
-              {(plot.exchangeDate || completionDate) && (
+              {(plot.exchangeDate || exchangeDate || completionDate) && (
                 <button className="btn btn-sm btn-danger" onClick={() => recordCancellation('contract')}>
                   Contract cancelled
                 </button>

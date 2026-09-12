@@ -216,7 +216,7 @@ function SectionDetail({ section, onBack }: { section: CodeSection; onBack: () =
       </div>
 
       <p className="muted" style={{ fontSize: 12, marginTop: 16 }}>
-        Reference: New Homes Quality Code {CODE_VERSION}, clause {refLabel(section.ref)}. Plain-English
+        Reference: New Homes Quality Code {CODE_VERSION}, clause {refLabel(section.ref)}. This is a
         summary — read the{' '}
         <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
           official Code

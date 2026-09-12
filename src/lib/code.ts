@@ -18,6 +18,7 @@
 
 import { addDays, daysFromToday, diffDays, todayISO } from './dates'
 import type {
+  Cancellation,
   ChangeRecord,
   Clock,
   DocumentItem,
@@ -60,6 +61,16 @@ export const AFTER_SALES_YEARS = 2
 
 /** "Due soon" (amber) threshold in days. */
 export const DUE_SOON_DAYS = 5
+
+/** Which document stages are due by each journey stage. */
+export const DUE_STAGES: Record<PlotStage, string[]> = {
+  setup: [],
+  reserved: ['reservation'],
+  exchanged: ['reservation', 'pre_contract'],
+  notice_served: ['reservation', 'pre_contract', 'completion'],
+  completed: ['reservation', 'pre_contract', 'completion'],
+  cancelled: [],
+}
 
 /**
  * The auto-generated document checklist, grouped by journey stage.
@@ -106,8 +117,8 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   },
   {
     key: 'warranty_provider_notified',
-    label: 'Warranty provider given the buyer’s details',
-    hint: 'At the end of the reservation period, give the home warranty provider full details of the buyer and the reserved home, if the provider requires it.',
+    label: 'Warranty provider given the customer’s details',
+    hint: 'At the end of the reservation period, give the home warranty provider full details of the customer and the reserved home, if the provider requires it.',
     clause: '2.5',
     stage: 'pre_contract',
   },
@@ -197,7 +208,10 @@ export const STAGE_LABELS: Record<PlotStage, string> = {
   cancelled: 'Cancelled',
 }
 
-/** Derive the plot's journey stage from its dates. */
+/**
+ * Derive the plot's journey stage from its dates. Only a recorded legal
+ * completion counts as completed — an expected date passing never does.
+ */
 export function plotStage(plot: Plot, today = todayISO()): PlotStage {
   if (plot.cancellation) return 'cancelled'
   if (plot.completionDate && plot.completionDate <= today) return 'completed'
@@ -211,7 +225,7 @@ export function plotStage(plot: Plot, today = todayISO()): PlotStage {
 // Journey clocks — the Code's reservation-to-completion obligations
 // ---------------------------------------------------------------------------
 
-function ragForDeadline(daysRemaining: number): Rag {
+export function ragForDeadline(daysRemaining: number): Rag {
   if (daysRemaining < 0) return 'red'
   if (daysRemaining <= DUE_SOON_DAYS) return 'amber'
   return 'green'
@@ -220,6 +234,39 @@ function ragForDeadline(daysRemaining: number): Rag {
 /** The cancel-by date for a major change's 14-day window — Code 2.9. */
 export function majorChangeCancelBy(change: ChangeRecord): string {
   return addDays(change.date, MAJOR_CHANGE_CANCEL_DAYS)
+}
+
+/** The completion date the notice period and inspection are measured against. */
+export function targetCompletion(plot: Plot): string | undefined {
+  return plot.completionDate || plot.expectedCompletionDate
+}
+
+/** Last day of the cooling-off period — Code 2.3. */
+export function coolingOffEnd(reservationDate: string): string {
+  return addDays(reservationDate, COOLING_OFF_DAYS)
+}
+
+/** Refund due date after a cancellation — Code 2.4 (reservation fee) / 2.13 (contract deposit). */
+export function refundDueDate(c: Cancellation): string {
+  return addDays(c.date, c.kind === 'contract' ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS)
+}
+
+/** The 30-day put-right date for a snag — Code 3.3. */
+export function snagPutRightDate(issue: Issue): string {
+  return addDays(issue.startedAt, SNAG_PUT_RIGHT_DAYS)
+}
+
+/** Due date of a fixed complaint milestone — Code 3.4. */
+export function milestoneDue(issue: Issue, key: MilestoneKey): string {
+  const m = FIXED_MILESTONES.find((x) => x.key === key)
+  return addDays(issue.startedAt, m ? m.offsetDays : 0)
+}
+
+/** Open major changes whose 14-day window contains `iso` — Code 2.9. */
+export function majorChangeWindowsCovering(plot: Plot, iso: string): ChangeRecord[] {
+  return plot.changes.filter(
+    (c) => c.kind === 'major_change' && c.date <= iso && iso <= majorChangeCancelBy(c)
+  )
 }
 
 /**
@@ -234,8 +281,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   // 2.13 (contract deposit, 28 days). The one clock that survives cancellation.
   if (plot.cancellation && !plot.cancellation.refundedDate) {
     const isContract = plot.cancellation.kind === 'contract'
-    const days = isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS
-    const dueDate = addDays(plot.cancellation.date, days)
+    const dueDate = refundDueDate(plot.cancellation)
     const daysRemaining = daysFromToday(dueDate)
     out.push({
       kind: 'refund',
@@ -254,7 +300,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   // Cooling-off — 2.3. Awareness, not a developer deadline: the customer can
   // cancel for a full refund until this date.
   if (plot.reservationDate && stage === 'reserved') {
-    const end = addDays(plot.reservationDate, COOLING_OFF_DAYS)
+    const end = coolingOffEnd(plot.reservationDate)
     const daysRemaining = daysFromToday(end)
     if (daysRemaining >= 0) {
       out.push({
@@ -290,6 +336,8 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
     })
   }
 
+  if (stage === 'completed') return out
+
   // Major-change windows — 2.9. A hold on serving notice, and the customer's
   // right to cancel; amber while open so it is never missed.
   for (const change of plot.changes) {
@@ -312,11 +360,35 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
     })
   }
 
-  if (stage === 'completed') return out
+  // Notice served inside a major-change window — 2.9 says it cannot be.
+  if (plot.noticeServedDate && majorChangeWindowsCovering(plot, plot.noticeServedDate).length > 0) {
+    out.push({
+      kind: 'notice_in_window',
+      clause: '2.9',
+      label: 'Notice to complete served during a major-change window',
+      detail: 'The Code says notice to complete cannot be served while the customer\'s 14-day window to cancel over a major change is open. Check the dates, and take advice if the notice needs to be re-served.',
+      rag: 'amber',
+    })
+  }
 
-  // Notice period check + PCI reminder — 2.8.
-  if (plot.noticeServedDate && plot.completionDate) {
-    const period = diffDays(plot.noticeServedDate, plot.completionDate)
+  // Expected completion has passed but no legal completion is recorded.
+  if (plot.expectedCompletionDate && !plot.completionDate && daysFromToday(plot.expectedCompletionDate) < 0) {
+    out.push({
+      kind: 'completion_passed',
+      clause: '2.6',
+      label: 'Expected completion date passed — completed?',
+      detail: 'If legal completion took place, record the date under Edit details. If not, log the delay and update the expected completion date so the customer is kept informed.',
+      dueDate: plot.expectedCompletionDate,
+      daysRemaining: daysFromToday(plot.expectedCompletionDate),
+      rag: 'amber',
+    })
+  }
+
+  // Notice period check + PCI reminder — 2.8, measured against the expected
+  // completion date in the notice (or the actual one, if recorded).
+  const completionTarget = targetCompletion(plot)
+  if (plot.noticeServedDate && completionTarget) {
+    const period = diffDays(plot.noticeServedDate, completionTarget)
     if (period < NOTICE_PERIOD_MIN_DAYS) {
       out.push({
         kind: 'notice_period',
@@ -327,16 +399,16 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       })
     }
   }
-  if (stage === 'notice_served' && plot.completionDate) {
+  if (stage === 'notice_served' && completionTarget) {
     const pciDone = plot.documents.some((d) => d.key === 'pre_completion_inspection' && d.completed)
     if (!pciDone) {
-      const daysRemaining = daysFromToday(plot.completionDate)
+      const daysRemaining = daysFromToday(completionTarget)
       out.push({
         kind: 'pci',
         clause: '2.8',
         label: 'Offer the pre-completion inspection',
         detail: 'The customer (or their suitably qualified inspector, using the NHQB checklist) must get the chance to inspect after notice is served and before completion. Issues that breach warranty standards: fix ideally before completion, or within 30 days.',
-        dueDate: plot.completionDate,
+        dueDate: completionTarget,
         daysRemaining,
         rag: ragForDeadline(daysRemaining),
       })
@@ -471,12 +543,6 @@ function milestoneRag(completed: boolean, daysRemaining: number, issue: Issue): 
 // Clocks (what the dashboard and plot screen read from)
 // ---------------------------------------------------------------------------
 
-function ragFromDays(daysRemaining: number): Rag {
-  if (daysRemaining < 0) return 'red'
-  if (daysRemaining <= DUE_SOON_DAYS) return 'amber'
-  return 'green'
-}
-
 // ---------------------------------------------------------------------------
 // Snag monthly updates — Code 3.3
 // ---------------------------------------------------------------------------
@@ -494,19 +560,20 @@ export interface SnagUpdate {
 }
 
 /**
- * The monthly-update schedule for a snag that is still open past its 30-day
- * put-right window — the Code requires the customer to be updated at least
- * once a month until it is settled. Update #n falls due 30·(n+1) days after
- * the snag was reported; past updates plus the next upcoming one are listed.
+ * The monthly-update schedule for a snag that is not put right within its
+ * 30-day window — Code 3.3: explain the reason for the delay when the 30 days
+ * lapse, then keep the customer updated at least once a month until it is
+ * settled. Update #1 is therefore due on day 30 and #n on day 30·n; past
+ * updates plus the next upcoming one are listed.
  */
 export function snagUpdateSchedule(issue: Issue, today = todayISO()): SnagUpdate[] {
   if (issue.type !== 'snag' || issue.status !== 'open') return []
   const daysOpen = diffDays(issue.startedAt, today)
-  if (daysOpen <= SNAG_PUT_RIGHT_DAYS) return []
+  if (daysOpen < SNAG_PUT_RIGHT_DAYS) return []
   const progress = issue.milestoneProgress || {}
   const out: SnagUpdate[] = []
   let n = 1
-  let offset = SNAG_PUT_RIGHT_DAYS + SNAG_UPDATE_INTERVAL_DAYS
+  let offset = SNAG_PUT_RIGHT_DAYS
   while (offset <= daysOpen + SNAG_UPDATE_INTERVAL_DAYS) {
     const key = `snag_update_${n}`
     const p = progress[key]
@@ -549,15 +616,21 @@ export function clockForIssue(issue: Issue, today = todayISO()): Clock | null {
   }
 
   if (issue.type === 'snag') {
-    const dueDate = addDays(issue.startedAt, SNAG_PUT_RIGHT_DAYS)
+    const putRight = snagPutRightDate(issue)
+    // Past the 30 days, compliance is the monthly update (3.3): once the delay
+    // has been explained, the live deadline is the next update, not the
+    // long-passed put-right date.
+    const update = nextSnagUpdate(issue, today)
+    const explained = daysFromToday(putRight) < 0 && update !== null && update.n > 1
+    const dueDate = explained ? update.dueDate : putRight
     const daysRemaining = daysFromToday(dueDate)
     return {
       issueId: issue.id,
       type: 'snag',
-      label: 'Snag — put right',
+      label: explained ? 'Delayed snag — monthly update to the customer' : 'Snag — put right',
       dueDate,
       daysRemaining,
-      rag: ragFromDays(daysRemaining),
+      rag: ragForDeadline(daysRemaining),
     }
   }
 
@@ -573,7 +646,7 @@ export function clockForIssue(issue: Issue, today = todayISO()): Clock | null {
     label: `Complaint — ${next.label}`,
     dueDate: next.dueDate,
     daysRemaining: next.daysRemaining,
-    rag: ragFromDays(next.daysRemaining),
+    rag: ragForDeadline(next.daysRemaining),
   }
 }
 

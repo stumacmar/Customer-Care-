@@ -1,8 +1,9 @@
 /*
- * Ingest a buyer's report. The buyer's app sends an email containing a small
- * paste-code; pasting it (or the whole email) here decodes the report and
- * hands it to the normal logging flow — so the clock starts exactly as if the
- * developer had typed it, with the buyer's own words preserved.
+ * Ingest a customer's report. The customer's app sends an email containing a
+ * small paste-code; pasting it (or the whole email) here decodes the report
+ * and hands it to the normal logging flow — so the Code timescale starts
+ * exactly as if the developer had typed it, with the customer's own words
+ * preserved.
  */
 
 import { useState } from 'react'
@@ -12,7 +13,7 @@ import { formatDate } from '../lib/dates'
 import type { IssueType } from '../types'
 
 const TYPE_LABEL: Record<IssueType, string> = {
-  snag: 'Snag',
+  snag: 'Snag or defect',
   complaint: 'Complaint',
   emergency: 'Emergency',
 }
@@ -23,7 +24,7 @@ export function BuyerReportSheet({
 }: {
   onClose: () => void
   /** Hands the decoded report to the logging flow. */
-  onDecoded: (type: IssueType, description: string) => void
+  onDecoded: (type: IssueType, description: string, receivedOn?: string) => void
 }) {
   const [text, setText] = useState('')
   const [report, setReport] = useState<BuyerReport | null>(null)
@@ -39,26 +40,26 @@ export function BuyerReportSheet({
     if (decoded && decoded.k === 'report') {
       setReport(decoded)
     } else if (value.trim().length > 20) {
-      setError('That does not look like a buyer report code — paste the whole email if unsure.')
+      setError('That does not look like a report code — paste the whole email if unsure.')
     }
   }
 
   const log = () => {
     if (!report) return
     const description =
-      `${report.description}\n[Reported by the buyer via their plot link` +
+      `${report.description}\n[Reported by the customer via their plot link` +
       `${report.sentOn ? `, sent ${formatDate(report.sentOn)}` : ''}]`
-    onDecoded(report.type, description)
+    onDecoded(report.type, description, report.sentOn)
   }
 
   return (
     <Sheet
-      title="Paste a buyer report"
-      subtitle="Paste the code (or the whole email) from the buyer's message."
+      title="Paste a customer report"
+      subtitle="Paste the code (or the whole email) from the customer's message."
       onClose={onClose}
     >
       <div className="field">
-        <label>Buyer's report</label>
+        <label>Customer's report</label>
         <textarea
           rows={5}
           value={text}

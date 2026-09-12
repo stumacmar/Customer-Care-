@@ -6,6 +6,7 @@
  * else.
  */
 
+import { todayISO } from './dates'
 import { DOCUMENT_TEMPLATE } from './code'
 import type { AppState, Development, DocumentItem, Plot } from '../types'
 
@@ -46,8 +47,15 @@ function migrate(parsed: Partial<AppState>): AppState {
   // v2 → v3: stage-tag existing documents, add the new checklist items in
   // template order (preserving any ticks/files on items the user already had),
   // and default the changes log.
+  const today = todayISO()
   for (const p of plots) {
     if (!Array.isArray(p.changes)) p.changes = []
+    // Pre-v4 records held one completion date that was "expected until it
+    // passed". A future date is an expectation, not a legal completion.
+    if (p.completionDate && p.completionDate > today && !p.expectedCompletionDate) {
+      p.expectedCompletionDate = p.completionDate
+      p.completionDate = undefined
+    }
     const existing = new Map<string, DocumentItem>((p.documents || []).map((d) => [d.key, d]))
     p.documents = DOCUMENT_TEMPLATE.map((t) => {
       const prior = existing.get(t.key)

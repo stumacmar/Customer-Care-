@@ -33,11 +33,11 @@ const STEPS: Step[] = [
   {
     icon: 'wrench',
     tint: 'var(--snag)',
-    text: 'The moment a customer reports anything, log it: Snag, Complaint or Emergency. The app works out every Code deadline — you never calculate a date.',
+    text: 'The moment a customer reports anything, log it: Snag or defect, Complaint, or Emergency. The app works out every Code deadline — you never calculate a date.',
   },
   {
     rag: true,
-    text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = relax.',
+    text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = on track.',
   },
   {
     icon: 'edit',
@@ -47,7 +47,7 @@ const STEPS: Step[] = [
   {
     icon: 'mail',
     tint: 'var(--complaint)',
-    text: 'Paste emails to and from the customer into the plot as they happen, so the trail is in the app and not stranded in your inbox.',
+    text: 'Paste emails to and from the customer into the plot as they happen, so the evidence trail is in the record and not only in your inbox.',
   },
   {
     icon: 'file',

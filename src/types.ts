@@ -213,7 +213,9 @@ export interface Plot {
   exchangeDate?: string // ISO date
   /** Date the notice to complete was served — opens the PCI window (2.8). */
   noticeServedDate?: string // ISO date
-  /** Expected completion date until it passes; then the actual completion date. */
+  /** The expected completion date — moves when a delay is logged. Never treated as the actual. */
+  expectedCompletionDate?: string // ISO date
+  /** Legal completion — the actual date, recorded when it happens. Starts the two-year after-sales period (3.1). */
   completionDate?: string // ISO date
   /**
    * Set when the home is sold on within the two-year after-sales period.
@@ -270,6 +272,8 @@ export type JourneyClockKind =
   | 'refund' // 2.4 / 2.13 — refund due after cancellation
   | 'notice_period' // 2.8 — completion notice period shorter than 14 days
   | 'pci' // 2.8 — offer the pre-completion inspection before completion
+  | 'completion_passed' // expected completion date has passed with no legal completion recorded
+  | 'notice_in_window' // 2.9 — notice to complete served inside an open major-change window
 
 /**
  * A pre-completion clock derived from the plot's journey dates and changes —

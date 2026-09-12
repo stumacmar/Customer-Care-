@@ -209,7 +209,7 @@ export const CODE_SECTIONS: CodeSection[] = [
     summary: 'While the reservation is valid you cannot cancel it or re-reserve the same home to someone else.',
     points: [
       'While the Reservation Agreement is valid, the developer cannot cancel it and must not enter a new reservation or sale agreement with another customer for the same home.',
-      'At the end of the reservation period, give the warranty provider full details of the buyer and reserved home if required (subject to data protection).',
+      'At the end of the reservation period, give the warranty provider full details of the customer and reserved home if required (subject to data protection).',
     ],
     keywords: ['cannot cancel', 'developer cancel', 'reserve to someone else', 'gazumping'],
   },
