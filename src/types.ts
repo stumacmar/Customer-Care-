@@ -236,12 +236,6 @@ export interface Plot {
   expectedCompletionDate?: string // ISO date
   /** Legal completion — the actual date, recorded when it happens. Starts the two-year after-sales period (3.1). */
   completionDate?: string // ISO date
-  /**
-   * Set when the home is sold on within the two-year after-sales period.
-   * The Code cover follows the home, so the new owner gets a reduced,
-   * post-completion-only buyer view.
-   */
-  ownershipTransferredOn?: string // ISO date
   /** Set if the purchase was cancelled — starts the refund clock (2.4 / 2.13). */
   cancellation?: Cancellation
   documents: DocumentItem[]

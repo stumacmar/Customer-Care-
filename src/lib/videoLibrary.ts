@@ -17,7 +17,6 @@ export type VideoSlug =
   | 'complaint'
   | 'emergency'
   | 'emails'
-  | 'second-owner'
   | 'ombudsman'
 
 export const VIDEOS: Record<VideoSlug, { title: string; code: string; duration: number }> = {
@@ -34,6 +33,5 @@ export const VIDEOS: Record<VideoSlug, { title: string; code: string; duration: 
   'complaint': { title: "A formal complaint", code: "Code 3.4 · 3.5", duration: 80 },
   'emergency': { title: "An emergency", code: "Code 3.1 · 3.2 · glossary", duration: 62 },
   'emails': { title: "Emails in the record", code: "The evidence trail", duration: 52 },
-  'second-owner': { title: "The home is sold on", code: "Code 3.1", duration: 51 },
   'ombudsman': { title: "Escalation to the Ombudsman", code: "Code 3.5", duration: 54 },
 }

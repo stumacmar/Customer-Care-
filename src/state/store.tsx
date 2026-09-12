@@ -66,7 +66,6 @@ type Action =
           | 'noticeServedDate'
           | 'expectedCompletionDate'
           | 'completionDate'
-          | 'ownershipTransferredOn'
         >
       >
     }
@@ -309,7 +308,6 @@ function reducer(state: AppState, action: Action): AppState {
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
           ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6: keep the customer informed of the expected completion date and of any change to it.'],
           ['completionDate', 'Legal completion recorded', 'Code 3.1: the two-year after-sales service runs from this date.'],
-          ['ownershipTransferredOn', 'Ownership transfer recorded', 'The home was sold on within the two-year after-sales period. Code cover follows the home — the new owner keeps the after-sales, complaints and Ombudsman rights until the period ends.'],
         ]
         const events: TimelineEvent[] = []
         for (const [key, label, detail] of stamps) {

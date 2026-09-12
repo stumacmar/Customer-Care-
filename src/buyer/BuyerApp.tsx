@@ -190,14 +190,8 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
           {snap.customerNames} · built by {snap.developerName || 'your developer'}
         </p>
 
-        {snap.secondOwner ? (
-          <SecondOwnerCover snap={snap} />
-        ) : (
-          <>
-            <JourneyStrip snap={snap} stage={stage} />
-            <WhatsNext snap={snap} stage={stage} today={today} />
-          </>
-        )}
+        <JourneyStrip snap={snap} stage={stage} />
+        <WhatsNext snap={snap} stage={stage} today={today} />
 
         {/* Report a problem — one guided route so every issue reaches the
             correct Code process. */}
@@ -220,8 +214,8 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
 
         {snap.issues.length > 0 && <IssuesOnRecord issues={snap.issues} />}
 
-        {!snap.secondOwner && <DocumentsReceived snap={snap} />}
-        {!snap.secondOwner && snap.changes.length > 0 && <ChoicesAndChanges snap={snap} />}
+        <DocumentsReceived snap={snap} />
+        {snap.changes.length > 0 && <ChoicesAndChanges snap={snap} />}
         <YourRights />
 
         <p className="muted" style={{ fontSize: 12, marginTop: 24, lineHeight: 1.55 }}>
@@ -253,28 +247,6 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
 }
 
 // ---------------------------------------------------------------------------
-
-/**
- * What a second owner sees instead of the purchase journey. The Code's
- * after-sales cover follows the home for two years from the original
- * completion, but the sale history belonged to the first owner.
- */
-function SecondOwnerCover({ snap }: { snap: BuyerSnapshot }) {
-  const windowEnd = snap.completionDate ? addYears(snap.completionDate, AFTER_SALES_YEARS) : undefined
-  return (
-    <div className="section">
-      <h3>Am I covered as the new owner?</h3>
-      <div className="card" style={{ fontSize: 14.5, lineHeight: 1.55 }}>
-        Under the New Homes Quality Code (the Code), the developer's after-sales service applies
-        to matters reported within two years of the home's original legal completion
-        {windowEnd ? ` — until ${formatDate(windowEnd)}` : ''}. As the current homeowner you can
-        report snags, defects and emergencies to the developer in that period. The Code advises
-        future owners to take legal advice about their position; your solicitor or conveyancer
-        can confirm what applies to you.
-      </div>
-    </div>
-  )
-}
 
 function JourneyStrip({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage }) {
   const steps: { key: BuyerStage; label: string; date?: string }[] = [

@@ -1,14 +1,14 @@
 /*
  * The Guide tab — three ways in, one at a time:
  *
- *   Watch  a poster grid of the tour and the fifteen scenario videos,
+ *   Watch  a poster grid of the tour and the fourteen scenario videos,
  *          grouped by where they fall in a plot's life. Tap one and it
  *          plays in a theatre sheet — only ever one player on screen.
  *   Read   the manual, text first, with compact chips that open the
  *          theatre at the relevant video (or the right second of the tour).
  *   Print  the step-by-step picture guide, with its cover.
  *
- * Browsing and watching are separate on purpose: fifteen inline players
+ * Browsing and watching are separate on purpose: fourteen inline players
  * stacked in an accordion is how this tab used to feel, and it felt like it.
  */
 
@@ -31,7 +31,7 @@ const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
     title: 'Before completion',
     slugs: ['reservation', 'exchange', 'choices', 'major-change', 'delay', 'notice-inspection', 'completion', 'cooling-off-cancellation'],
   },
-  { title: 'After completion', slugs: ['snag', 'complaint', 'emergency', 'emails', 'second-owner', 'ombudsman'] },
+  { title: 'After completion', slugs: ['snag', 'complaint', 'emergency', 'emails', 'ombudsman'] },
 ]
 const ORDER: VideoSlug[] = GROUPS.flatMap((g) => g.slugs)
 
@@ -120,14 +120,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
       'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution letter by day 10, Complaint Assessment and Response letter by day 30, Eight-Week Letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, complete the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
       'Emergency: the Code defines it as an immediate threat to safety, security, health or well-being, and your after-sales statement sets out what qualifies — typically external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
       '"Remind me" on any issue (or on the journey) drops its deadlines into your phone calendar with alerts.',
-    ],
-  },
-  {
-    title: 'If the home is sold on',
-    videos: ['second-owner'],
-    body: [
-      'If the home changes hands within the two years, Code 3.6 says your after-sales service applies to matters reported within two years of the original legal completion. Record the ownership transfer under "Edit details & dates", update the customer name and email to the new owner, and share a fresh link.',
-      'The new owner\'s app is an after-sales-only view — no purchase history, which belonged to the first owner — with the date the period ends and the report flow for snags, defects and emergencies. The Code advises future owners to take legal advice about their position, and the page says so.',
+      'If the home is sold on within the two years, Code 3.6 says only that your after-sales service applies to matters reported within two years of the original legal completion, and that future owners should get legal advice. The app does not need anything extra: the plot record stays as it is.',
     ],
   },
   {

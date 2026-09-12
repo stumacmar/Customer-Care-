@@ -67,12 +67,6 @@ export interface BuyerSnapshot {
   issues: SnapshotIssue[]
   /** ISO date the developer generated this link. */
   sharedOn: string
-  /**
-   * Set when the home has been sold on within the two-year after-sales
-   * period. Code cover follows the home, but the purchase journey belonged
-   * to the first owner — a second owner gets the post-completion view only.
-   */
-  secondOwner?: boolean
 }
 
 /** What travels back when the buyer reports a problem. */
@@ -121,11 +115,7 @@ export function buildSnapshot(
       outcome: c.outcome,
       cancelBy: c.kind === 'major_change' ? majorChangeCancelBy(c) || undefined : undefined,
     })),
-    // A second owner sees only matters raised since the home changed hands —
-    // the first owner's complaints are their personal data.
-    issues: plot.issues
-      .filter((i) => !plot.ownershipTransferredOn || i.startedAt >= plot.ownershipTransferredOn)
-      .map((i) => ({
+    issues: plot.issues.map((i) => ({
       reference: i.reference,
       type: i.type,
       status: i.status,
@@ -136,7 +126,6 @@ export function buildSnapshot(
       putRightBy: i.type === 'snag' ? snagPutRightDate(i) : undefined,
     })),
     sharedOn: today,
-    secondOwner: plot.ownershipTransferredOn ? true : undefined,
   }
 }
 

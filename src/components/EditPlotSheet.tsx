@@ -169,43 +169,6 @@ export function EditPlotSheet({
         </button>
       </div>
 
-      {plot.completionDate && !plot.cancellation && (
-        <div className="section">
-          <h3>If the home is sold on</h3>
-          <div className="card">
-            {plot.ownershipTransferredOn ? (
-              <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-                Ownership transfer recorded on {formatDate(plot.ownershipTransferredOn)}. Update
-                the customer name and email above to the new owner, then share a fresh
-                link — they will see the after-sales view only.
-              </p>
-            ) : (
-              <>
-                <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-                  If the home changes hands within the two-year after-sales period, the Code
-                  cover follows the home. Record the transfer, update the customer name and
-                  email above to the new owner, and share a fresh link — the new owner
-                  gets an after-sales-only view (no purchase history).
-                </p>
-                <button
-                  className="btn btn-sm"
-                  onClick={() => {
-                    dispatch({
-                      type: 'UPDATE_PLOT_DETAILS',
-                      plotId: plot.id,
-                      patch: { ownershipTransferredOn: todayISO() },
-                    })
-                    onSaved('Ownership transfer recorded — now update the owner details and re-share')
-                  }}
-                >
-                  Record ownership transfer
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
       {!plot.cancellation && !plot.completionDate && (
         <div className="section">
           <h3>If the customer pulls out</h3>
