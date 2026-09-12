@@ -27,7 +27,7 @@ export function NewDevelopmentSheet({
   }
 
   return (
-    <Sheet title="New development" subtitle="A site you're building. Add its plots next." onClose={onClose}>
+    <Sheet title="New development" subtitle="A site you are building. Add its plots next." onClose={onClose}>
       <div className="field">
         <label>Development name</label>
         <input
@@ -45,6 +45,7 @@ export function NewDevelopmentSheet({
           placeholder="e.g. Cheltenham"
         />
       </div>
+
       <div className="sheet-actions">
         <button className="btn btn-ghost" onClick={onClose}>
           Cancel

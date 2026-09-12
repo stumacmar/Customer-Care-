@@ -10,7 +10,7 @@ import { useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { addDays, formatDate, todayISO } from '../lib/dates'
-import { COOLING_OFF_DAYS, EXCHANGE_MIN_DAYS } from '../lib/code'
+import { EXCHANGE_MIN_DAYS } from '../lib/code'
 import { Icon } from './icons'
 import type { Plot } from '../types'
 
@@ -18,10 +18,12 @@ export function EditPlotSheet({
   plot,
   onClose,
   onSaved,
+  onDelete,
 }: {
   plot: Plot
   onClose: () => void
   onSaved: (msg: string) => void
+  onDelete?: () => void
 }) {
   const { dispatch } = useStore()
   const [address, setAddress] = useState(plot.address)
@@ -29,6 +31,7 @@ export function EditPlotSheet({
   const [customerEmail, setCustomerEmail] = useState(plot.customerEmail || '')
   const [reservationDate, setReservationDate] = useState(plot.reservationDate || '')
   const [exchangeDeadline, setExchangeDeadline] = useState(plot.exchangeDeadline || '')
+  const [exchangeAgreementNote, setExchangeAgreementNote] = useState(plot.exchangeAgreementNote || '')
   const [exchangeDate, setExchangeDate] = useState(plot.exchangeDate || '')
   const [noticeServedDate, setNoticeServedDate] = useState(plot.noticeServedDate || '')
   const [expectedCompletionDate, setExpectedCompletionDate] = useState(plot.expectedCompletionDate || '')
@@ -46,6 +49,7 @@ export function EditPlotSheet({
         customerEmail,
         reservationDate: reservationDate || undefined,
         exchangeDeadline: exchangeDeadline || undefined,
+        exchangeAgreementNote: exchangeAgreementNote || undefined,
         exchangeDate: exchangeDate || undefined,
         noticeServedDate: noticeServedDate || undefined,
         expectedCompletionDate: expectedCompletionDate || undefined,
@@ -60,13 +64,13 @@ export function EditPlotSheet({
     const what = kind === 'contract' ? 'contract' : 'reservation'
     if (
       !confirm(
-        `Record that the customer cancelled the ${what}? This starts the Code's refund deadline ` +
-          `(${kind === 'contract' ? '28 days — Code 2.13' : '14 days — Code 2.4'}).`
+        `Record that the customer cancelled the ${what}? The refund is due within ` +
+          `${kind === 'contract' ? '28 days (Code 2.13)' : '14 days (Code 2.4)'} of their notice.`
       )
     )
       return
     dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: cancelDate || todayISO() })
-    onSaved('Cancellation recorded — refund deadline running')
+    onSaved('Cancellation recorded')
     onClose()
   }
 
@@ -100,11 +104,11 @@ export function EditPlotSheet({
       </div>
 
       <div className="field">
-        <label>Reservation date (starts the {COOLING_OFF_DAYS}-day cooling-off)</label>
+        <label>Reservation date</label>
         <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Exchange-by date from the Reservation Agreement</label>
+        <label>Exchange-by date (from the Reservation Agreement)</label>
         <input type="date" value={exchangeDeadline} onChange={(e) => setExchangeDeadline(e.target.value)} />
         {reservationDate && !exchangeDeadline && (
           <div className="dictate-hint">
@@ -118,6 +122,14 @@ export function EditPlotSheet({
             </button>
           </div>
         )}
+        {exchangeDeadline && (
+          <input
+            style={{ marginTop: 8 }}
+            value={exchangeAgreementNote}
+            onChange={(e) => setExchangeAgreementNote(e.target.value)}
+            placeholder="Agreed extension or change? Note the reason and who agreed it (kept on the record)"
+          />
+        )}
         {exchangeTooEarly && (
           <div className="dictate-hint" style={{ color: 'var(--amber)' }}>
             Earlier than the Code minimum of six weeks ({formatDate(suggestedExchange)}). Code 2.2
@@ -127,19 +139,19 @@ export function EditPlotSheet({
         )}
       </div>
       <div className="field">
-        <label>Exchange of contracts — actual date</label>
+        <label>Exchange of contracts</label>
         <input type="date" value={exchangeDate} onChange={(e) => setExchangeDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Notice to complete served (opens the inspection window)</label>
+        <label>Notice to complete served</label>
         <input type="date" value={noticeServedDate} onChange={(e) => setNoticeServedDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Expected completion date (update it when a delay is notified)</label>
+        <label>Expected completion</label>
         <input type="date" value={expectedCompletionDate} onChange={(e) => setExpectedCompletionDate(e.target.value)} />
       </div>
       <div className="field">
-        <label>Legal completion — actual date (starts the two-year after-sales period)</label>
+        <label>Legal completion</label>
         <input type="date" value={completionDate} max={todayISO()} onChange={(e) => setCompletionDate(e.target.value)} />
       </div>
       {orderProblems.length > 0 && (
@@ -157,44 +169,7 @@ export function EditPlotSheet({
         </button>
       </div>
 
-      {plot.completionDate && !plot.cancellation && (
-        <div className="section">
-          <h3>If the home is sold on</h3>
-          <div className="card">
-            {plot.ownershipTransferredOn ? (
-              <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-                Ownership transfer recorded on {formatDate(plot.ownershipTransferredOn)}. Update
-                the customer name and email above to the new owner, then share a fresh
-                link — they will see the after-sales view only.
-              </p>
-            ) : (
-              <>
-                <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-                  If the home changes hands within the two-year after-sales period, the Code
-                  cover follows the home. Record the transfer, update the customer name and
-                  email above to the new owner, and share a fresh link — the new owner
-                  gets an after-sales-only view (no purchase history).
-                </p>
-                <button
-                  className="btn btn-sm"
-                  onClick={() => {
-                    dispatch({
-                      type: 'UPDATE_PLOT_DETAILS',
-                      plotId: plot.id,
-                      patch: { ownershipTransferredOn: todayISO() },
-                    })
-                    onSaved('Ownership transfer recorded — now update the owner details and re-share')
-                  }}
-                >
-                  Record ownership transfer
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {!plot.cancellation && (
+      {!plot.cancellation && !plot.completionDate && (
         <div className="section">
           <h3>If the customer pulls out</h3>
           <div className="card">
@@ -218,6 +193,13 @@ export function EditPlotSheet({
               )}
             </div>
           </div>
+        </div>
+      )}
+      {onDelete && (
+        <div className="section">
+          <button className="btn btn-sm btn-danger btn-block" onClick={onDelete}>
+            Delete this plot and its records
+          </button>
         </div>
       )}
     </Sheet>

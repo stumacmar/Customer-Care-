@@ -13,7 +13,7 @@ import {
   clocksForPlot,
   computeComplaintMilestones,
   coolingOffEnd,
-  DUE_STAGES,
+  dueStagesFor,
   journeyClocksForPlot,
   majorChangeCancelBy,
   majorChangeWindowsCovering,
@@ -44,6 +44,19 @@ export function isPlotRetired(plot: Plot, today = todayISO()): boolean {
   return addYears(plot.completionDate, AFTER_SALES_YEARS) < today && !openIssues
 }
 
+/**
+ * When the personal data can go: two years from the later of reservation and
+ * legal completion (the period in which a complaint can be referred to the
+ * Ombudsman — Code 3.5), with nothing still open.
+ */
+export function isPlotDeletable(plot: Plot, today = todayISO()): boolean {
+  if (plot.issues.some((i) => i.status === 'open')) return false
+  const anchors = [plot.reservationDate, plot.completionDate].filter((d): d is string => !!d)
+  if (anchors.length === 0) return false
+  const latest = anchors.sort()[anchors.length - 1]
+  return addYears(latest, AFTER_SALES_YEARS) < today
+}
+
 /** Roll a development's plots up into one status for the developments list. */
 export interface DevelopmentStatus {
   rag: Rag
@@ -69,12 +82,18 @@ export function developmentStatus(dev: Development, plots: Plot[]): DevelopmentS
   if (needAction > 0) rag = 'red'
   else if (dueSoon > 0) rag = 'amber'
 
+  // The nearest dated action across the site, so green and amber carry a
+  // time frame rather than just a colour.
+  const soonest = statuses
+    .map((s) => s.next.daysRemaining)
+    .filter((d): d is number => d !== undefined)
+    .sort((a, b) => a - b)[0]
   const parts: string[] = []
   parts.push(`${active.length} plot${active.length === 1 ? '' : 's'}`)
   if (needAction > 0) parts.push(`${needAction} need action`)
-  else if (dueSoon > 0) parts.push(`${dueSoon} due soon`)
-  else if (dev.status === 'active' && active.length > 0) parts.push('all on track')
-  if (retired > 0) parts.push(`${retired} retired`)
+  else if (dueSoon > 0) parts.push(`${dueSoon} due soon${soonest !== undefined ? ` · next ${describeCountdown(soonest)}` : ''}`)
+  else if (dev.status === 'active' && active.length > 0) parts.push(soonest !== undefined ? `on track · next ${describeCountdown(soonest)}` : 'all on track')
+  if (retired > 0) parts.push(`${retired} archived`)
   if (dev.status === 'finished') parts.unshift('Finished')
 
   return { rag, activePlots: active.length, retiredPlots: retired, needAction, dueSoon, headline: parts.join(' · ') }
@@ -178,6 +197,10 @@ export function nextAction(plot: Plot): NextAction {
   for (const c of plot.changes) {
     if (!journeyLive || c.kind !== 'major_change' || c.outcome) continue
     const cancelBy = majorChangeCancelBy(c)
+    if (!cancelBy) {
+      candidates.push({ label: 'Call the customer, then send the written notice of the major change', rag: 'amber', priority: 2 })
+      continue
+    }
     if (daysFromToday(cancelBy) >= 0) {
       candidates.push({
         label: `Waiting on the customer — they may cancel until ${formatDate(cancelBy)}`,
@@ -206,14 +229,14 @@ export function nextAction(plot: Plot): NextAction {
     }
   }
   if (journeyLive && plot.noticeServedDate && majorChangeWindowsCovering(plot, plot.noticeServedDate).length > 0) {
-    candidates.push({ label: 'Notice to complete was served inside a major-change window — check the dates (Code 2.9)', rag: 'amber', priority: 2 })
+    candidates.push({ label: 'Notice to complete was served inside a major-change window — check the dates', rag: 'amber', priority: 2 })
   }
   if (journeyLive && plot.expectedCompletionDate && !plot.completionDate && daysFromToday(plot.expectedCompletionDate) < 0) {
     candidates.push({ label: 'Expected completion date passed — record legal completion, or log the delay and update the date', rag: 'amber', priority: 2.5 })
   }
 
   // Paperwork for the current stage
-  const outstanding = plot.documents.filter((d) => DUE_STAGES[stage].includes(d.stage) && !d.completed)
+  const outstanding = plot.documents.filter((d) => dueStagesFor(plot).includes(d.stage) && !d.completed)
   if (outstanding.length > 0) {
     candidates.push({
       label: `Tick off ${outstanding.length} document${outstanding.length === 1 ? '' : 's'}`,
@@ -258,7 +281,7 @@ export function plotStatus(plot: Plot): PlotStatus {
   // Before completion only the stages reached so far can have outstanding
   // documents; count against the documents due by the current stage so a
   // freshly reserved plot is not "13 documents outstanding" on day one.
-  const dueDocs = plot.documents.filter((d) => DUE_STAGES[stage].includes(d.stage))
+  const dueDocs = plot.documents.filter((d) => dueStagesFor(plot).includes(d.stage))
   const docsTotal = dueDocs.length
   const docsComplete = dueDocs.filter((d) => d.completed).length
 

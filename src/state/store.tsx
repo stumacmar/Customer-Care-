@@ -31,13 +31,14 @@ import { emptyState, id, loadState, saveState } from '../lib/storage'
 type Action =
   | { type: 'SET_DEVELOPER_NAME'; name: string }
   | { type: 'SET_DEVELOPER_EMAIL'; email: string }
-  | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string }
+  | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string; tradingName?: string }
   | {
       type: 'UPDATE_DEVELOPMENT'
       devId: string
-      patch: Partial<Pick<Development, 'name' | 'location' | 'status'>>
+      patch: Partial<Pick<Development, 'name' | 'location' | 'status' | 'tradingName'>>
     }
   | { type: 'DELETE_DEVELOPMENT'; devId: string }
+  | { type: 'TOGGLE_PART1'; devId: string; key: string; completed: boolean }
   | {
       type: 'ADD_PLOT'
       plotId: string
@@ -60,11 +61,11 @@ type Action =
           | 'customerEmail'
           | 'reservationDate'
           | 'exchangeDeadline'
+          | 'exchangeAgreementNote'
           | 'exchangeDate'
           | 'noticeServedDate'
           | 'expectedCompletionDate'
           | 'completionDate'
-          | 'ownershipTransferredOn'
         >
       >
     }
@@ -85,7 +86,9 @@ type Action =
       date: string
       subject?: string
       body: string
+      issueId?: string
     }
+  | { type: 'RECORD_NOTICE_SENT'; plotId: string; changeId: string; date: string }
   | {
       type: 'RESOLVE_CHANGE'
       plotId: string
@@ -93,7 +96,7 @@ type Action =
       outcome: 'accepted' | 'cancelled'
     }
   | { type: 'DELETE_CHANGE'; plotId: string; changeId: string }
-  | { type: 'RECORD_CANCELLATION'; plotId: string; kind: Cancellation['kind']; date: string }
+  | { type: 'RECORD_CANCELLATION'; plotId: string; kind: Cancellation['kind']; date: string; fullRefund?: boolean }
   | { type: 'RECORD_REFUND'; plotId: string }
   | { type: 'SET_CODE_REFS'; show: boolean }
   | { type: 'RECORD_BACKUP' }
@@ -203,6 +206,7 @@ function reducer(state: AppState, action: Action): AppState {
         id: action.devId,
         name: action.name.trim(),
         location: action.location?.trim() || undefined,
+        tradingName: action.tradingName?.trim() || undefined,
         status: 'active',
         createdAt: nowISO(),
       }
@@ -213,6 +217,7 @@ function reducer(state: AppState, action: Action): AppState {
       const patch = { ...action.patch }
       if (patch.name !== undefined) patch.name = patch.name.trim()
       if (patch.location !== undefined) patch.location = patch.location.trim() || undefined
+      if (patch.tradingName !== undefined) patch.tradingName = patch.tradingName.trim() || undefined
       return {
         ...state,
         developments: state.developments.map((d) =>
@@ -220,6 +225,22 @@ function reducer(state: AppState, action: Action): AppState {
         ),
       }
     }
+
+    case 'TOGGLE_PART1':
+      return {
+        ...state,
+        developments: state.developments.map((d) =>
+          d.id === action.devId
+            ? {
+                ...d,
+                part1: {
+                  ...(d.part1 || {}),
+                  [action.key]: { completed: action.completed, completedDate: action.completed ? todayISO() : undefined },
+                },
+              }
+            : d
+        ),
+      }
 
     case 'DELETE_DEVELOPMENT':
       // Removes the development and every plot on it.
@@ -287,14 +308,18 @@ function reducer(state: AppState, action: Action): AppState {
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
           ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6: keep the customer informed of the expected completion date and of any change to it.'],
           ['completionDate', 'Legal completion recorded', 'Code 3.1: the two-year after-sales service runs from this date.'],
-          ['ownershipTransferredOn', 'Ownership transfer recorded', 'The home was sold on within the two-year after-sales period. Code cover follows the home — the new owner keeps the after-sales, complaints and Ombudsman rights until the period ends.'],
         ]
         const events: TimelineEvent[] = []
         for (const [key, label, detail] of stamps) {
           const next = patch[key] as string | undefined
-          if (next !== undefined && next !== plot[key as keyof Plot] && next) {
-            events.push(event('stage_recorded', `${label} — ${formatDate(next)}`, detail))
+          const prev = plot[key as keyof Plot] as string | undefined
+          if (next !== undefined && next !== prev) {
+            if (next) events.push(event('stage_recorded', `${label} — ${formatDate(next)}`, detail))
+            else if (prev) events.push(event('note', `${label.replace(' recorded', '')} removed (was ${formatDate(prev)})`))
           }
+        }
+        if (patch.exchangeAgreementNote !== undefined && patch.exchangeAgreementNote !== plot.exchangeAgreementNote && patch.exchangeAgreementNote) {
+          events.push(event('note', `Exchange-by date agreement: ${patch.exchangeAgreementNote}`))
         }
         if (events.length === 0) events.push(event('note', 'Plot details updated'))
         return { plot: { ...plot, ...patch }, events }
@@ -314,13 +339,14 @@ function reducer(state: AppState, action: Action): AppState {
           choice: 'Choice confirmed',
           extra: 'Extra ordered',
           minor_change: 'Change notified (not major)',
-          major_change: 'MAJOR change notified in writing',
+          major_change: 'MAJOR change identified',
           delay: 'Delay notified',
           visit: 'Site visit / appointment recorded',
+          build_update: 'Build progress update given',
         }
         const detail =
           action.kind === 'major_change'
-            ? `${change.description}\nCustomer may cancel for a full refund until ${formatDate(majorChangeCancelBy(change))} (Code 2.9). Notice to complete must not be served during this window.`
+            ? `${change.description}\nCode 2.9: call the customer, then send the written notice. Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.`
             : change.description
         const ev = event('change_logged', `${noun[action.kind]}: ${truncate(change.description)}`, detail)
         return { plot: { ...plot, changes: [change, ...plot.changes] }, events: [ev] }
@@ -331,16 +357,19 @@ function reducer(state: AppState, action: Action): AppState {
         const rec: Correspondence = {
           id: id('cor_'),
           direction: action.direction,
+          issueId: action.issueId || undefined,
           date: action.date,
           subject: action.subject?.trim() || undefined,
           body: action.body.trim(),
           createdAt: nowISO(),
         }
         const who = action.direction === 'to_customer' ? 'Email to customer' : 'Email from customer'
+        const re = rec.issueId ? plot.issues.find((i) => i.id === rec.issueId)?.reference : undefined
         const ev = event(
           'correspondence_logged',
-          `${who}${rec.subject ? `: ${truncate(rec.subject)}` : `: ${truncate(rec.body)}`}`,
-          rec.body
+          `${who}${re ? ` (${re})` : ''}${rec.subject ? `: ${truncate(rec.subject)}` : `: ${truncate(rec.body)}`}`,
+          rec.body,
+          rec.issueId
         )
         return { plot: { ...plot, correspondence: [rec, ...(plot.correspondence || [])] }, events: [ev] }
       })
@@ -359,8 +388,28 @@ function reducer(state: AppState, action: Action): AppState {
             ? `Major change accepted by customer: ${truncate(desc)}`
             : `Customer cancelled following major change: ${truncate(desc)}`,
           action.outcome === 'cancelled'
-            ? 'Code 2.9: the customer is entitled to a full refund of the contract deposit, reservation fee and any other payments. Record the cancellation on this plot to start the refund clock.'
+            ? 'Code 2.9: the customer is entitled to a full refund of the contract deposit, reservation fee and any other payments. The refund deadline runs from the date of their notice.'
             : undefined
+        )
+        return { plot: { ...plot, changes }, events: [ev] }
+      })
+
+    case 'RECORD_NOTICE_SENT':
+      return updatePlot(state, action.plotId, (plot) => {
+        let desc = ''
+        const changes = plot.changes.map((c) => {
+          if (c.id !== action.changeId || c.kind !== 'major_change') return c
+          desc = c.description
+          // First recorded send stands — the window runs from the first notice.
+          return c.noticeSentOn ? c : { ...c, noticeSentOn: action.date }
+        })
+        const target = changes.find((c) => c.id === action.changeId)
+        if (!target || target.noticeSentOn !== action.date) return { plot, events: [] }
+        const cancelBy = majorChangeCancelBy(target)
+        const ev = event(
+          'change_logged',
+          `Written notice of major change received by the customer — ${formatDate(action.date)}: ${truncate(desc)}`,
+          `Code 2.9: the customer may cancel for a full refund until ${cancelBy ? formatDate(cancelBy) : '—'} (14 days from receiving written details). Notice to complete must not be served during this window.`
         )
         return { plot: { ...plot, changes }, events: [ev] }
       })
@@ -382,7 +431,9 @@ function reducer(state: AppState, action: Action): AppState {
           `${isContract ? 'Contract' : 'Reservation'} cancelled — ${formatDate(action.date)}`,
           isContract
             ? 'Code 2.13: refund the contract deposit and any other amounts due within 28 days.'
-            : 'Code 2.4: refund the reservation fee, less any deductions set out in the Reservation Agreement, within 14 days of the notice. Within the 14-day cooling-off period the refund must be in full (Code 2.3).'
+            : action.fullRefund
+              ? 'Code 2.9: refund the reservation fee and any other payments in full within 14 days of the notice.'
+              : 'Code 2.4: refund the reservation fee, less any deductions set out in the Reservation Agreement, within 14 days of the notice. Within the 14-day cooling-off period the refund must be in full (Code 2.3).'
         )
         // A cancellation already on record (possibly refunded) is never
         // overwritten — that would restart a refund deadline already met.
@@ -390,7 +441,7 @@ function reducer(state: AppState, action: Action): AppState {
           return { plot, events: [event('note', 'Cancellation already on record — not changed')] }
         }
         return {
-          plot: { ...plot, cancellation: { kind: action.kind, date: action.date } },
+          plot: { ...plot, cancellation: { kind: action.kind, date: action.date, fullRefund: action.fullRefund || undefined } },
           events: [ev],
         }
       })
@@ -536,7 +587,9 @@ function reducer(state: AppState, action: Action): AppState {
           body: action.body,
           createdAt: nowISO(),
         }
-        // Saving a letter also actions the matching milestone.
+        // Saving a letter also actions the matching milestone; a closure
+        // letter closes the complaint (3.4e), so there is no second step.
+        const closing = action.milestoneKey === 'closure'
         const issues = plot.issues.map((i) => {
           if (i.id !== action.issueId) return i
           const progress = { ...(i.milestoneProgress || {}) }
@@ -545,10 +598,18 @@ function reducer(state: AppState, action: Action): AppState {
           } else {
             progress[action.milestoneKey] = { ...progress[action.milestoneKey], letterId }
           }
-          return { ...i, milestoneProgress: progress }
+          const next = { ...i, milestoneProgress: progress }
+          if (closing && i.status === 'open') {
+            return { ...next, status: 'resolved' as const, resolvedAt: todayISO(), resolutionNote: i.resolutionNote || 'Closure letter sent' }
+          }
+          return next
         })
-        const ev = event('letter_generated', `Letter generated: ${action.title}`, undefined, action.issueId)
-        return { plot: { ...plot, letters: [letter, ...plot.letters], issues }, events: [ev] }
+        const events = [event('letter_generated', `Letter generated: ${action.title}`, undefined, action.issueId)]
+        const target = plot.issues.find((i) => i.id === action.issueId)
+        if (closing && target && target.status === 'open') {
+          events.unshift(event('issue_resolved', `Complaint closed (${target.reference || target.id})`, 'Closure letter sent', action.issueId))
+        }
+        return { plot: { ...plot, letters: [letter, ...plot.letters], issues }, events }
       })
 
     case 'ADD_NOTE':

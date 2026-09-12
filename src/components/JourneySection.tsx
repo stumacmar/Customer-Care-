@@ -6,7 +6,7 @@
  * pre-completion inspection (2.8). All derived from dates; nothing to work out.
  */
 
-import { journeyClocksForPlot, plotStage, STAGE_LABELS } from '../lib/code'
+import { journeyClocksForPlot, plotStage } from '../lib/code'
 import { describeCountdown, formatDate } from '../lib/dates'
 import { downloadJourneyCalendar } from '../lib/ics'
 import { useStore } from '../state/store'
@@ -38,7 +38,7 @@ export function JourneySection({
 
   const markRefunded = () => {
     dispatch({ type: 'RECORD_REFUND', plotId: plot.id })
-    onToast('Refund recorded — plot moves to the archive')
+    onToast('Refund recorded')
   }
 
   const remindMe = () => {
@@ -51,9 +51,7 @@ export function JourneySection({
 
   return (
     <div className="section">
-      <h3>
-        Journey <span className="count-pill">{STAGE_LABELS[stage]}</span>
-      </h3>
+      <h3>Journey</h3>
 
       {stage === 'cancelled' ? (
         <div className="card" style={{ borderColor: 'var(--red)' }}>

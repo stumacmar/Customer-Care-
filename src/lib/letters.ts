@@ -74,7 +74,7 @@ function signOff(ctx: LetterContext): string {
 
 function ombudsmanBlock(): string {
   return [
-    'Referring your complaint to the New Homes Ombudsman:',
+    'Referring your complaint to the New Homes Ombudsman Service:',
     '   If your complaint is not resolved through our complaints process — or once it',
     '   has been open for 56 days — you may refer it to the New Homes Ombudsman',
     '   Service, which is free and independent.',
@@ -101,7 +101,7 @@ function acknowledgement(ctx: LetterContext): LetterDraft {
     '',
     'What happens next:',
     `  • By ${formatDate(milestoneDue(ctx.issue, 'path_to_resolution'))} we will send you our written ` +
-      "'path to resolution', setting out how we will investigate your complaint.",
+      "'Path to Resolution', setting out how we will investigate your complaint.",
     `  • By ${formatDate(milestoneDue(ctx.issue, 'assessment_response'))} we will send you our full ` +
       'Complaint Assessment and Response letter.',
     '',
@@ -170,14 +170,15 @@ function assessmentResponse(ctx: LetterContext): LetterDraft {
     '1. Our assessment of each item raised:',
     '   [Report on each complaint item SEPARATELY. For each one state either:',
     '    – settled: what action has been taken to resolve it; or',
-    '    – further investigation needed: what and by when (estimated date); or',
+    '    – further investigation needed: what further steps are needed, why, and',
+    '      how long we expect to need to reach a decision; or',
     '    – works required: what corrective work will be done and its estimated',
     '      completion date; or',
     '    – rejected: the reasons why we do not uphold this item.]',
     '',
     '2. Keeping you updated:',
-    '   For anything not yet settled, we will update you on progress at least once ' +
-      'every 28 days until it is resolved.',
+    '   For anything not yet settled, our next update will be by [date — within 28 days ' +
+      'of this letter], and at least once every 28 days after that until it is resolved.',
     '',
     '3. If you are not satisfied with this response:',
     '   Please contact [name / contact details] and we will look at it again. ' +
@@ -192,7 +193,7 @@ function assessmentResponse(ctx: LetterContext): LetterDraft {
   ].join('\n')
   return {
     milestoneKey: 'assessment_response',
-    title: 'Assessment & Response letter (Day 30)',
+    title: 'Complaint Assessment and Response letter (Day 30)',
     subject: `Complaint Assessment and Response (${ref}) — ${ctx.plot.address}`,
     body,
   }
@@ -231,8 +232,8 @@ function eightWeek(ctx: LetterContext): LetterDraft {
   ].join('\n')
   return {
     milestoneKey: 'eight_week',
-    title: 'Eight-Week letter (Day 56)',
-    subject: `Eight-week update — your complaint (${ref}) — ${ctx.plot.address}`,
+    title: 'Eight-Week Letter (Day 56)',
+    subject: `Eight-Week Letter update — your complaint (${ref}) — ${ctx.plot.address}`,
     body,
   }
 }
@@ -284,8 +285,8 @@ const GENERATORS: Record<string, (ctx: LetterContext) => LetterDraft> = {
 export const LETTER_MENU: { key: string; label: string }[] = [
   { key: 'acknowledgement', label: 'Acknowledgement (Day 5)' },
   { key: 'path_to_resolution', label: 'Path to Resolution (Day 10)' },
-  { key: 'assessment_response', label: 'Assessment & Response (Day 30)' },
-  { key: 'eight_week', label: 'Eight-Week (Day 56)' },
+  { key: 'assessment_response', label: 'Complaint Assessment and Response (Day 30)' },
+  { key: 'eight_week', label: 'Eight-Week Letter (Day 56)' },
   { key: 'closure', label: 'Closure' },
 ]
 
@@ -357,13 +358,13 @@ export function majorChangeLetter(
     'Your right to cancel:',
     `   If you find this change unacceptable, you have the right to cancel your ` +
       `Reservation Agreement or contract of sale within 14 days of receiving this ` +
-      `letter — that is, by ${formatDate(cancelBy)} — and receive a full refund of your ` +
+      `letter${cancelBy ? ` — that is, by ${formatDate(cancelBy)} —` : ' —'} and receive a full refund of your ` +
       'contract deposit, reservation fee and any other payments you have made.',
     '',
-    'We recommend that you discuss this letter with your legal adviser before deciding.',
+    'We recommend that you discuss this letter with your solicitor or conveyancer before deciding.',
     '',
-    'If we do not hear from you by the date above, we will assume you are content to ' +
-      'proceed. Please contact us with any questions in the meantime.',
+    'Please let us know your decision by the date above, and contact us with any questions ' +
+      'in the meantime.',
     journeySignOff(developerName),
   ].join('\n')
   return {
@@ -400,13 +401,13 @@ export function delayUpdateLetter(
     '',
     'Your contract of sale sets out what happens if the home is not ready by the date we ' +
       'said it would be, including the circumstances in which you can cancel. If you have ' +
-      'any questions we recommend speaking to your legal adviser.',
+      'any questions we recommend speaking to your solicitor or conveyancer.',
     '',
     'We are sorry for the inconvenience and will keep you updated.',
     journeySignOff(developerName),
   ].join('\n')
   return {
-    title: 'Completion timetable update (Code 2.6 / 2.8)',
+    title: 'Completion timetable update (Code 2.7 / 2.8)',
     subject: `Completion timetable update — ${plot.address}`,
     body,
   }
@@ -417,7 +418,7 @@ export function snagReminderText(plot: Plot, issue: Issue, developerName: string
   return [
     `Snag logged ${formatDate(issue.startedAt)} at ${plot.address || '[address]'}.`,
     `Put-right deadline: ${formatDate(addDays(issue.startedAt, SNAG_PUT_RIGHT_DAYS))} ` +
-      `(${SNAG_PUT_RIGHT_DAYS} days — the Code requires after-sales issues to be settled ` +
+      `(${SNAG_PUT_RIGHT_DAYS} days — the Code expects after-sales issues to be settled ` +
       'within 30 days unless there is a significant reason for delay).',
     `Description: ${issue.description || '[description]'}`,
     developerName ? `Logged by: ${developerName}` : '',

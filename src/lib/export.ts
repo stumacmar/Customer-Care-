@@ -22,6 +22,7 @@ const CHANGE_KIND_LABEL: Record<ChangeKind, string> = {
   major_change: 'MAJOR change',
   delay: 'Delay notified',
   visit: 'Site visit / appointment',
+  build_update: 'Build progress update',
 }
 
 function csvCell(value: unknown): string {
@@ -54,7 +55,7 @@ export function exportPlotCSV(plot: Plot): void {
     rows.push([formatDateTime(e.timestamp), e.type, e.summary, e.detail || ''])
   }
   const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n')
-  download(`${safeName(plot)}-compliance-timeline.csv`, 'text/csv;charset=utf-8', csv)
+  download(`${safeName(plot)}-record.csv`, 'text/csv;charset=utf-8', csv)
 }
 
 function escapeHtml(s: string): string {
@@ -69,10 +70,10 @@ function escapeHtml(s: string): string {
  * Open a clean, print-ready compliance record in a new window and trigger the
  * browser's print dialog (Save as PDF). No dependency on a PDF library.
  */
-export function exportPlotPrintable(plot: Plot, developerName: string): void {
+export function exportPlotPrintable(plot: Plot, developerName: string, part1?: { label: string; clause: string; done?: string }[]): void {
   const win = window.open('', '_blank', 'width=900,height=1200')
   if (!win) {
-    alert('Please allow pop-ups to export the compliance record.')
+    alert('Please allow pop-ups to export the plot record.')
     return
   }
 
@@ -95,7 +96,9 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
         c.kind === 'major_change'
           ? c.outcome
             ? `${c.outcome === 'accepted' ? 'Accepted' : 'Customer cancelled'} ${formatDate(c.outcomeDate)}`
-            : `Cancellation window to ${formatDate(majorChangeCancelBy(c))}`
+            : c.noticeSentOn
+              ? `Written notice sent ${formatDate(c.noticeSentOn)} · cancellation window to ${formatDate(majorChangeCancelBy(c) || undefined)}`
+              : 'Written notice not yet sent'
           : ''
       return `<tr>
         <td>${formatDate(c.date)}</td>
@@ -106,11 +109,13 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
     })
     .join('')
 
+  const refOf = (issueId?: string) => (issueId ? plot.issues.find((i) => i.id === issueId)?.reference || '' : '')
   const corrRows = (plot.correspondence || [])
     .map(
       (c) => `<tr>
         <td>${formatDate(c.date)}</td>
         <td>${c.direction === 'to_customer' ? 'To customer' : 'From customer'}</td>
+        <td>${escapeHtml(refOf(c.issueId))}</td>
         <td>${escapeHtml(c.subject || '')}</td>
         <td>${escapeHtml(c.body)}</td>
       </tr>`
@@ -154,7 +159,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
   const docsDone = plot.documents.filter((d) => d.completed).length
 
   win.document.write(`<!doctype html>
-<html><head><meta charset="utf-8"><title>Customer communications record — ${escapeHtml(plot.address)}</title>
+<html><head><meta charset="utf-8"><title>Plot record — ${escapeHtml(plot.address)}</title>
 <style>
   * { box-sizing: border-box; }
   body { font: 13px/1.5 -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; margin: 32px; }
@@ -170,12 +175,13 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
 </style></head>
 <body>
   <button onclick="window.print()" style="float:right;padding:8px 14px;">Save as PDF / Print</button>
-  <h1>Customer Communications Record</h1>
+  <h1>Plot record</h1>
   <div class="meta"><strong>Property:</strong> ${escapeHtml(plot.address || '—')}</div>
   <div class="meta"><strong>Customer(s):</strong> ${escapeHtml(plot.customerNames || '—')}</div>
   <div class="meta"><strong>Reserved:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Exchanged:</strong> ${formatDate(plot.exchangeDate)} &nbsp; <strong>Notice to complete:</strong> ${formatDate(plot.noticeServedDate)} &nbsp; <strong>Expected completion:</strong> ${formatDate(plot.expectedCompletionDate)} &nbsp; <strong>Legal completion:</strong> ${formatDate(plot.completionDate)}</div>
   ${plot.cancellation ? `<div class="meta"><strong>Cancelled:</strong> ${escapeHtml(plot.cancellation.kind)} cancellation on ${formatDate(plot.cancellation.date)}${plot.cancellation.refundedDate ? ` — refund paid ${formatDate(plot.cancellation.refundedDate)}` : ' — refund outstanding'}</div>` : ''}
   <div class="meta"><strong>Developer:</strong> ${escapeHtml(developerName || '—')}</div>
+  ${part1 && part1.length ? `<div class="meta"><strong>Part 1 of the Code (site):</strong> ${part1.map((p) => `${escapeHtml(p.label)} (${escapeHtml(p.clause)}) — ${p.done ? `ticked ${p.done}` : 'not ticked'}`).join('; ')}</div>` : ''}
   <div class="meta"><strong>Record generated:</strong> ${formatDateTime(new Date().toISOString())}</div>
 
   <h2>Document checklist (${docsDone}/${plot.documents.length} complete)</h2>
@@ -192,7 +198,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
   <h2>Correspondence with the customer (${(plot.correspondence || []).length})</h2>
   ${
     (plot.correspondence || []).length
-      ? `<table><tr><th>Date</th><th>Direction</th><th>Subject</th><th>Content</th></tr>${corrRows}</table>`
+      ? `<table><tr><th>Date</th><th>Direction</th><th>Re</th><th>Subject</th><th>Content</th></tr>${corrRows}</table>`
       : '<p class="muted">No emails logged.</p>'
   }
 

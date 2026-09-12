@@ -12,7 +12,7 @@ import type { AppState, Development, DocumentItem, Plot } from '../types'
 
 const STORAGE_KEY = 'plot-clock-state-v1'
 
-export const CURRENT_VERSION = 3
+export const CURRENT_VERSION = 5
 
 export function emptyState(): AppState {
   return { version: CURRENT_VERSION, developerName: '', developments: [], plots: [] }
@@ -48,13 +48,22 @@ function migrate(parsed: Partial<AppState>): AppState {
   // template order (preserving any ticks/files on items the user already had),
   // and default the changes log.
   const today = todayISO()
+  const from = typeof parsed.version === 'number' ? parsed.version : 0
   for (const p of plots) {
     if (!Array.isArray(p.changes)) p.changes = []
     // Pre-v4 records held one completion date that was "expected until it
     // passed". A future date is an expectation, not a legal completion.
-    if (p.completionDate && p.completionDate > today && !p.expectedCompletionDate) {
+    if (from < 4 && p.completionDate && p.completionDate > today && !p.expectedCompletionDate) {
       p.expectedCompletionDate = p.completionDate
       p.completionDate = undefined
+    }
+    // Pre-v5 major changes were logged as "date notified to the customer", so
+    // that date is the notice date. Newer records start their window only when
+    // the written notice is recorded as received — never on reload.
+    if (from < 5) {
+      for (const c of p.changes) {
+        if (c.kind === 'major_change' && !c.noticeSentOn) c.noticeSentOn = c.date
+      }
     }
     const existing = new Map<string, DocumentItem>((p.documents || []).map((d) => [d.key, d]))
     p.documents = DOCUMENT_TEMPLATE.map((t) => {

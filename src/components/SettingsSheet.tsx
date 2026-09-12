@@ -5,13 +5,15 @@
  * team, one screen.
  */
 
+import { CODE_SOURCE_URL, NHOS_URL, NHQB_DEVELOPERS_EMAIL, NHQB_FEES_URL, NHQB_PORTAL_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL, QUICK_GUIDE_URL, SNAGGING_GUIDE_URL } from '../lib/codeContent'
 import { useRef, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { buildSeedState } from '../lib/seed'
+import { letterheadName } from '../lib/letterhead'
 import { formatDate, formatDateTime } from '../lib/dates'
 import { exportPlotPrintable } from '../lib/export'
-import { isPlotRetired } from '../lib/status'
+import { isPlotDeletable } from '../lib/status'
 import { downloadBackup, parseBackup } from '../lib/storage'
 import { Icon } from './icons'
 
@@ -65,11 +67,13 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
 
   const loadDemo = () => {
     if (state.plots.length && !confirm('Load demo data? This adds a sample development alongside what you have.')) return
-    const seed = buildSeedState(state.developerName || 'Meadow Homes Ltd')
+    const seed = buildSeedState(state.developerName || 'Meadow Homes Ltd', state.developerEmail)
     dispatch({
       type: 'REPLACE_STATE',
       state: {
         ...seed,
+        showCodeRefs: state.showCodeRefs,
+        lastBackupAt: state.lastBackupAt,
         developments: [...seed.developments, ...state.developments],
         plots: [...seed.plots, ...state.plots],
       },
@@ -100,16 +104,16 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
   }
 
   const deletePlot = (plotId: string, address: string) => {
-    if (!confirm(`Delete "${address}" and all its records? Export it first if you haven't. This cannot be undone.`)) return
+    if (!confirm(`Delete "${address}" and all its records? Export it first if you have not. This cannot be undone.`)) return
     dispatch({ type: 'DELETE_PLOT', plotId })
     onToast('Plot deleted')
   }
 
-  // Housekeeping: retired plots — completion over 2 years ago, so the New Homes
-  // Ombudsman window has closed. They already auto-retire out of the active
-  // view; here (GDPR data minimisation) is where you export a copy and delete
-  // the personal data for good.
-  const oldPlots = state.plots.filter((p) => isPlotRetired(p))
+  // Housekeeping: plots whose two-year period has ended (from the later of
+  // reservation and legal completion — Code 3.5) with nothing open. They are
+  // already archived out of the daily view; here is where the personal data is
+  // exported and deleted (data minimisation).
+  const oldPlots = state.plots.filter((p) => isPlotDeletable(p))
   const devName = (id: string) => state.developments.find((d) => d.id === id)?.name || ''
 
   return (
@@ -124,7 +128,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="field">
-        <label>Your email (customer reports from shared plot links arrive here)</label>
+        <label>Your email — customer reports arrive here (a shared mailbox is best)</label>
         <input
           type="email"
           value={email}
@@ -137,7 +141,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <h3>Back up &amp; restore</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-            Everything lives only on this device. Download a backup weekly and keep it in your
+            Download a backup weekly and keep it in your
             email, Drive or iCloud — it is also how you move your records between phone and
             computer.
             {state.lastBackupAt
@@ -190,16 +194,17 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <div className="card">
           {oldPlots.length === 0 ? (
             <p className="muted" style={{ margin: 0 }}>
-              Nothing needs attention. Plots completed more than 2 years ago will appear here —
-              that's when the customer's window to go to the Ombudsman closes, so you can
-              export a copy for your records and delete the personal data.
+              Nothing needs attention. A plot appears here two years after the later of its
+              reservation and legal completion, once nothing is open — the period in which a
+              complaint can be referred to the Ombudsman. Export a copy, then delete the
+              personal data.
             </p>
           ) : (
             <>
               <p className="muted" style={{ marginTop: 0 }}>
-                These plots completed over 2 years ago. The Ombudsman window has closed —
-                export a copy for your files, then consider deleting them (GDPR says don't
-                keep personal data longer than you need it).
+                The two-year period has ended on these plots and nothing is open. Export a
+                copy for your files, then delete them — personal data should not be kept longer
+                than needed.
               </p>
               <div className="stack">
                 {oldPlots.map((p) => (
@@ -208,13 +213,13 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
                       <div style={{ fontWeight: 600 }}>{p.address}</div>
                       <div className="muted" style={{ fontSize: 12 }}>
                         {devName(p.developmentId) ? `${devName(p.developmentId)} · ` : ''}
-                        Completed {formatDate(p.completionDate)}
+                        {p.completionDate ? `Legal completion ${formatDate(p.completionDate)}` : p.cancellation ? `Cancelled ${formatDate(p.cancellation.date)}` : `Reserved ${formatDate(p.reservationDate)}`}
                       </div>
                     </div>
                     <div className="wrap-actions">
                       <button
                         className="btn btn-sm"
-                        onClick={() => exportPlotPrintable(p, state.developerName)}
+                        onClick={() => exportPlotPrintable(p, letterheadName(state, p))}
                       >
                         <Icon name="file" size={15} /> Export
                       </button>
@@ -240,8 +245,8 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
             <div className="muted" style={{ fontSize: 14, marginTop: 8 }}>
               <p style={{ marginTop: 0 }}>
                 <strong>Where the data lives:</strong> everything you enter stays on this device
-                only. Nothing is sent to us or anyone else — there is no server. Emailing a
-                letter uses your own email account.
+                only. Nothing is sent to NHQB. Links and reports you send carry the details you
+                choose to share. Emailing a letter uses your own email account.
               </p>
               <p>
                 <strong>You are the data controller</strong> for your customers' details (names,
@@ -249,14 +254,14 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
               </p>
               <p>
                 1. <strong>Store the minimum</strong> — name, address, email. Nothing else is
-                needed, so don't add more. Avoid photographing people.
+                needed, so do not add more. Avoid photographing people.
                 <br />
                 2. <strong>Answer requests</strong> — if a customer asks what you hold, the
                 plot's Export gives them everything. If they ask you to erase it (and you no
-                longer need it for a live complaint or the Ombudsman window), delete the plot.
+                longer need it for a live complaint or the two-year period), delete the plot.
                 <br />
-                3. <strong>Don't keep it forever</strong> — the housekeeping section above
-                flags plots 2 years after completion, when the Ombudsman window closes. Export
+                3. <strong>Do not keep it forever</strong> — the housekeeping section above
+                lists plots once the two-year period has ended and nothing is open. Export
                 for your files, then delete.
               </p>
               <p style={{ marginBottom: 0 }}>
@@ -269,11 +274,56 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="section">
+        <h3>NHQB resources</h3>
+        <div className="card" style={{ fontSize: 14, lineHeight: 1.7 }}>
+          <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>The New Homes Quality Code V2 (PDF)</a>
+          <br />
+          <a href={QUICK_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>A quick guide to the Code (PDF)</a>
+          <br />
+          <a href={PCI_CHECKLIST_HOUSE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Pre-completion inspection checklist — house (PDF)</a>
+          <br />
+          <a href={PCI_CHECKLIST_APARTMENT_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Pre-completion inspection checklist — apartment (PDF)</a>
+          <br />
+          <a href={SNAGGING_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>A Homeowner Guide to Snagging (PDF)</a>
+          <br />
+          <a href={NHOS_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>New Homes Ombudsman Service — complaints are made through their own portal</a>
+          <br />
+          <a href={NHQB_PORTAL_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>NHQB developer portal (login)</a>
+          <span className="muted"> — Code training for customer-facing staff is completed through the portal (Code 1.6).</span>
+          <br />
+          <a href={NHQB_FEES_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Registration fees and New Homes Ombudsman Service (NHOS) complaint charges</a>
+          <span className="muted"> — from 1 January 2027 a two-tier NHOS complaint fee applies, paid quarterly in arrears, with the first three complaints each calendar year free (nhqb.org.uk, September 2026).</span>
+        </div>
+      </div>
+
+      <div className="section">
+        <h3>About this app</h3>
+        <div className="card muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+          <p style={{ marginTop: 0 }}>
+            NHQB Plot Tracker is a free tool provided by the New Homes Quality Board to help
+            registered developers keep to the New Homes Quality Code. Using it is your choice, and
+            it does not replace the Code, your own procedures, or NHQB's audits and attestation.
+          </p>
+          <p>
+            You are the data controller for the customer information you enter. Everything is
+            stored on your own device; NHQB does not receive, hold or process it, and accepts no
+            responsibility for how the app is used or for any loss or breach of data held on your
+            device. Keep backups and follow the data protection guidance above.
+          </p>
+          <p style={{ marginBottom: 0 }}>
+            Problems with the app: <a href={`mailto:${NHQB_DEVELOPERS_EMAIL}`} style={{ color: 'var(--link)' }}>{NHQB_DEVELOPERS_EMAIL}</a>.
+            <br />
+            <span style={{ fontSize: 12 }}>Wording subject to NHQB legal review.</span>
+          </p>
+        </div>
+      </div>
+
+      <div className="section">
         <h3>Demo</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
-            See the app with a realistic development — a snag ticking down, a live complaint
-            mid-procedure, an emergency, plus a finished development with a retired plot.
+            See the app with a realistic development — a snag due in three days, a live complaint
+            mid-procedure, an emergency, plus a finished development with an archived plot.
           </p>
           <button className="btn btn-sm btn-primary" onClick={loadDemo}>
             Load demo data
@@ -282,10 +332,10 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="section">
-        <h3>Danger zone</h3>
+        <h3>Delete everything</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
-            Wipes every plot, issue, letter and photo on this device. You'll be asked to type
+            Wipes every plot, issue, letter and photo on this device. You will be asked to type
             DELETE to confirm. Exports you saved elsewhere are unaffected.
           </p>
           <button className="btn btn-sm btn-danger" onClick={reset}>
@@ -295,7 +345,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <p className="muted" style={{ fontSize: 12, marginTop: 16 }}>
-        Data is stored on this device only. Export a plot's compliance record to keep a copy.
+        Data is stored on this device only. Export a plot's record to keep a copy.
       </p>
     </Sheet>
   )

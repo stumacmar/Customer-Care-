@@ -2,9 +2,9 @@
  * Spec & changes — the evidence trail between reservation and completion:
  * customer choices ("front door in Anthracite confirmed"), paid extras,
  * developer changes (minor vs major — Code 2.9), and delays to the timetable
- * (Code 2.6/2.8). Logging a major change starts the customer's 14-day
- * cancellation window automatically and offers the written notice the Code
- * requires.
+ * (Code 2.7/2.8). Logging a major change drafts the written notice the Code
+ * requires; the customer's 14-day cancellation window starts when that notice
+ * is recorded as received (2.9).
  */
 
 import { useState } from 'react'
@@ -26,7 +26,7 @@ export const CHANGE_KIND_META: Record<
   extra: {
     label: 'Extra',
     badgeClass: 'rag-green',
-    blurb: 'A paid extra or upgrade the customer ordered. Keep the price and what was agreed.',
+    blurb: 'A paid extra or upgrade the customer ordered. Keep the price and what was agreed. If it changes the timescale, tell the customer to take legal advice (Code 2.9).',
   },
   minor_change: {
     label: 'Change',
@@ -36,17 +36,22 @@ export const CHANGE_KIND_META: Record<
   major_change: {
     label: 'Major change',
     badgeClass: 'snag',
-    blurb: 'Significantly affects size, appearance or value (incl. internal layout). You must tell the customer in writing — they can cancel within 14 days for a full refund, and notice to complete cannot be served in that window.',
+    blurb: 'Significantly affects size, appearance or value (including internal layout). Call the customer, then tell them in writing — they can cancel within 14 days of receiving it for a full refund, and notice to complete cannot be served in that window.',
   },
   delay: {
     label: 'Delay',
     badgeClass: 'snag',
     blurb: 'The expected completion timetable has moved. Keep the customer informed — and update the expected completion date on this plot too.',
   },
+  build_update: {
+    label: 'Build update',
+    badgeClass: 'complaint',
+    blurb: 'A progress update given to the customer — the stage the build has reached and what happens next. Not a change to the home; the record that they were kept informed.',
+  },
   visit: {
     label: 'Site visit',
     badgeClass: 'complaint',
-    blurb: 'A trade or inspection appointment at the home. Record who, when, and the outcome — attended, no access, or turned away — with a photo of the job sheet if there is one. Attendance disputes are common; this is your evidence.',
+    blurb: 'A trade or inspection appointment at the home. Record who, when, and the outcome — attended, no access, or turned away — with a photo of the job sheet if there is one. This is your evidence if attendance is disputed.',
   },
 }
 
@@ -123,7 +128,8 @@ function ChangeCard({
 }) {
   const meta = CHANGE_KIND_META[change.kind]
   const isMajor = change.kind === 'major_change'
-  const windowOpen = isMajor && !change.outcome && daysFromToday(majorChangeCancelBy(change)) >= 0
+  const cancelBy = isMajor ? majorChangeCancelBy(change) : null
+  const windowOpen = isMajor && !change.outcome && !!cancelBy && daysFromToday(cancelBy) >= 0
 
   return (
     <div className="card">
@@ -132,9 +138,11 @@ function ChangeCard({
         <span className="ref">{formatDate(change.date)}</span>
         {isMajor && !change.outcome && (
           <span className="badge snag" style={{ marginLeft: 'auto' }}>
-            {windowOpen
-              ? `cancel window ${describeCountdown(daysFromToday(majorChangeCancelBy(change))).replace('due ', 'ends ')}`
-              : 'record outcome'}
+            {!cancelBy
+              ? 'notice not sent'
+              : windowOpen
+                ? `cancel window ${describeCountdown(daysFromToday(cancelBy)).replace('due ', 'ends ')}`
+                : 'record outcome'}
           </span>
         )}
         {isMajor && change.outcome && (
@@ -153,7 +161,7 @@ function ChangeCard({
             <Icon name="mail" size={15} /> {change.kind === 'delay' ? 'Draft update' : 'Draft written notice'}
           </button>
         )}
-        {isMajor && !change.outcome && (
+        {isMajor && !change.outcome && !!cancelBy && (
           <button className="btn btn-sm" onClick={onResolve}>
             Record outcome
           </button>

@@ -12,18 +12,21 @@ export function EditDevelopmentSheet({
   dev,
   onClose,
   onSaved,
+  onDelete,
 }: {
   dev: Development
   onClose: () => void
   onSaved: (msg: string) => void
+  onDelete?: () => void
 }) {
   const { dispatch } = useStore()
   const [name, setName] = useState(dev.name)
   const [location, setLocation] = useState(dev.location || '')
+  const [tradingName, setTradingName] = useState(dev.tradingName || '')
 
   const save = () => {
     if (!name.trim()) return
-    dispatch({ type: 'UPDATE_DEVELOPMENT', devId: dev.id, patch: { name, location } })
+    dispatch({ type: 'UPDATE_DEVELOPMENT', devId: dev.id, patch: { name, location, tradingName } })
     onSaved('Development updated')
     onClose()
   }
@@ -38,6 +41,15 @@ export function EditDevelopmentSheet({
         <label>Location (optional)</label>
         <input value={location} onChange={(e) => setLocation(e.target.value)} />
       </div>
+      <div className="field">
+        <label>Trading name for letters (optional)</label>
+        <input
+          value={tradingName}
+          onChange={(e) => setTradingName(e.target.value)}
+          placeholder="e.g. Riverside Homes LLP"
+        />
+        <div className="dictate-hint">Used on letters, exports and the customer's app for this site instead of the company name in Settings.</div>
+      </div>
       <div className="sheet-actions">
         <button className="btn btn-ghost" onClick={onClose}>
           Cancel
@@ -46,6 +58,13 @@ export function EditDevelopmentSheet({
           Save
         </button>
       </div>
+      {onDelete && (
+        <div className="section">
+          <button className="btn btn-sm btn-danger btn-block" onClick={onDelete}>
+            Delete this development and all its plots
+          </button>
+        </div>
+      )}
     </Sheet>
   )
 }

@@ -1,14 +1,14 @@
 /*
  * The Guide tab — three ways in, one at a time:
  *
- *   Watch  a poster grid of the tour and the fifteen scenario videos,
+ *   Watch  a poster grid of the tour and the fourteen scenario videos,
  *          grouped by where they fall in a plot's life. Tap one and it
  *          plays in a theatre sheet — only ever one player on screen.
  *   Read   the manual, text first, with compact chips that open the
  *          theatre at the relevant video (or the right second of the tour).
  *   Print  the step-by-step picture guide, with its cover.
  *
- * Browsing and watching are separate on purpose: fifteen inline players
+ * Browsing and watching are separate on purpose: fourteen inline players
  * stacked in an accordion is how this tab used to feel, and it felt like it.
  */
 
@@ -16,12 +16,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from './icons'
 import { Sheet } from './ui'
 import { VIDEOS, type VideoSlug } from '../lib/videoLibrary'
+import { NHOS_URL, NHQB_FEES_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
 
 type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 136
+const TOUR_DURATION = 140
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -30,7 +31,7 @@ const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
     title: 'Before completion',
     slugs: ['reservation', 'exchange', 'choices', 'major-change', 'delay', 'notice-inspection', 'completion', 'cooling-off-cancellation'],
   },
-  { title: 'After completion', slugs: ['snag', 'complaint', 'emergency', 'emails', 'second-owner', 'ombudsman'] },
+  { title: 'After completion', slugs: ['snag', 'complaint', 'emergency', 'emails', 'ombudsman'] },
 ]
 const ORDER: VideoSlug[] = GROUPS.flatMap((g) => g.slugs)
 
@@ -40,7 +41,7 @@ const ORDER: VideoSlug[] = GROUPS.flatMap((g) => g.slugs)
  * than a Code stage. IMPORTANT: tour timestamps must be refreshed whenever
  * demo.mp4 is re-recorded; the scenario videos regenerate with the app.
  */
-const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: string[] }[] = [
+const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: string[]; links?: { label: string; href: string }[] }[] = [
   {
     title: 'Set up once (two minutes)',
     videos: ['setup'],
@@ -64,9 +65,9 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     watchAt: 13,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
-      'Colours: green means on track, orange means act this week, red means act today. Anything red sorts to the top of every list.',
+      'Colours: red means overdue or an emergency, amber means due within five days, green means on track. Anything red sorts to the top of every list.',
       'The journey strip shows where the plot is: Reserved → Exchanged → Notice → Completed. Record each date as it happens via "Edit details & dates" — the right deadlines follow automatically.',
-      'Tap "why?" on any deadline or checklist group to see the exact Code rule behind it, quoted. (Clause numbers stay out of your way otherwise — turn them on in Settings if you want them visible.)',
+      'Tap "why?" on any deadline or checklist group to see the Code rule behind it, summarised. (Clause numbers stay out of your way otherwise — turn them on in Settings if you want them visible.)',
     ],
   },
   {
@@ -81,10 +82,10 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Choices, changes and delays',
     videos: ['choices', 'major-change', 'delay'],
     body: [
-      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
-      'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
+      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, roof on and watertight (a build update), plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
+      'A MAJOR change (one that significantly affects size, appearance or value) is special. Call the customer first and have the conversation, then send the written notice the app drafts and record the day they receive it. The customer\'s 14-day cancellation window runs from that day, and the app warns you not to serve notice to complete during it. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
-      'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. Attendance disputes are among the most common Code disputes, and this is the evidence that settles them.',
+      'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. This is your evidence if attendance is disputed.',
     ],
   },
   {
@@ -94,7 +95,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
       'The evidence trail is only complete if the emails are in it. If a dispute arises, the correspondence needs to be in the record, not only in your inbox. "Log an email" on the plot takes a pasted email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
       'It joins the timeline and both exports, so the file you hand the Ombudsman carries the correspondence alongside the dates, documents and letters.',
       'On Android you can skip the copying: share an email straight from your mail app to Plot Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
-      'Log it the day it happens, like everything else. A one-line note made at the time carries more weight than a recollection six months later.',
+      'Log it the day it happens, like everything else, so the record is made at the time.',
     ],
   },
   {
@@ -102,8 +103,12 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['notice-inspection', 'completion'],
     body: [
       'When you serve notice to complete, record the date. The app checks you have left at least 14 calendar days before completion and prompts you to offer the pre-completion inspection — the customer can attend themselves or appoint a suitably qualified professional, using the NHQB checklist.',
-      'Anything the inspection finds that falls short of warranty standards: log it as a snag or defect — put right before completion where possible, or within 30 days.',
-      'At legal completion, work down the handover group of the checklist: schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regulations certificate, after-sales statement. Attach files as you go.',
+      'Anything the inspection finds that falls short of warranty standards: log it as a snag or defect — put right before legal completion where possible, or within 30 days. The Code\'s glossary says snags may be identified at the pre-completion inspection or after completion.',
+      'At legal completion, work down the Completion & handover group of the checklist: warranty evidence, schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regulation completion certificate, after-sales statement. Attach files as you go.',
+    ],
+    links: [
+      { label: 'NHQB pre-completion inspection checklist — house (PDF)', href: PCI_CHECKLIST_HOUSE_URL },
+      { label: 'NHQB pre-completion inspection checklist — apartment (PDF)', href: PCI_CHECKLIST_APARTMENT_URL },
     ],
   },
   {
@@ -111,28 +116,21 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['snag', 'complaint', 'emergency'],
     body: [
       'The moment a customer reports anything, log it with one of the three big buttons. You never work out a date — the app does it.',
-      'Snag or defect: a 30-day put-right deadline. A snag is a minor or cosmetic issue; a defect affects how part of the home works. Both carry the same duty. If it cannot be put right in 30 days, the app reminds you to update the customer at least monthly, with the reason for the delay, until it is.',
-      'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution by day 10, Assessment & Response by day 30, Eight-Week letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, complete the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
-      'Emergency: an immediate threat to safety, security, health or well-being — for example external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
+      'Snag or defect: a 30-day put-right deadline. A snag is a minor issue or cosmetic imperfection; a defect is incomplete work, or a fault in completed work, that does not meet the expected quality or finish, including the warranty standards. Both carry the same duty. If it cannot be put right in 30 days, the app reminds you to update the customer at least monthly, with the reason for the delay, until it is.',
+      'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution letter by day 10, Complaint Assessment and Response letter by day 30, Eight-Week Letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, complete the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
+      'Emergency: the Code defines it as an immediate threat to safety, security, health or well-being, and your after-sales statement sets out what qualifies — typically external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
       '"Remind me" on any issue (or on the journey) drops its deadlines into your phone calendar with alerts.',
-    ],
-  },
-  {
-    title: 'If the home is sold on',
-    videos: ['second-owner'],
-    body: [
-      'If the home changes hands within the two years, the Code\'s after-sales cover follows the home. Record the ownership transfer under "Edit details & dates", update the customer name and email to the new owner, and share a fresh link.',
-      'The new owner\'s app is an after-sales-only view — no purchase history, which belonged to the first owner — with their cover date, the guided report flow, and their rights under the Code.',
+      'If the home is sold on within the two years, Code 3.6 says only that your after-sales service applies to matters reported within two years of the original legal completion, and that future owners should get legal advice. The app does not need anything extra: the plot record stays as it is.',
     ],
   },
   {
     title: 'Sharing with your customer',
-    watchAt: 87,
+    watchAt: 92,
     body: [
-      '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
+      '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
       'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the customer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
-      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Note that before completion every report arrives as a formal complaint, because under the Code snags exist only after completion, and the emergency option appears only once they have moved in. A pre-completion report you would call a snag is therefore a complaint under the Code, and its timetable applies.',
+      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Under the Code\'s glossary, snags may be identified at the pre-completion inspection or after completion — so a problem with the home arrives as a snag or defect from notice to complete onwards, and as a formal complaint before that. The emergency option appears only once they have moved in.',
       'Share a fresh link whenever there is an update worth showing — each new link replaces their snapshot.',
     ],
   },
@@ -141,7 +139,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['cooling-off-cancellation'],
     body: [
       'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee within 14 days (in full if they are still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
-      'Mark the refund paid when it is done — the plot then archives itself with its evidence intact.',
+      'Mark the refund paid when it is done — the plot is then archived with its evidence intact.',
     ],
   },
   {
@@ -149,7 +147,12 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['ombudsman'],
     body: [
       'Tap "Export PDF" on the plot: every date, document, change, email, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman Service, or your insurer.',
-      'Plots archive themselves two years after legal completion, when the Ombudsman window closes. Settings → Data housekeeping then prompts you to export a copy and delete the personal data (good practice under data protection law).',
+      'Plots are archived two years after legal completion. Settings → Data housekeeping lists a plot for export and deletion two years after the later of reservation and legal completion, once nothing is open — the period in which a complaint can be referred to the Ombudsman.',
+      'Complaints to the New Homes Ombudsman Service (NHOS) are made by the customer through the NHOS portal, separate from this app. From 1 January 2027 NHQB\'s fee model includes a two-tier NHOS complaint fee, paid quarterly in arrears, with the first three complaints each calendar year free (nhqb.org.uk, September 2026).',
+    ],
+    links: [
+      { label: 'NHQB registration fees and NHOS complaint charges', href: NHQB_FEES_URL },
+      { label: 'New Homes Ombudsman Service', href: NHOS_URL },
     ],
   },
 ]
@@ -194,11 +197,11 @@ function PosterCard({ slug, onPlay }: { slug: VideoSlug; onPlay: () => void }) {
 
 function TourHero({ onPlay }: { onPlay: () => void }) {
   return (
-    <button className="vhero" onClick={onPlay} aria-label="Play the two-minute tour">
+    <button className="vhero" onClick={onPlay} aria-label="Play the tour">
       <img src="./demo.jpg" alt="" />
       <span className="vh-text">
         <span className="vh-kicker">Start here</span>
-        <b>The two-minute tour</b>
+        <b>The quick tour</b>
         <span className="vh-sub">The whole app, narrated with captions — {formatStamp(TOUR_DURATION)}. Sound on.</span>
         <span className="vh-play">▶ Play</span>
       </span>
@@ -220,7 +223,7 @@ function Theatre({
   const ref = useRef<HTMLVideoElement>(null)
   const isTour = playing.kind === 'tour'
   const meta = isTour ? null : VIDEOS[playing.slug]
-  const title = isTour ? 'The two-minute tour' : meta!.title
+  const title = isTour ? 'The quick tour' : meta!.title
   const sub = isTour
     ? playing.at !== undefined
       ? `From ${formatStamp(playing.at)} — the moment this section is about.`
@@ -393,12 +396,24 @@ export function GuideTab() {
                   {s.body.map((p, i) => (
                     <p key={i}>{p}</p>
                   ))}
+                  {s.links && (
+                    <p>
+                      {s.links.map((l, i) => (
+                        <span key={l.href}>
+                          {i > 0 && <br />}
+                          <a href={l.href} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
+                            {l.label}
+                          </a>
+                        </span>
+                      ))}
+                    </p>
+                  )}
                 </div>
               </details>
             ))}
           </div>
           <p className="muted" style={{ fontSize: 12, marginTop: 20, lineHeight: 1.55 }}>
-            The golden rule behind all of it: <strong>log things the moment they happen</strong>,
+            The one rule behind all of it: <strong>log things the moment they happen</strong>,
             on your phone, on site. Deadlines, letters and the audit trail follow by themselves.
             For the rules behind any deadline, see The Code tab — or tap "why?" wherever you see it.
           </p>
@@ -423,7 +438,7 @@ export function GuideTab() {
           </a>
           <p className="muted" style={{ fontSize: 12, marginTop: 14, lineHeight: 1.55 }}>
             The picture guide is regenerated from the live app whenever a screen changes, so it
-            always matches what you see on the phone.
+            is regenerated with each release.
           </p>
         </div>
       )}

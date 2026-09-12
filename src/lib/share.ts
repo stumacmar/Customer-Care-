@@ -13,6 +13,7 @@
  * paste-code inside a pre-addressed email.
  */
 
+import { majorChangeCancelBy, snagPutRightDate } from './code'
 import type { ChangeKind, DocumentStage, IssueStatus, IssueType, Plot } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -30,6 +31,8 @@ export interface SnapshotChange {
   date: string
   description: string
   outcome?: 'accepted' | 'cancelled'
+  /** Major changes: last day the customer may cancel, once the written notice has been sent. */
+  cancelBy?: string
 }
 
 export interface SnapshotIssue {
@@ -41,6 +44,8 @@ export interface SnapshotIssue {
   description: string
   /** Complaint milestone keys already actioned, so the buyer sees progress. */
   done?: string[]
+  /** Snags and defects: the 30-day put-right date (3.3). */
+  putRightBy?: string
 }
 
 /** What the buyer's app receives — the buyer-relevant slice of one plot. */
@@ -62,12 +67,6 @@ export interface BuyerSnapshot {
   issues: SnapshotIssue[]
   /** ISO date the developer generated this link. */
   sharedOn: string
-  /**
-   * Set when the home has been sold on within the two-year after-sales
-   * period. Code cover follows the home, but the purchase journey belonged
-   * to the first owner — a second owner gets the post-completion view only.
-   */
-  secondOwner?: boolean
 }
 
 /** What travels back when the buyer reports a problem. */
@@ -105,7 +104,7 @@ export function buildSnapshot(
     docs: plot.documents
       .filter((d) => d.key !== 'contract_checked' && d.key !== 'warranty_provider_notified')
       .map((d) => ({
-        label: d.label,
+        label: d.customerLabel || d.label,
         stage: d.stage,
         completedDate: d.completed ? d.completedDate : undefined,
       })),
@@ -114,12 +113,9 @@ export function buildSnapshot(
       date: c.date,
       description: c.description,
       outcome: c.outcome,
+      cancelBy: c.kind === 'major_change' ? majorChangeCancelBy(c) || undefined : undefined,
     })),
-    // A second owner sees only matters raised since the home changed hands —
-    // the first owner's complaints are their personal data.
-    issues: plot.issues
-      .filter((i) => !plot.ownershipTransferredOn || i.startedAt >= plot.ownershipTransferredOn)
-      .map((i) => ({
+    issues: plot.issues.map((i) => ({
       reference: i.reference,
       type: i.type,
       status: i.status,
@@ -127,9 +123,9 @@ export function buildSnapshot(
       resolvedAt: i.resolvedAt,
       description: i.description.slice(0, 300),
       done: i.milestoneProgress ? Object.keys(i.milestoneProgress) : undefined,
+      putRightBy: i.type === 'snag' ? snagPutRightDate(i) : undefined,
     })),
     sharedOn: today,
-    secondOwner: plot.ownershipTransferredOn ? true : undefined,
   }
 }
 

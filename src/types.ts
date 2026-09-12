@@ -55,6 +55,8 @@ export type DocumentStage = 'reservation' | 'pre_contract' | 'completion'
 
 /** A single tick-and-upload item on a plot's document checklist. */
 export interface DocumentItem {
+  /** How the item reads on the customer's page (their side of the same thing). */
+  customerLabel?: string
   key: string
   label: string
   hint?: string
@@ -85,7 +87,7 @@ export interface DocumentItem {
  *  - delay         change to the expected completion timetable — Code 2.6/2.8:
  *                  keep the customer informed and updated
  */
-export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit'
+export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit' | 'build_update'
 
 /** One entry in the spec-and-changes log. */
 export interface ChangeRecord {
@@ -95,6 +97,13 @@ export interface ChangeRecord {
   /** ISO date the choice was confirmed / the change or delay was notified. */
   date: string
   photoDataUrl?: string
+  /**
+   * Major changes only: ISO date the customer received the written notice
+   * (the day it was emailed, or the delivery date if posted). Code 2.9 runs
+   * the customer's 14-day window from receipt, so there is no window until
+   * this is recorded.
+   */
+  noticeSentOn?: string
   /** Major changes only: how the 14-day window ended. */
   outcome?: 'accepted' | 'cancelled'
   outcomeDate?: string // ISO date
@@ -110,6 +119,8 @@ export interface Cancellation {
   kind: 'reservation' | 'contract'
   /** ISO date the customer's notice of cancellation was received. */
   date: string
+  /** Cancelled over a major change (2.9): the refund is in full, no deductions. */
+  fullRefund?: boolean
   /** ISO date the refund was paid — clears the refund clock. */
   refundedDate?: string
 }
@@ -167,6 +178,10 @@ export interface Development {
   id: string
   name: string
   location?: string
+  /** Name used on letters and exports for this site, if different from the company name (subsidiary, JV). */
+  tradingName?: string
+  /** Part 1 of the Code (selling a new home) — ticked once per site, by clause key. */
+  part1?: Record<string, { completed: boolean; completedDate?: string }>
   status: 'active' | 'finished'
   createdAt: string // ISO datetime
 }
@@ -186,6 +201,8 @@ export type PlotStage = 'setup' | 'reserved' | 'exchanged' | 'notice_served' | '
 export interface Correspondence {
   id: string
   direction: 'to_customer' | 'from_customer'
+  /** The complaint or snag this email is about, if any — groups the NHOS bundle. */
+  issueId?: string
   /** The email's own date — when it was sent/received, not when pasted. */
   date: string // ISO date
   subject?: string
@@ -209,6 +226,8 @@ export interface Plot {
    * customer asks for earlier.
    */
   exchangeDeadline?: string // ISO date
+  /** Any agreed extension or change to the exchange-by date, with the reason — kept on the record (2.2). */
+  exchangeAgreementNote?: string
   /** Date contracts were actually exchanged (missives concluded in Scotland). */
   exchangeDate?: string // ISO date
   /** Date the notice to complete was served — opens the PCI window (2.8). */
@@ -217,12 +236,6 @@ export interface Plot {
   expectedCompletionDate?: string // ISO date
   /** Legal completion — the actual date, recorded when it happens. Starts the two-year after-sales period (3.1). */
   completionDate?: string // ISO date
-  /**
-   * Set when the home is sold on within the two-year after-sales period.
-   * The Code cover follows the home, so the new owner gets a reduced,
-   * post-completion-only buyer view.
-   */
-  ownershipTransferredOn?: string // ISO date
   /** Set if the purchase was cancelled — starts the refund clock (2.4 / 2.13). */
   cancellation?: Cancellation
   documents: DocumentItem[]

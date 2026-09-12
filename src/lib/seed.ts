@@ -45,7 +45,7 @@ function change(partial: Partial<ChangeRecord> & Pick<ChangeRecord, 'kind' | 'de
   return { id: id('chg_'), createdAt: nowISO(), ...partial }
 }
 
-export function buildSeedState(developerName: string): AppState {
+export function buildSeedState(developerName: string, developerEmail?: string): AppState {
   const today = todayISO()
 
   const meadow: Development = {
@@ -104,7 +104,8 @@ export function buildSeedState(developerName: string): AppState {
     change({
       kind: 'major_change',
       description: 'Kitchen/diner window moved to side elevation following drainage redesign.',
-      date: addDays(today, -4), // 10 days left in the 14-day window
+      date: addDays(today, -4),
+      noticeSentOn: addDays(today, -4), // written notice sent the same day: 10 days left in the window
     }),
     change({
       kind: 'delay',
@@ -234,6 +235,8 @@ export function buildSeedState(developerName: string): AppState {
   return {
     version: 3,
     developerName,
+    // A shared mailbox, as the app recommends — sharing a plot needs one.
+    developerEmail: developerEmail || 'customercare@meadowhomes.example',
     developments: [meadow, brook],
     plots: [red, exchanged, reserved, amber, green, retired],
   }

@@ -141,7 +141,7 @@ export function buildJourneyCalendar(plot: Plot): { filename: string; content: s
   for (const c of plot.changes) {
     if (c.kind !== 'major_change' || c.outcome) continue
     const cancelBy = majorChangeCancelBy(c)
-    if (daysFromToday(cancelBy) < 0) continue
+    if (!cancelBy || daysFromToday(cancelBy) < 0) continue
     events.push({
       uid: `${plot.id}-${c.id}-window`,
       date: cancelBy,

@@ -35,6 +35,9 @@ export function Sheet({
     <div className="scrim" onClick={onClose}>
       <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
         <div className="sheet-grab" />
+        <button className="sheet-close" aria-label="Close" onClick={onClose}>
+          ✕
+        </button>
         <h2>{title}</h2>
         {subtitle && <p className="sub">{subtitle}</p>}
         {children}
@@ -49,7 +52,7 @@ export function useToast() {
   const show = (m: string) => {
     setMsg(m)
     if (toastTimer) clearTimeout(toastTimer)
-    toastTimer = setTimeout(() => setMsg(null), 2400)
+    toastTimer = setTimeout(() => setMsg(null), 3500)
   }
   const node = msg ? <div className="toast">{msg}</div> : null
   return { show, node }

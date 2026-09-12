@@ -9,6 +9,9 @@ import { useMemo, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { delayUpdateLetter, majorChangeLetter } from '../lib/letters'
+import { letterheadName } from '../lib/letterhead'
+import { formatDate, todayISO } from '../lib/dates'
+import { majorChangeCancelBy } from '../lib/code'
 import { Icon } from './icons'
 import type { ChangeRecord, Plot } from '../types'
 
@@ -24,14 +27,18 @@ export function ChangeLetterSheet({
   onToast: (msg: string) => void
 }) {
   const { state, dispatch } = useStore()
+  const from = letterheadName(state, plot)
   const draft = useMemo(
     () =>
       change.kind === 'delay'
-        ? delayUpdateLetter(state.developerName, plot, change)
-        : majorChangeLetter(state.developerName, plot, change),
-    [state.developerName, plot, change]
+        ? delayUpdateLetter(from, plot, change)
+        : majorChangeLetter(from, plot, change),
+    [from, plot, change]
   )
   const [body, setBody] = useState(draft.body)
+  const [sentOn, setSentOn] = useState(todayISO())
+  const isMajor = change.kind === 'major_change'
+  const cancelBy = majorChangeCancelBy(change)
 
   const record = () => {
     dispatch({
@@ -42,6 +49,13 @@ export function ChangeLetterSheet({
       title: draft.title,
       body,
     })
+  }
+
+  // Receipt of the written notice is what starts the customer's 14-day window
+  // (Code 2.9) — an explicit step, never a side effect of copying or printing.
+  const markReceived = () => {
+    dispatch({ type: 'RECORD_NOTICE_SENT', plotId: plot.id, changeId: change.id, date: sentOn || todayISO() })
+    onToast('Recorded — the customer\'s 14-day window is running')
   }
 
   const email = () => {
@@ -73,6 +87,21 @@ export function ChangeLetterSheet({
 
   return (
     <Sheet title={draft.title} subtitle="Check it, fill anything in [brackets], then send." onClose={onClose}>
+      {isMajor && !change.noticeSentOn && (
+        <div className="card" style={{ marginBottom: 12, borderLeft: '4px solid var(--accent)' }}>
+          <strong>Call the customer first.</strong>{' '}
+          <span className="muted">
+            Have the conversation, then send this notice. A letter should never be the first the
+            customer hears of a major change.
+          </span>
+        </div>
+      )}
+      {isMajor && change.noticeSentOn && (
+        <p className="muted" style={{ fontSize: 12.5, marginTop: 0 }}>
+          Written notice received {formatDate(change.noticeSentOn)} — the customer may cancel until{' '}
+          {cancelBy ? formatDate(cancelBy) : '—'}.
+        </p>
+      )}
       <div className="field">
         <label>Draft (edit anything in [brackets], then send)</label>
         <textarea className="letter-body" value={body} onChange={(e) => setBody(e.target.value)} spellCheck />
@@ -92,15 +121,23 @@ export function ChangeLetterSheet({
       {!plot.customerEmail && (
         <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 12 }}>
           No customer email saved for this plot — the email will open with a blank "To" box.
-          Add it via "Edit details" on the plot screen.
+          Add it via "Edit details & dates" on the plot screen.
         </p>
       )}
-      {change.kind === 'major_change' && (
-        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-          Code 2.9: the customer's 14-day cancellation window runs from the day they{' '}
-          <strong>receive</strong> written details — send this promptly, and do not serve
-          notice to complete until the window has closed.
-        </p>
+      {isMajor && !change.noticeSentOn && (
+        <div className="card" style={{ marginBottom: 12 }}>
+          <div className="field" style={{ marginBottom: 8 }}>
+            <label>Date the customer received it (the day it was emailed, or the delivery date if posted)</label>
+            <input type="date" value={sentOn} max={todayISO()} onChange={(e) => setSentOn(e.target.value)} />
+          </div>
+          <button className="btn btn-primary btn-block" onClick={markReceived}>
+            Record the notice as received
+          </button>
+          <p className="muted" style={{ fontSize: 12, margin: '8px 0 0' }}>
+            Code 2.9: the 14-day cancellation window runs from the day the customer receives
+            written details. Notice to complete cannot be served until it has closed.
+          </p>
+        </div>
       )}
       <button className="btn btn-block" onClick={onClose}>
         Done

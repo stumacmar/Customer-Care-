@@ -8,23 +8,23 @@ import { useState } from 'react'
 import { DictationField, PhotoField, Sheet } from './ui'
 import { usePlot, useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
-import { formatDate, todayISO } from '../lib/dates'
-import { Icon, type IconName } from './icons'
+import { addDays, formatDate, todayISO } from '../lib/dates'
+import type { IconName } from './icons'
 import type { IssueType } from '../types'
 
 const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] = [
-  { key: 'snag', label: 'Snag', ico: 'wrench', blurb: `A snag or defect. Starts the ${SNAG_PUT_RIGHT_DAYS}-day put-right deadline (Code 3.3).` },
+  { key: 'snag', label: 'Snag or defect', ico: 'wrench', blurb: `Put right within ${SNAG_PUT_RIGHT_DAYS} days of the report, or explain the delay and update the customer monthly (Code 3.3).` },
   {
     key: 'complaint',
     label: 'Complaint',
     ico: 'megaphone',
-    blurb: 'Starts the formal complaints procedure: acknowledgement (5d), path to resolution (10d), assessment (30d), 8-week letter (56d).',
+    blurb: 'The formal complaints procedure: acknowledgement by day 5, Path to Resolution letter by day 10, Complaint Assessment and Response letter by day 30, Eight-Week Letter by day 56 (Code 3.4).',
   },
   {
     key: 'emergency',
     label: 'Emergency',
     ico: 'alert',
-    blurb: 'An immediate threat to safety, security, health or well-being. Flagged urgent — never queued behind routine snags.',
+    blurb: 'An immediate threat to safety, security, health or well-being. Flagged urgent and kept at the top of every list.',
   },
 ]
 
@@ -47,7 +47,7 @@ export function LogIssueSheet({
 }) {
   const { dispatch } = useStore()
   const plot = usePlot(plotId)
-  const [type, setType] = useState<IssueType>(initialType)
+  const type = initialType
   const [description, setDescription] = useState(initialDescription || '')
   const [receivedOn, setReceivedOn] = useState(initialReceivedOn && initialReceivedOn <= todayISO() ? initialReceivedOn : todayISO())
   const [photo, setPhoto] = useState<string | undefined>(undefined)
@@ -81,23 +81,17 @@ export function LogIssueSheet({
       photoDataUrl: photo,
       receivedOn: receivedOn || undefined,
     })
-    onLogged(`${meta.label} logged — the Code timescale is running`)
+    onLogged(
+      type === 'snag'
+        ? `${meta.label} logged — put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
+        : type === 'complaint'
+          ? 'Complaint logged — acknowledge in writing within 5 days'
+          : 'Emergency logged — deal with it now'
+    )
   }
 
   return (
-    <Sheet title="Log something" subtitle="Under 20 seconds: type, photo, one line." onClose={onClose}>
-      <div className="type-picker">
-        {TYPES.map((t) => (
-          <button
-            key={t.key}
-            className={`type-opt ${t.key}${type === t.key ? ' active' : ''}`}
-            onClick={() => setType(t.key)}
-          >
-            <span className="ico"><Icon name={t.ico} size={22} /></span>
-            {t.label}
-          </button>
-        ))}
-      </div>
+    <Sheet title={`Log a${type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}`} subtitle="Date, one line, optional photo." onClose={onClose}>
 
       <div
         className={`badge ${type}`}
@@ -172,8 +166,8 @@ export function LogIssueSheet({
         <button className="btn btn-ghost" onClick={onClose}>
           Cancel
         </button>
-        <button className="btn btn-primary" onClick={submit}>
-          Log {meta.label.toLowerCase()}
+        <button className="btn btn-primary" onClick={submit} disabled={!description.trim()}>
+          Log {type === 'snag' ? 'snag' : meta.label.toLowerCase()}
         </button>
       </div>
     </Sheet>

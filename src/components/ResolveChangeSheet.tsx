@@ -40,7 +40,7 @@ export function ResolveChangeSheet({
       return
     }
     const kind = plotStage(plot) === 'reserved' ? 'reservation' : 'contract'
-    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO() })
+    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO(), fullRefund: true })
     onToast('Cancellation recorded — the refund deadline is running')
     onClose()
   }
@@ -61,8 +61,8 @@ export function ResolveChangeSheet({
       </div>
       <p className="muted" style={{ fontSize: 13 }}>
         If the customer cancelled, the Code requires a <strong>full refund</strong> of the
-        contract deposit, reservation fee and any other payments (2.9) — the refund deadline
-        starts on this plot the moment you record it.
+        contract deposit, reservation fee and any other payments (2.9). The refund deadline runs
+        from the date of the customer's notice.
       </p>
       <button className="btn btn-block btn-ghost" onClick={onClose}>
         Back

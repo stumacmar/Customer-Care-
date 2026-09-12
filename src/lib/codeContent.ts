@@ -35,6 +35,20 @@ export const CODE_VERSION = 'Version 2 (March 2026)'
 export const CODE_SOURCE_URL =
   'https://www.nhqb.org.uk/wp-content/uploads/2026/02/New-Homes-Quality-Code-V2-March-2026.pdf'
 
+/** NHQB's published resources (nhqb.org.uk/resources, checked September 2026). */
+export const QUICK_GUIDE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/A-quick-guide-to-the-New-Homes-Quality-Code-V2-March-26.pdf'
+export const PCI_CHECKLIST_HOUSE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/NHQB-PCI-Checklist-house-V2-March-2026.pdf'
+export const PCI_CHECKLIST_APARTMENT_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/NHQB-PCI-Checklist-apartment-V2-March-2026.pdf'
+export const SNAGGING_GUIDE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/06/A-Homeowner-Guide-to-Snagging-V2-May-2026.pdf'
+export const NHOS_URL = 'https://www.nhos.org.uk/'
+export const NHQB_FEES_URL = 'https://www.nhqb.org.uk/developer-fees/'
+export const NHQB_PORTAL_URL = 'https://developers.nhqb.org.uk/login.html'
+export const NHQB_DEVELOPERS_EMAIL = 'developers@nhqb.org.uk'
+
 const PART_PRINCIPLES = 'Statement of Principles'
 const PART_1 = 'Part 1 · Selling a new home'
 const PART_2 = 'Part 2 · Legal documents, information, inspection & completion'
@@ -389,10 +403,10 @@ export const CODE_SECTIONS: CodeSection[] = [
     ref: '3.5',
     part: PART_3,
     title: 'Referrals to the New Homes Ombudsman Service',
-    summary: 'A complaint can be referred to the Ombudsman after 56 days of the complaint start date, if it arose within two years of completion.',
+    summary: 'A complaint can be referred to the Ombudsman after 56 days from the complaint start date, if it arose within two years of completion.',
     points: [
       'If defects or snags are not dealt with in line with the complaints procedure, the customer can refer the dispute to the New Homes Ombudsman Service.',
-      'A complaint that arose within the first two years after completion can be referred to the Ombudsman after 56 days of the complaint start date — whether or not the referral date is within the two years.',
+      'A complaint that arose within the first two years after completion can be referred to the Ombudsman after 56 days from the complaint start date — whether or not the referral date is within the two years.',
       'Customers should refer as soon as possible; the Ombudsman follows its scheme rules in deciding whether to look into a complaint.',
       'Co-operate with any Ombudsman request to provide all relevant information about a complaint.',
     ],
@@ -508,14 +522,14 @@ export const CODE_SECTIONS: CodeSection[] = [
  */
 export const QUICK_ANSWERS: { q: string; ref: string; a: string }[] = [
   { q: 'How long do I have to fix a snag?', ref: '3.3', a: 'As soon as possible, and within 30 days unless there is a significant reason for delay. If delayed, update the customer at least monthly.' },
-  { q: 'What are the complaint deadlines?', ref: '3.4', a: 'Acknowledge within 5 days, Path to Resolution by day 10, Assessment & Response by day 30, Eight-Week letter by day 56 — all from the complaint start date (first business day after receipt).' },
+  { q: 'What are the complaint deadlines?', ref: '3.4', a: 'Acknowledge within 5 days, Path to Resolution by day 10, Complaint Assessment and Response by day 30, Eight-Week Letter by day 56 — all from the complaint start date (first business day after receipt).' },
   { q: 'What must I hand over at completion?', ref: '2.11', a: 'Schedule of Incomplete Work, pre-completion inspection offer, home demonstration, warranty documents, complaints procedure copy, health & safety file, and building regulation completion certificate (or note why not yet available).' },
-  { q: 'When can the customer go to the Ombudsman?', ref: '3.5', a: 'After 56 days of the complaint start date, for a complaint that arose within two years of completion.' },
+  { q: 'When can the customer go to the Ombudsman?', ref: '3.5', a: 'After 56 days from the complaint start date, for a complaint that arose within two years of completion.' },
   { q: 'What counts as an emergency?', ref: 'G-emergency', a: 'An issue that poses an immediate threat to safety, security, health or well-being. Emergencies are not snags.' },
   { q: 'How much can I charge for early bird / plot reservation?', ref: '2.1', a: 'No more than £150, with clear refund terms (full refund if the customer withdraws within 24 hours of the plot being released, or a longer period you set).' },
   { q: 'How long is the cooling-off period?', ref: '2.3', a: 'At least 14 days, with a full refund of the reservation fee if the customer cancels for any reason during it.' },
   { q: 'When must I refund a deposit?', ref: '2.13', a: 'Within 28 days of the contract being cancelled.' },
-  { q: 'What must be in the Reservation Agreement?', ref: '2.2', a: 'Who they are buying from, the fee, the 14-day cooling-off, refund terms, the home’s details and price, warranty contact and summary, the exchange-by date (at least 6 weeks after reservation), tenure and costs — plus the Affordability Schedule.' },
+  { q: 'What must be in the Reservation Agreement?', ref: '2.2', a: 'Who they are buying from, the fee, the 14-day cooling-off, refund terms, the home’s details and price, warranty contact and summary, the exchange-by date (at least six weeks after reservation), tenure and costs — plus the Affordability Schedule.' },
   { q: 'What happens if I make a major change?', ref: '2.9', a: 'Tell the customer in writing. They can cancel within 14 days of receiving the details for a full refund, and you cannot serve notice to complete during those 14 days. Recommend they take legal advice.' },
   { q: 'How much notice of completion must I give?', ref: '2.8', a: 'The completion notice period is usually expected to be at least 14 calendar days, so there is time for the pre-completion inspection after notice is served.' },
 ]

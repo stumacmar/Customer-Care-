@@ -82,8 +82,23 @@ function IssueCard({
   const { state, dispatch } = useStore()
   const [resolving, setResolving] = useState(false)
   const [note, setNote] = useState('')
+  const [noting, setNoting] = useState(false)
+  const [newNote, setNewNote] = useState('')
   const clock = clockForIssue(issue)
   const isOpen = issue.status === 'open'
+  // Everything filed against this issue between the milestones — phone calls
+  // noted, emails logged — so the record is the whole exchange.
+  const record = plot.timeline.filter(
+    (e) => e.issueId === issue.id && (e.type === 'note' || e.type === 'correspondence_logged')
+  )
+
+  const addNote = () => {
+    if (!newNote.trim()) return
+    dispatch({ type: 'ADD_NOTE', plotId: plot.id, note: newNote, issueId: issue.id })
+    setNewNote('')
+    setNoting(false)
+    onToast('Note added to the record')
+  }
 
   const resolve = () => {
     dispatch({ type: 'RESOLVE_ISSUE', plotId: plot.id, issueId: issue.id, note })
@@ -130,7 +145,7 @@ function IssueCard({
       )}
       {issue.type === 'emergency' && isOpen && (
         <div className="badge emergency" style={{ marginBottom: 8 }}>
-          Health / safety / wellbeing risk — deal with this first.
+          Health, safety or well-being risk — deal with this first.
         </div>
       )}
 
@@ -149,10 +164,43 @@ function IssueCard({
         </div>
       )}
 
-      {isOpen && !resolving && (
+      {record.length > 0 && (
+        <div className="muted" style={{ fontSize: 12.5, marginTop: 6 }}>
+          {record.slice(0, 3).map((e) => (
+            <div key={e.id} style={{ marginBottom: 3 }}>
+              <span style={{ opacity: 0.7 }}>{formatDate(e.timestamp.slice(0, 10))}</span> · {e.summary}
+            </div>
+          ))}
+          {record.length > 3 && <div style={{ opacity: 0.7 }}>+{record.length - 3} more in the timeline</div>}
+        </div>
+      )}
+
+      {isOpen && noting && (
+        <div style={{ marginTop: 10 }}>
+          <textarea
+            rows={2}
+            value={newNote}
+            onChange={(e) => setNewNote(e.target.value)}
+            placeholder="e.g. Phoned Mr Ali 10:15 — agreed the plumber returns Thursday"
+          />
+          <div className="wrap-actions" style={{ marginTop: 8 }}>
+            <button className="btn btn-sm btn-primary" onClick={addNote} disabled={!newNote.trim()}>
+              Add to the record
+            </button>
+            <button className="btn btn-sm btn-ghost" onClick={() => setNoting(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {isOpen && !resolving && !noting && (
         <div className="wrap-actions" style={{ marginTop: 12 }}>
           <button className="btn btn-sm btn-primary" onClick={() => setResolving(true)}>
             {issue.type === 'complaint' ? 'Close complaint' : 'Mark resolved'}
+          </button>
+          <button className="btn btn-sm" onClick={() => setNoting(true)}>
+            <Icon name="edit" size={16} /> Add a note
           </button>
           <button
             className="btn btn-sm"

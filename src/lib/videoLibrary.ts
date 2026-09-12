@@ -17,23 +17,21 @@ export type VideoSlug =
   | 'complaint'
   | 'emergency'
   | 'emails'
-  | 'second-owner'
   | 'ombudsman'
 
 export const VIDEOS: Record<VideoSlug, { title: string; code: string; duration: number }> = {
-  'setup': { title: "First setup", code: "Two minutes, once", duration: 39 },
+  'setup': { title: "First setup", code: "Settings", duration: 40 },
   'reservation': { title: "Reservation day", code: "Code 2.2 · 2.3", duration: 59 },
-  'cooling-off-cancellation': { title: "If the sale falls through", code: "Code 2.4 · 2.13", duration: 44 },
-  'exchange': { title: "Exchange of contracts", code: "Code 2.2 · 2.6 · 2.7", duration: 50 },
-  'choices': { title: "Choices, extras and site visits", code: "Code 2.6 · the evidence trail", duration: 71 },
-  'major-change': { title: "A major change", code: "Code 2.9", duration: 58 },
-  'delay': { title: "A delay", code: "Code 2.6 · 2.10", duration: 60 },
+  'cooling-off-cancellation': { title: "If the sale falls through", code: "Code 2.4 · 2.13", duration: 43 },
+  'exchange': { title: "Exchange of contracts", code: "Code 2.2 · 2.6 · 2.7", duration: 51 },
+  'choices': { title: "Choices, extras and site visits", code: "Code 2.2 · 2.6", duration: 65 },
+  'major-change': { title: "A major change", code: "Code 2.9", duration: 64 },
+  'delay': { title: "A delay", code: "Code 2.7 · 2.8", duration: 60 },
   'notice-inspection': { title: "Notice to complete and inspection", code: "Code 2.8", duration: 64 },
   'completion': { title: "Completion and handover", code: "Code 2.11 · 2.12 · 3.1", duration: 56 },
-  'snag': { title: "A snag or defect", code: "Code 3.3", duration: 71 },
-  'complaint': { title: "A formal complaint", code: "Code 3.4 · 3.5", duration: 79 },
-  'emergency': { title: "An emergency", code: "Code 3.1 · 3.2 · glossary", duration: 63 },
+  'snag': { title: "A snag or defect", code: "Code 3.3", duration: 74 },
+  'complaint': { title: "A formal complaint", code: "Code 3.4 · 3.5", duration: 78 },
+  'emergency': { title: "An emergency", code: "Code 3.1 · 3.3 · glossary", duration: 66 },
   'emails': { title: "Emails in the record", code: "The evidence trail", duration: 52 },
-  'second-owner': { title: "The home is sold on", code: "Code 3.1", duration: 51 },
-  'ombudsman': { title: "Escalation to the Ombudsman", code: "Code 3.5", duration: 54 },
+  'ombudsman': { title: "Formal complaints to the Ombudsman", code: "Code 3.5", duration: 50 },
 }

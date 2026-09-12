@@ -8,6 +8,7 @@
 
 import { useState } from 'react'
 import { Sheet } from './ui'
+import { useStore } from '../state/store'
 import { decodeShare, extractCode, type BuyerReport } from '../lib/share'
 import { formatDate } from '../lib/dates'
 import type { IssueType } from '../types'
@@ -19,13 +20,15 @@ const TYPE_LABEL: Record<IssueType, string> = {
 }
 
 export function BuyerReportSheet({
+  plotId,
   onClose,
-  onDecoded,
+  onLogged,
 }: {
+  plotId: string
   onClose: () => void
-  /** Hands the decoded report to the logging flow. */
-  onDecoded: (type: IssueType, description: string, receivedOn?: string) => void
+  onLogged: (msg: string) => void
 }) {
+  const { dispatch } = useStore()
   const [text, setText] = useState('')
   const [report, setReport] = useState<BuyerReport | null>(null)
   const [error, setError] = useState<string | null>(null)
@@ -44,12 +47,15 @@ export function BuyerReportSheet({
     }
   }
 
+  // One tap: the report already carries its type, wording and date, so it is
+  // logged straight into the record with the customer's date as the receipt.
   const log = () => {
     if (!report) return
     const description =
       `${report.description}\n[Reported by the customer via their plot link` +
       `${report.sentOn ? `, sent ${formatDate(report.sentOn)}` : ''}]`
-    onDecoded(report.type, description, report.sentOn)
+    dispatch({ type: 'LOG_ISSUE', plotId, issueType: report.type, description, receivedOn: report.sentOn })
+    onLogged(`${TYPE_LABEL[report.type]} logged from the customer's report`)
   }
 
   return (
@@ -91,7 +97,7 @@ export function BuyerReportSheet({
           Cancel
         </button>
         <button className="btn btn-primary" onClick={log} disabled={!report}>
-          Log it — the deadline starts
+          Log it
         </button>
       </div>
     </Sheet>
