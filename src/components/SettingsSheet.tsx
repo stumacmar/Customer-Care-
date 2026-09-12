@@ -117,7 +117,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
   const devName = (id: string) => state.developments.find((d) => d.id === id)?.name || ''
 
   return (
-    <Sheet title="Settings" onClose={onClose}>
+    <Sheet title="Settings" onClose={onClose} autosave>
       <div className="field">
         <label>Developer / company name (appears on letters and exports)</label>
         <input

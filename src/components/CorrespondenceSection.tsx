@@ -3,24 +3,21 @@
  * so the evidence trail doesn't live in Outlook. The Ombudsman bundle is
  * only complete if the emails are in it; ten seconds of pasting at the time
  * beats an evening of dragging at dispute time.
+ *
+ * Emails are logged from the plot's one "Log a choice, change, delay, visit
+ * or email" button (LogChangeSheet); EmailFields is the form it shows. The
+ * Android share target opens the same form on its own (LogEmailSheet).
  */
 
 import { useState } from 'react'
 import { DictationField, Sheet } from './ui'
 import { usePlot, useStore } from '../state/store'
 import { formatDate, todayISO } from '../lib/dates'
-import { Icon } from './icons'
 import type { Plot } from '../types'
 
 const SHOW_COUNT = 3
 
-export function CorrespondenceSection({
-  plot,
-  onLog,
-}: {
-  plot: Plot
-  onLog: () => void
-}) {
+export function CorrespondenceSection({ plot }: { plot: Plot }) {
   const [showAll, setShowAll] = useState(false)
   const items = plot.correspondence || []
   const visible = showAll ? items : items.slice(0, SHOW_COUNT)
@@ -33,7 +30,8 @@ export function CorrespondenceSection({
       </h3>
       {items.length === 0 ? (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 0 }}>
-          Paste emails here the day they happen — they join the timeline and the export.
+          Emails to and from the customer, logged the day they happen under "Log a choice,
+          change, delay, visit or email". They join the timeline and the export.
         </p>
       ) : (
         <div className="stack" style={{ marginTop: 10 }}>
@@ -65,14 +63,12 @@ export function CorrespondenceSection({
           )}
         </div>
       )}
-      <button className="btn btn-block" style={{ marginTop: 10 }} onClick={onLog}>
-        <Icon name="mail" size={17} /> Log an email to or from the customer
-      </button>
     </div>
   )
 }
 
-export function LogEmailSheet({
+/** The email form: direction, the email's own date, subject, body, and the complaint or snag it is about. */
+export function EmailFields({
   plotId,
   initialBody,
   onClose,
@@ -99,15 +95,10 @@ export function LogEmailSheet({
     if (!body.trim()) return
     dispatch({ type: 'LOG_CORRESPONDENCE', plotId, direction, date: date || todayISO(), subject, body, issueId: issueId || undefined })
     onLogged('Email logged to the record')
-    onClose()
   }
 
   return (
-    <Sheet
-      title="Log an email"
-      subtitle="Paste it verbatim — this is a copy of what was said, kept with the plot's evidence."
-      onClose={onClose}
-    >
+    <>
       <div className="type-picker" style={{ gridTemplateColumns: '1fr 1fr' }}>
         <button
           className={`type-opt${direction === 'from_customer' ? ' active complaint' : ''}`}
@@ -169,6 +160,37 @@ export function LogEmailSheet({
           Log email
         </button>
       </div>
+    </>
+  )
+}
+
+/** The email form on its own sheet — used when an email is shared into the app from the mail client. */
+export function LogEmailSheet({
+  plotId,
+  initialBody,
+  onClose,
+  onLogged,
+}: {
+  plotId: string
+  initialBody?: string
+  onClose: () => void
+  onLogged: (msg: string) => void
+}) {
+  return (
+    <Sheet
+      title="Log an email"
+      subtitle="Paste it verbatim — this is a copy of what was said, kept with the plot's evidence."
+      onClose={onClose}
+    >
+      <EmailFields
+        plotId={plotId}
+        initialBody={initialBody}
+        onClose={onClose}
+        onLogged={(msg) => {
+          onLogged(msg)
+          onClose()
+        }}
+      />
     </Sheet>
   )
 }

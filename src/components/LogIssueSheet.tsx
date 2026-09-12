@@ -2,6 +2,11 @@
  * Log one of the three trigger types. Designed to take under 20 seconds on a
  * phone: pick type → photo → one-line voice/typed description → done. The app
  * then calculates every downstream deadline itself.
+ *
+ * A report from the customer's app arrives by email carrying a small code.
+ * Paste that email into the description of any of the three and the sheet
+ * decodes it: the customer's own words and the date they sent it are kept,
+ * and if their app sent it as a different type the sheet switches to match.
  */
 
 import { useState } from 'react'
@@ -9,6 +14,7 @@ import { DictationField, PhotoField, Sheet } from './ui'
 import { usePlot, useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
 import { addDays, formatDate, todayISO } from '../lib/dates'
+import { decodeShare, extractCode, type BuyerReport } from '../lib/share'
 import type { IconName } from './icons'
 import type { IssueType } from '../types'
 
@@ -31,26 +37,22 @@ const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] =
 export function LogIssueSheet({
   plotId,
   initialType,
-  initialDescription,
-  initialReceivedOn,
   onClose,
   onLogged,
 }: {
   plotId: string
   initialType: IssueType
-  /** Prefilled when the issue arrives as a customer report. */
-  initialDescription?: string
-  /** The date the customer sent it, when it arrives as a report — the Code timescale runs from receipt, not from the paste. */
-  initialReceivedOn?: string
   onClose: () => void
   onLogged: (msg: string) => void
 }) {
   const { dispatch } = useStore()
   const plot = usePlot(plotId)
-  const type = initialType
-  const [description, setDescription] = useState(initialDescription || '')
-  const [receivedOn, setReceivedOn] = useState(initialReceivedOn && initialReceivedOn <= todayISO() ? initialReceivedOn : todayISO())
+  const [type, setType] = useState<IssueType>(initialType)
+  const [description, setDescription] = useState('')
+  const [receivedOn, setReceivedOn] = useState(todayISO())
   const [photo, setPhoto] = useState<string | undefined>(undefined)
+  // Set once a pasted customer report has been decoded into the fields.
+  const [report, setReport] = useState<BuyerReport | null>(null)
   // Code 3.4: complaints can be combined into one, with the timetable running
   // from the first complaint received. null = start a separate complaint.
   const [combineWith, setCombineWith] = useState<string | null>(null)
@@ -59,6 +61,23 @@ export function LogIssueSheet({
   const openComplaints = (plot?.issues || []).filter(
     (i) => i.type === 'complaint' && i.status === 'open'
   )
+
+  // The description field doubles as the place to paste the customer's email.
+  const onDescription = (value: string) => {
+    setDescription(value)
+    const code = extractCode(value)
+    if (!code) return
+    void decodeShare(code).then((decoded) => {
+      if (!decoded || decoded.k !== 'report') return
+      setReport(decoded)
+      setType(decoded.type)
+      setDescription(
+        `${decoded.description}\n[Reported by the customer via their plot link` +
+          `${decoded.sentOn ? `, sent ${formatDate(decoded.sentOn)}` : ''}]`
+      )
+      if (decoded.sentOn && decoded.sentOn <= todayISO()) setReceivedOn(decoded.sentOn)
+    })
+  }
 
   const submit = () => {
     if (type === 'complaint' && combineWith) {
@@ -82,16 +101,18 @@ export function LogIssueSheet({
       receivedOn: receivedOn || undefined,
     })
     onLogged(
-      type === 'snag'
-        ? `${meta.label} logged — put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
-        : type === 'complaint'
-          ? 'Complaint logged — acknowledge in writing within 5 days'
-          : 'Emergency logged — deal with it now'
+      report
+        ? `${meta.label} logged from the customer's report`
+        : type === 'snag'
+          ? `${meta.label} logged — put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
+          : type === 'complaint'
+            ? 'Complaint logged — acknowledge in writing within 5 days'
+            : 'Emergency logged — deal with it now'
     )
   }
 
   return (
-    <Sheet title={`Log a${type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}`} subtitle="Date, one line, optional photo." onClose={onClose}>
+    <Sheet title={`Log a${type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}`} subtitle="Date, one line, optional photo — or paste the email from the customer's app." onClose={onClose}>
 
       <div
         className={`badge ${type}`}
@@ -156,10 +177,16 @@ export function LogIssueSheet({
         <label>Description</label>
         <DictationField
           value={description}
-          onChange={setDescription}
-          placeholder="One line — tap the mic to dictate"
+          onChange={onDescription}
+          placeholder="One line — tap the mic to dictate, or paste the email from the customer's app"
           rows={3}
         />
+        {report && (
+          <div className="dictate-hint">
+            From the customer's app{report.sentOn ? `, sent ${formatDate(report.sentOn)}` : ''}. Their words and date are kept.
+            {report.type !== initialType && ` Their app sent it as a${report.type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}, so it is logged as one.`}
+          </div>
+        )}
       </div>
 
       <div className="sheet-actions">

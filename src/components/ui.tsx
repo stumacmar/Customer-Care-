@@ -4,24 +4,38 @@
  * and used everywhere.
  */
 
-import { useEffect, useState } from 'react'
-import type { ReactNode } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import type { FormEvent, ReactNode } from 'react'
 import { Icon } from './icons'
 
+/**
+ * The bottom sheet. Closes on the ✕, on Escape, or on a tap outside it. If
+ * something has been typed and not yet saved, all three ask first — a sheet
+ * that autosaves as you type (Settings) passes `autosave` to skip the check.
+ */
 export function Sheet({
   title,
   subtitle,
   onClose,
+  autosave,
   children,
 }: {
   title: string
   subtitle?: string
   onClose: () => void
+  autosave?: boolean
   children: ReactNode
 }) {
+  const typed = useRef(false)
+
+  const close = useCallback(() => {
+    if (!autosave && typed.current && !confirm('Discard what you have typed?')) return
+    onClose()
+  }, [autosave, onClose])
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape') close()
     }
     document.addEventListener('keydown', onKey)
     document.body.style.overflow = 'hidden'
@@ -29,13 +43,23 @@ export function Sheet({
       document.removeEventListener('keydown', onKey)
       document.body.style.overflow = ''
     }
-  }, [onClose])
+  }, [close])
+
+  // Only typing counts — ticking a box or choosing a photo is not "unsaved text".
+  const onInput = (e: FormEvent) => {
+    const t = e.target as HTMLElement
+    if (t.tagName === 'TEXTAREA') typed.current = true
+    else if (t.tagName === 'INPUT') {
+      const kind = (t as HTMLInputElement).type
+      if (!['checkbox', 'radio', 'file', 'button', 'submit', 'range'].includes(kind)) typed.current = true
+    }
+  }
 
   return (
-    <div className="scrim" onClick={onClose}>
-      <div className="sheet" onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true">
+    <div className="scrim" onClick={close}>
+      <div className="sheet" onClick={(e) => e.stopPropagation()} onInput={onInput} role="dialog" aria-modal="true">
         <div className="sheet-grab" />
-        <button className="sheet-close" aria-label="Close" onClick={onClose}>
+        <button className="sheet-close" aria-label="Close" onClick={close}>
           ✕
         </button>
         <h2>{title}</h2>

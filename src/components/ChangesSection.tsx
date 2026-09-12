@@ -85,9 +85,9 @@ export function ChangesSection({
 
       {plot.changes.length === 0 ? (
         <div className="card muted">
-          Log every choice, extra, change and delay here the moment it happens — front door
-          colour confirmed, kitchen upgrade ordered, layout change notified. It becomes the
-          evidence trail if a query is ever raised.
+          Log every choice, extra, change, delay, site visit and email here the moment it
+          happens — front door colour confirmed, kitchen upgrade ordered, layout change
+          notified. It becomes the evidence trail if a query is ever raised.
         </div>
       ) : (
         <div className="stack">
@@ -109,7 +109,7 @@ export function ChangesSection({
       )}
 
       <button className="btn btn-block" style={{ marginTop: 10 }} onClick={onLogChange}>
-        <Icon name="plus" size={17} /> Log a choice, change, delay or visit
+        <Icon name="plus" size={17} /> Log a choice, change, delay, visit or email
       </button>
     </div>
   )

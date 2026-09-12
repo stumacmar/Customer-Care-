@@ -82,7 +82,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Choices, changes and delays',
     videos: ['choices', 'major-change', 'delay'],
     body: [
-      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, roof on and watertight (a build update), plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
+      '"Log a choice, change, delay, visit or email" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, roof on and watertight (a build update), plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
       'A MAJOR change (one that significantly affects size, appearance or value) is special. Call the customer first and have the conversation, then send the written notice the app drafts and record the day they receive it. The customer\'s 14-day cancellation window runs from that day, and the app warns you not to serve notice to complete during it. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
       'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. This is your evidence if attendance is disputed.',
@@ -92,7 +92,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Emails with the customer',
     videos: ['emails'],
     body: [
-      'The evidence trail is only complete if the emails are in it. If a dispute arises, the correspondence needs to be in the record, not only in your inbox. "Log an email" on the plot takes a pasted email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
+      'The evidence trail is only complete if the emails are in it. If a dispute arises, the correspondence needs to be in the record, not only in your inbox. Tap "Log a choice, change, delay, visit or email" on the plot and pick Email: paste the email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
       'It joins the timeline and both exports, so the file you hand the Ombudsman carries the correspondence alongside the dates, documents and letters.',
       'On Android you can skip the copying: share an email straight from your mail app to Plot Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
       'Log it the day it happens, like everything else, so the record is made at the time.',
@@ -129,7 +129,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     body: [
       '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
-      'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the customer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
+      'When they report a problem, you get an email carrying a small code. Tap Snag, Complaint or Emergency, paste the email into the description, and it logs with the correct Code timescale — their words and date preserved, and if their app sent it as a different type the sheet switches to match. Their app keeps their own record of what they sent and when.',
       'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Under the Code\'s glossary, snags may be identified at the pre-completion inspection or after completion — so a problem with the home arrives as a snag or defect from notice to complete onwards, and as a formal complaint before that. The emergency option appears only once they have moved in.',
       'Share a fresh link whenever there is an update worth showing — each new link replaces their snapshot.',
     ],
