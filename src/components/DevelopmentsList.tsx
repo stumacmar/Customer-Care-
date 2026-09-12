@@ -89,7 +89,7 @@ export function DevelopmentsList({
           <div className="empty-sell">
             <div className="sell-row">
               <Icon name="clock" size={17} strokeWidth={1.8} />
-              <span>Every New Homes Quality Code deadline tracked for you — you never work out a date</span>
+              <span>The Code's deadlines tracked for you — you never work out a date</span>
             </div>
             <div className="sell-row">
               <Icon name="key" size={17} strokeWidth={1.8} />

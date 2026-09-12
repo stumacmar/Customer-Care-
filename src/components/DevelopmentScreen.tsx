@@ -1,6 +1,6 @@
 /*
  * A development's plots. Active plots show as the familiar traffic-light rows;
- * plots whose two-year Ombudsman window has closed auto-retire into a collapsed
+ * plots whose two-year after-sales period has closed archive into a collapsed
  * "Retired" section (kept for the record, out of the daily view). The developer
  * can edit the development, mark it finished when they move on, or reopen it.
  */
@@ -38,6 +38,7 @@ export function DevelopmentScreen({
   const plots = useMemo(() => state.plots.filter((p) => p.developmentId === devId), [state.plots, devId])
   const active = plots.filter((p) => !isPlotRetired(p))
   const retired = plots.filter((p) => isPlotRetired(p))
+  const part1Done = PART1_TEMPLATE.filter((t) => dev?.part1?.[t.key]?.completed).length
   const activeRows = active
     .map((p) => ({ plot: p, status: plotStatus(p) }))
     .sort((a, b) => RAG_RANK[a.status.rag] - RAG_RANK[b.status.rag])
@@ -142,13 +143,15 @@ export function DevelopmentScreen({
 
       {/* Part 1 of the Code applies to the site as a whole, before any plot is
           reserved — a small developer working plot by plot can otherwise miss it. */}
-      <div className="section">
-        <h3>
-          Before reservation — Part 1 of the Code{' '}
-          <span className="count-pill">
-            {PART1_TEMPLATE.filter((t) => dev.part1?.[t.key]?.completed).length}/{PART1_TEMPLATE.length}
-          </span>
-        </h3>
+      <details className="section guide-item" open={part1Done < PART1_TEMPLATE.length}>
+        <summary>
+          <h3 style={{ display: 'inline' }}>
+            Before reservation — Part 1 of the Code{' '}
+            <span className="count-pill">
+              {part1Done}/{PART1_TEMPLATE.length}
+            </span>
+          </h3>
+        </summary>
         <div className="card">
           <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
             Selling a new home. Tick each once for this site; the Code tab has the full clause
@@ -169,7 +172,7 @@ export function DevelopmentScreen({
                 </button>
                 <div className="doc-body">
                   <div className="doc-label">
-                    {t.label} <span className="clause-ref">Code {t.clause}</span>
+                    {t.label} {state.showCodeRefs && <span className="clause-ref">Code {t.clause}</span>}
                   </div>
                   <div className="doc-hint">{t.hint}</div>
                   {on && p?.completedDate && <div className="doc-hint">Ticked {formatDate(p.completedDate)}</div>}
@@ -178,7 +181,7 @@ export function DevelopmentScreen({
             )
           })}
         </div>
-      </div>
+      </details>
 
       {retired.length > 0 && (
         <div className="section">
@@ -203,11 +206,11 @@ export function DevelopmentScreen({
                     <span className="headline">
                       {plot.cancellation
                         ? `Cancelled ${formatDate(plot.cancellation.date)} · refund paid`
-                        : `Completed ${formatDate(plot.completionDate)} · Ombudsman window closed`}
+                        : `Legal completion ${formatDate(plot.completionDate)} · after-sales period ended`}
                     </span>
                   </span>
                   <span className="badge resolved" style={{ alignSelf: 'center' }}>
-                    {plot.cancellation ? 'cancelled' : 'retired'}
+                    {plot.cancellation ? 'cancelled' : 'archived'}
                   </span>
                 </button>
               ))}
@@ -216,17 +219,12 @@ export function DevelopmentScreen({
         </div>
       )}
 
-      <div className="section">
-        <button className="btn btn-sm btn-danger btn-block" onClick={remove}>
-          Delete development
-        </button>
-      </div>
 
       <button className="fab" onClick={() => onNewPlot(devId)}>
         + Plot
       </button>
 
-      {editing && <EditDevelopmentSheet dev={dev} onClose={() => setEditing(false)} onSaved={onToast} />}
+      {editing && <EditDevelopmentSheet dev={dev} onClose={() => setEditing(false)} onSaved={onToast} onDelete={remove} />}
     </div>
   )
 }

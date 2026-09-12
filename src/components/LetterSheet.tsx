@@ -92,7 +92,7 @@ export function LetterSheet({
   return (
     <Sheet
       title="Draft letter"
-      subtitle={`Complaint ${issue.reference || ''} · pre-filled with legal deadlines`}
+      subtitle={`Complaint ${issue.reference || ''} · pre-filled with the Code timescales`}
       onClose={onClose}
     >
       <div className="field">
@@ -117,7 +117,7 @@ export function LetterSheet({
       </div>
 
       <div className="wrap-actions" style={{ marginBottom: 12 }}>
-        <button className="btn btn-sm btn-primary" onClick={email}>
+        <button className="btn btn-sm" onClick={email}>
           <Icon name="mail" size={16} /> Email to customer
         </button>
         <button className="btn btn-sm" onClick={copy}>
@@ -130,7 +130,7 @@ export function LetterSheet({
       {!plot.customerEmail && (
         <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 12 }}>
           No customer email saved for this plot — the email will open with a blank "To" box.
-          Add it via "Edit details" on the plot screen.
+          Add it via "Edit details & dates" on the plot screen.
         </p>
       )}
 

@@ -64,15 +64,16 @@ export function LogChangeSheet({
 
   return (
     <Sheet
-      title="Log to Spec & changes"
-      subtitle="Choices, extras, changes, delays and site visits — the evidence trail."
+      title="Add to Spec & changes"
+      subtitle="Choices, extras, changes, delays, build updates and site visits."
       onClose={onClose}
     >
       <div className="type-picker" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
         {KINDS.map((k) => (
           <button
             key={k}
-            className={`type-opt${kind === k ? ` active ${k === 'major_change' ? 'snag' : k === 'delay' ? 'emergency' : 'complaint'}` : ''}`}
+            className={`type-opt${kind === k ? ` active ${k === 'major_change' || k === 'delay' ? 'snag' : 'complaint'}` : ''}`}
+            aria-pressed={kind === k}
             onClick={() => setKind(k)}
             style={{ fontSize: 12, padding: '10px 2px' }}
           >
@@ -100,13 +101,13 @@ export function LogChangeSheet({
 
       <div className="field">
         <label>
-          {kind === 'delay' || kind === 'build_update' ? 'Date the customer was told' : kind === 'visit' ? 'Date of the visit / appointment' : kind === 'major_change' ? 'Date the change was identified' : kind === 'minor_change' ? 'Date notified to the customer' : 'Date agreed / confirmed'}
+          {kind === 'visit' ? 'Date of the visit' : kind === 'major_change' ? 'Date the change was identified' : 'Date'}
         </label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
 
       <div className="field">
-        <label>{kind === 'visit' ? 'Who came, when, and the outcome — attended, no access, or turned away.' : 'What exactly? One clear line.'}</label>
+        <label>What happened?</label>
         <DictationField
           value={description}
           onChange={setDescription}

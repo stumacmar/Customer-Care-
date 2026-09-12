@@ -12,10 +12,12 @@ export function EditDevelopmentSheet({
   dev,
   onClose,
   onSaved,
+  onDelete,
 }: {
   dev: Development
   onClose: () => void
   onSaved: (msg: string) => void
+  onDelete?: () => void
 }) {
   const { dispatch } = useStore()
   const [name, setName] = useState(dev.name)
@@ -44,7 +46,7 @@ export function EditDevelopmentSheet({
         <input
           value={tradingName}
           onChange={(e) => setTradingName(e.target.value)}
-          placeholder="Only if this site trades under a different name, e.g. a subsidiary or JV"
+          placeholder="e.g. Riverside Homes LLP"
         />
         <div className="dictate-hint">Used on letters, exports and the customer's app for this site instead of the company name in Settings.</div>
       </div>
@@ -56,6 +58,13 @@ export function EditDevelopmentSheet({
           Save
         </button>
       </div>
+      {onDelete && (
+        <div className="section">
+          <button className="btn btn-sm btn-danger btn-block" onClick={onDelete}>
+            Delete this development and all its plots
+          </button>
+        </div>
+      )}
     </Sheet>
   )
 }

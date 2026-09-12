@@ -23,21 +23,21 @@ const STEPS: Step[] = [
   {
     icon: 'clipboard',
     tint: 'var(--green)',
-    text: 'Log every choice, extra, change, delay and site visit in Spec & changes. A major change starts the customer\'s 14-day cancellation window and drafts the written notice for you.',
+    text: 'Log every choice, extra, change, delay and site visit in Spec & changes. For a major change, call the customer first; the app drafts the written notice, and the customer\'s 14-day cancellation window runs from the day they receive it.',
   },
   {
     icon: 'check-circle',
     tint: 'var(--green)',
-    text: 'Tick off each document as you give it — grouped by stage, from the Reservation Agreement to the handover pack. That is your evidence trail.',
+    text: 'Tick off each document as you give it — grouped by stage, from the Reservation Agreement to completion and handover. That is your evidence trail.',
   },
   {
     icon: 'wrench',
     tint: 'var(--snag)',
-    text: 'The moment a customer reports anything, log it: Snag or defect, Complaint, or Emergency. The app works out every Code deadline — you never calculate a date.',
+    text: 'The moment a customer reports anything, log it: Snag (or defect), Complaint, or Emergency. The app works out the Code deadline — you never calculate a date.',
   },
   {
     rag: true,
-    text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = on track, time in hand.',
+    text: 'Glance at the colours daily. Red = overdue, or an emergency. Amber = due within five days. Green = on track, time in hand.',
   },
   {
     icon: 'edit',
@@ -52,7 +52,7 @@ const STEPS: Step[] = [
   {
     icon: 'file',
     tint: 'var(--text-dim)',
-    text: 'If anything is ever escalated to the Ombudsman, tap "Export" — every date, document, change, email and letter in one file.',
+    text: 'If anything is ever referred to the Ombudsman, tap "Export PDF" — every date, document, change, email and letter in one file.',
   },
 ]
 
@@ -91,7 +91,7 @@ export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpe
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, letterSpacing: '0.16em', fontSize: 16 }}>NHQB</div>
           <div className="muted" style={{ fontSize: 12 }}>
-            New Homes Quality Code compliance, one plot at a time.
+            Tracks plot progress, keeps customers updated, and keeps you on the Code.
           </div>
         </div>
       </div>
@@ -106,12 +106,12 @@ export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpe
         ))}
       </div>
       <p className="muted" style={{ fontSize: 13 }}>
-        The golden rule: <strong>log it the moment it happens</strong>, on your phone, on site.
+        The one rule: <strong>log it the moment it happens</strong>, on your phone, on site.
         Everything else — deadlines, letters, documentation — follows by itself.
       </p>
       {onOpenGuide && (
         <button className="btn btn-block" style={{ marginBottom: 8 }} onClick={onOpenGuide}>
-          Full guide &amp; demo video
+          Guide and videos
         </button>
       )}
       <button className="btn btn-block btn-primary" onClick={onClose}>

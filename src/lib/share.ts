@@ -13,7 +13,7 @@
  * paste-code inside a pre-addressed email.
  */
 
-import { majorChangeCancelBy } from './code'
+import { majorChangeCancelBy, snagPutRightDate } from './code'
 import type { ChangeKind, DocumentStage, IssueStatus, IssueType, Plot } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -44,6 +44,8 @@ export interface SnapshotIssue {
   description: string
   /** Complaint milestone keys already actioned, so the buyer sees progress. */
   done?: string[]
+  /** Snags and defects: the 30-day put-right date (3.3). */
+  putRightBy?: string
 }
 
 /** What the buyer's app receives — the buyer-relevant slice of one plot. */
@@ -108,7 +110,7 @@ export function buildSnapshot(
     docs: plot.documents
       .filter((d) => d.key !== 'contract_checked' && d.key !== 'warranty_provider_notified')
       .map((d) => ({
-        label: d.label,
+        label: d.customerLabel || d.label,
         stage: d.stage,
         completedDate: d.completed ? d.completedDate : undefined,
       })),
@@ -131,6 +133,7 @@ export function buildSnapshot(
       resolvedAt: i.resolvedAt,
       description: i.description.slice(0, 300),
       done: i.milestoneProgress ? Object.keys(i.milestoneProgress) : undefined,
+      putRightBy: i.type === 'snag' ? snagPutRightDate(i) : undefined,
     })),
     sharedOn: today,
     secondOwner: plot.ownershipTransferredOn ? true : undefined,

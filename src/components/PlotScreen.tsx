@@ -43,8 +43,6 @@ export function PlotScreen({
   const plot = usePlot(plotId)
   const { state, dispatch } = useStore()
   const [logType, setLogType] = useState<IssueType | null>(null)
-  const [logDescription, setLogDescription] = useState<string | undefined>(undefined)
-  const [logReceivedOn, setLogReceivedOn] = useState<string | undefined>(undefined)
   const [letterFor, setLetterFor] = useState<{ issue: Issue; key?: string } | null>(null)
   const [editing, setEditing] = useState(false)
   const [sharing, setSharing] = useState(false)
@@ -99,14 +97,10 @@ export function PlotScreen({
         <span className="next-label">{describeAction(status.next)}</span>
       </div>
 
-      {/* Customer + actions. The journey dates live in the journey strip below,
-          so they are not repeated here. */}
+      {/* Contact + actions. The customer's name is in the header and the journey
+          dates live in the journey strip below, so neither is repeated here. */}
       <div className="meta-grid card" style={{ marginTop: 10 }}>
-        <div>
-          <div className="k">Customer</div>
-          <div className="v">{plot.customerNames || <span className="muted">not set</span>}</div>
-        </div>
-        <div>
+        <div style={{ gridColumn: '1 / -1' }}>
           <div className="k">Customer email</div>
           <div className="v" style={{ overflowWrap: 'anywhere' }}>
             {plot.customerEmail || <span className="muted">not set</span>}
@@ -137,17 +131,15 @@ export function PlotScreen({
           <button className="log-btn snag" onClick={() => setLogType('snag')}>
             <span className="ico"><Icon name="wrench" size={26} /></span>
             Snag
-            <small>or defect · 30 days</small>
+            <small>or defect</small>
           </button>
           <button className="log-btn complaint" onClick={() => setLogType('complaint')}>
             <span className="ico"><Icon name="megaphone" size={26} /></span>
             Complaint
-            <small>5·10·30·56d</small>
           </button>
           <button className="log-btn emergency" onClick={() => setLogType('emergency')}>
             <span className="ico"><Icon name="alert" size={26} /></span>
             Emergency
-            <small>urgent</small>
           </button>
         </div>
         <button
@@ -183,8 +175,8 @@ export function PlotScreen({
         <h3>Records &amp; export</h3>
         <div className="card">
           <p className="muted" style={{ marginTop: 0 }}>
-            One clean file showing every document you supplied and the dates you did so, plus the
-            full history — ready if a customer query is ever escalated to the Ombudsman.
+            The whole record in one file — documents, dates, changes, emails, letters and the
+            timeline — for an Ombudsman referral or an NHQB audit.
           </p>
           <div className="wrap-actions">
             <button className="btn btn-sm btn-primary" onClick={() => exportPlotPrintable(plot, letterheadName(state, plot))}>
@@ -197,27 +189,14 @@ export function PlotScreen({
         </div>
       </div>
 
-      <div className="section">
-        <button className="btn btn-sm btn-danger btn-block" onClick={remove}>
-          Delete plot
-        </button>
-      </div>
 
       {logType && (
         <LogIssueSheet
           plotId={plot.id}
           initialType={logType}
-          initialDescription={logDescription}
-          initialReceivedOn={logReceivedOn}
-          onClose={() => {
-            setLogType(null)
-            setLogDescription(undefined)
-            setLogReceivedOn(undefined)
-          }}
+          onClose={() => setLogType(null)}
           onLogged={(msg) => {
             setLogType(null)
-            setLogDescription(undefined)
-            setLogReceivedOn(undefined)
             onToast(msg)
           }}
         />
@@ -235,12 +214,11 @@ export function PlotScreen({
 
       {pastingReport && (
         <BuyerReportSheet
+          plotId={plot.id}
           onClose={() => setPastingReport(false)}
-          onDecoded={(type, description, receivedOn) => {
+          onLogged={(msg) => {
             setPastingReport(false)
-            setLogDescription(description)
-            setLogReceivedOn(receivedOn)
-            setLogType(type)
+            onToast(msg)
           }}
         />
       )}
@@ -287,7 +265,7 @@ export function PlotScreen({
         />
       )}
 
-      {editing && <EditPlotSheet plot={plot} onClose={() => setEditing(false)} onSaved={onToast} />}
+      {editing && <EditPlotSheet plot={plot} onClose={() => setEditing(false)} onSaved={onToast} onDelete={remove} />}
     </div>
   )
 }

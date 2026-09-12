@@ -55,6 +55,8 @@ export type DocumentStage = 'reservation' | 'pre_contract' | 'completion'
 
 /** A single tick-and-upload item on a plot's document checklist. */
 export interface DocumentItem {
+  /** How the item reads on the customer's page (their side of the same thing). */
+  customerLabel?: string
   key: string
   label: string
   hint?: string
@@ -96,9 +98,10 @@ export interface ChangeRecord {
   date: string
   photoDataUrl?: string
   /**
-   * Major changes only: ISO date the written notice was sent. Code 2.9 runs
-   * the customer's 14-day window from receipt of written details, so there
-   * is no window until this is recorded.
+   * Major changes only: ISO date the customer received the written notice
+   * (the day it was emailed, or the delivery date if posted). Code 2.9 runs
+   * the customer's 14-day window from receipt, so there is no window until
+   * this is recorded.
    */
   noticeSentOn?: string
   /** Major changes only: how the 14-day window ended. */
@@ -116,6 +119,8 @@ export interface Cancellation {
   kind: 'reservation' | 'contract'
   /** ISO date the customer's notice of cancellation was received. */
   date: string
+  /** Cancelled over a major change (2.9): the refund is in full, no deductions. */
+  fullRefund?: boolean
   /** ISO date the refund was paid — clears the refund clock. */
   refundedDate?: string
 }

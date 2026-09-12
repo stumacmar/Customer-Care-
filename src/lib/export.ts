@@ -55,7 +55,7 @@ export function exportPlotCSV(plot: Plot): void {
     rows.push([formatDateTime(e.timestamp), e.type, e.summary, e.detail || ''])
   }
   const csv = rows.map((r) => r.map(csvCell).join(',')).join('\n')
-  download(`${safeName(plot)}-compliance-timeline.csv`, 'text/csv;charset=utf-8', csv)
+  download(`${safeName(plot)}-record.csv`, 'text/csv;charset=utf-8', csv)
 }
 
 function escapeHtml(s: string): string {
@@ -70,10 +70,10 @@ function escapeHtml(s: string): string {
  * Open a clean, print-ready compliance record in a new window and trigger the
  * browser's print dialog (Save as PDF). No dependency on a PDF library.
  */
-export function exportPlotPrintable(plot: Plot, developerName: string): void {
+export function exportPlotPrintable(plot: Plot, developerName: string, part1?: { label: string; clause: string; done?: string }[]): void {
   const win = window.open('', '_blank', 'width=900,height=1200')
   if (!win) {
-    alert('Please allow pop-ups to export the compliance record.')
+    alert('Please allow pop-ups to export the plot record.')
     return
   }
 
@@ -159,7 +159,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
   const docsDone = plot.documents.filter((d) => d.completed).length
 
   win.document.write(`<!doctype html>
-<html><head><meta charset="utf-8"><title>Customer communications record — ${escapeHtml(plot.address)}</title>
+<html><head><meta charset="utf-8"><title>Plot record — ${escapeHtml(plot.address)}</title>
 <style>
   * { box-sizing: border-box; }
   body { font: 13px/1.5 -apple-system, Segoe UI, Roboto, Arial, sans-serif; color: #111; margin: 32px; }
@@ -175,12 +175,13 @@ export function exportPlotPrintable(plot: Plot, developerName: string): void {
 </style></head>
 <body>
   <button onclick="window.print()" style="float:right;padding:8px 14px;">Save as PDF / Print</button>
-  <h1>Customer Communications Record</h1>
+  <h1>Plot record</h1>
   <div class="meta"><strong>Property:</strong> ${escapeHtml(plot.address || '—')}</div>
   <div class="meta"><strong>Customer(s):</strong> ${escapeHtml(plot.customerNames || '—')}</div>
   <div class="meta"><strong>Reserved:</strong> ${formatDate(plot.reservationDate)} &nbsp; <strong>Exchanged:</strong> ${formatDate(plot.exchangeDate)} &nbsp; <strong>Notice to complete:</strong> ${formatDate(plot.noticeServedDate)} &nbsp; <strong>Expected completion:</strong> ${formatDate(plot.expectedCompletionDate)} &nbsp; <strong>Legal completion:</strong> ${formatDate(plot.completionDate)}</div>
   ${plot.cancellation ? `<div class="meta"><strong>Cancelled:</strong> ${escapeHtml(plot.cancellation.kind)} cancellation on ${formatDate(plot.cancellation.date)}${plot.cancellation.refundedDate ? ` — refund paid ${formatDate(plot.cancellation.refundedDate)}` : ' — refund outstanding'}</div>` : ''}
   <div class="meta"><strong>Developer:</strong> ${escapeHtml(developerName || '—')}</div>
+  ${part1 && part1.length ? `<div class="meta"><strong>Part 1 of the Code (site):</strong> ${part1.map((p) => `${escapeHtml(p.label)} (${escapeHtml(p.clause)}) — ${p.done ? `ticked ${p.done}` : 'not ticked'}`).join('; ')}</div>` : ''}
   <div class="meta"><strong>Record generated:</strong> ${formatDateTime(new Date().toISOString())}</div>
 
   <h2>Document checklist (${docsDone}/${plot.documents.length} complete)</h2>

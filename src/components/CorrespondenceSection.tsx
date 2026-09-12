@@ -31,13 +31,9 @@ export function CorrespondenceSection({
         Correspondence{' '}
         {items.length > 0 && <span className="count-pill">{items.length}</span>}
       </h3>
-      <button className="btn btn-block" onClick={onLog}>
-        <Icon name="mail" size={17} /> Log an email to or from the customer
-      </button>
       {items.length === 0 ? (
-        <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-          Paste emails here the day they happen — they join the timeline and the export, so the
-          record is complete without digging through your inbox later.
+        <p className="muted" style={{ fontSize: 12.5, marginTop: 0 }}>
+          Paste emails here the day they happen — they join the timeline and the export.
         </p>
       ) : (
         <div className="stack" style={{ marginTop: 10 }}>
@@ -69,6 +65,9 @@ export function CorrespondenceSection({
           )}
         </div>
       )}
+      <button className="btn btn-block" style={{ marginTop: 10 }} onClick={onLog}>
+        <Icon name="mail" size={17} /> Log an email to or from the customer
+      </button>
     </div>
   )
 }

@@ -73,6 +73,20 @@ export const DUE_STAGES: Record<PlotStage, string[]> = {
 }
 
 /**
+ * Document stages due for a plot right now. The pre-contract pack (2.6) is
+ * owed before exchange, so it comes due once the cooling-off period has
+ * ended rather than only after exchange.
+ */
+export function dueStagesFor(plot: Plot, today = todayISO()): string[] {
+  const stage = plotStage(plot, today)
+  const stages = [...DUE_STAGES[stage]]
+  if (stage === 'reserved' && plot.reservationDate && coolingOffEnd(plot.reservationDate) < today) {
+    stages.push('pre_contract')
+  }
+  return stages
+}
+
+/**
  * The auto-generated document checklist, grouped by journey stage.
  * Reservation: 2.2–2.3 · Pre-contract & exchange: 2.6–2.7 · Completion &
  * handover: 2.8, 2.11, 2.12, 3.1.
@@ -82,14 +96,16 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'reservation_agreement',
     label: 'Reservation Agreement signed, copy given to customer',
-    hint: 'Signed by both of you, and they keep a copy. It must include the fee, the 14-day cooling-off period, cancellation and refund terms, warranty provider details, and the exchange-by date (at least 6 weeks after reservation).',
+    customerLabel: 'Your signed Reservation Agreement',
+    hint: 'Signed by both of you, and they keep a copy. It must include the fee, the 14-day cooling-off period, cancellation and refund terms, warranty provider details, and the exchange-by date (at least six weeks after reservation).',
     clause: '2.2',
     stage: 'reservation',
   },
   {
     key: 'affordability_schedule',
     label: 'Affordability Schedule provided',
-    hint: 'The likely costs over the 5 years after the sale — ground rent, management and event fees, service charges (including rises and sinking funds), maintenance of built-in equipment, and upkeep of the property.',
+    customerLabel: 'Affordability Schedule (the likely running costs of your home)',
+    hint: 'The likely costs over the five years after the sale — ground rent, management and event fees, service charges (including rises and sinking funds), maintenance of built-in equipment, and upkeep of the property.',
     clause: '2.2',
     stage: 'reservation',
   },
@@ -97,6 +113,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'pre_contract_pack',
     label: 'Pre-contract information sent to customer’s legal adviser',
+    customerLabel: 'Pre-contract information, sent to your solicitor or conveyancer',
     hint: 'Warranty cover summary and provider contact, tenure, planning consent reference, list of included contents, confirmation the spec is as advertised (including the structural frame), build standards, any unusual restrictions, services that transfer later, management services, and the indicative costs schedule.',
     clause: '2.6',
     stage: 'pre_contract',
@@ -104,6 +121,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'expected_completion_info',
     label: 'Expected completion date + plan/brochure given',
+    customerLabel: 'Expected completion date and the plan of your home',
     hint: 'If the home is not yet complete: the expected completion date and a plan showing size, spec, layout, plot position and facing direction, steep slopes, boundary finishes and outbuildings.',
     clause: '2.6',
     stage: 'pre_contract',
@@ -111,6 +129,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'contact_named',
     label: 'Named contacts for questions given in writing',
+    customerLabel: 'Who to contact with questions (names and numbers)',
     hint: 'Who to contact (names and numbers) with questions before ownership transfers, and how their questions will be answered.',
     clause: '2.6',
     stage: 'pre_contract',
@@ -120,6 +139,13 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
     label: 'Warranty provider given the customer’s details',
     hint: 'At the end of the reservation period, give the home warranty provider full details of the customer and the reserved home, if the provider requires it.',
     clause: '2.5',
+    stage: 'pre_contract',
+  },
+  {
+    key: 'deposit_protection',
+    label: 'Deposit and fee protection arrangement in place',
+    hint: 'Code 2.13: reservation fees, deposits and other fees must be protected — through the warranty provider, a separate client account, or another adequate arrangement. Record which applies.',
+    clause: '2.13',
     stage: 'pre_contract',
   },
   {
@@ -133,13 +159,23 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'pre_completion_inspection',
     label: 'Pre-completion inspection offered / carried out',
-    hint: 'Offered after notice to complete and before the completion date, using the NHQB Pre-Completion Inspection Checklist.',
+    customerLabel: 'Pre-completion inspection offered',
+    hint: 'Offered after notice to complete and before the completion date, using the NHQB Pre-Completion Inspection Checklist. If the customer inspects themselves, tell them the checklist was designed for a professional.',
     clause: '2.8',
     stage: 'completion',
   },
   {
+    key: 'warranty_in_place',
+    label: 'New home warranty in place — evidence held',
+    hint: 'Code 2.10: legal completion can only take place on a complete new home with evidence that a new home warranty is in place.',
+    clause: '2.10',
+    stage: 'completion',
+    customerLabel: 'Confirmation that your new home warranty is in place',
+  },
+  {
     key: 'schedule_incomplete_work',
     label: 'Schedule of Incomplete Work (Home) issued',
+    customerLabel: 'Schedule of any work still to finish in your home',
     hint: 'After your final quality-assurance inspection — anything not finished at legal completion, with a statement of timescales for putting it right and the access you will need.',
     clause: '2.11',
     stage: 'completion',
@@ -147,6 +183,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'schedule_incomplete_dev',
     label: 'Schedule of Incomplete Work (Development) issued',
+    customerLabel: 'Schedule of work still to finish on the development',
     hint: 'The best available information on future phases of the development and estimated timescales, where known.',
     clause: '2.12',
     stage: 'completion',
@@ -154,6 +191,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'home_demonstration',
     label: 'Home demonstration completed',
+    customerLabel: 'Home demonstration (how your home and its systems work)',
     hint: 'Show the customer how the home, its systems and appliances work — can be combined with the pre-completion inspection.',
     clause: '2.11',
     stage: 'completion',
@@ -161,6 +199,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'warranty_docs',
     label: 'Warranty documentation provided',
+    customerLabel: 'Your warranty documents',
     hint: 'Full details of guarantees and warranties, plus the cover note or policy with exceptions, exclusions, limits and excesses.',
     clause: '2.11',
     stage: 'completion',
@@ -168,13 +207,15 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'complaints_procedure',
     label: 'Complaints procedure copy given to customer',
-    hint: 'A written copy of how to complain and the timescales.',
+    customerLabel: 'How to complain, and the timescales',
+    hint: 'A written copy of how to complain, the timescales, and how to refer a complaint to the New Homes Ombudsman Service.',
     clause: '2.11',
     stage: 'completion',
   },
   {
     key: 'health_safety_file',
     label: 'Health & safety file provided',
+    customerLabel: 'Health and safety file for your home',
     hint: 'For apartments, this goes to the managing agent or management company.',
     clause: '2.11',
     stage: 'completion',
@@ -182,6 +223,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'building_reg_certificate',
     label: 'Building regulation completion certificate',
+    customerLabel: 'Building regulation completion certificate',
     hint: 'Or confirmation the local authority has inspected (Scotland) — or a note explaining when it will be available.',
     clause: '2.11',
     stage: 'completion',
@@ -189,7 +231,16 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   {
     key: 'after_sales_statement',
     label: 'After-sales service written statement given',
-    hint: 'Your procedures and timescales, who to contact, the emergency process, and what counts as normal maintenance.',
+    customerLabel: 'Your developer\'s after-sales service statement',
+    hint: 'Your procedures and timescales, who to contact, what qualifies as an emergency and how to report one, how to refer a complaint to the New Homes Ombudsman Service, and what counts as normal maintenance.',
+    clause: '3.1',
+    stage: 'completion',
+  },
+  {
+    key: 'ongoing_works_hs',
+    label: 'Health and safety information for ongoing works given',
+    customerLabel: 'Health and safety information about building work still going on nearby',
+    hint: 'Code 3.1: if building work continues on the development after the customer moves in, tell them the precautions they must take and the measures you have in place.',
     clause: '3.1',
     stage: 'completion',
   },
@@ -205,7 +256,7 @@ export const PART1_TEMPLATE: ReadonlyArray<{ key: string; clause: string; label:
     key: 'marketing_clear',
     clause: '1.1',
     label: 'Sales information and marketing is clear, fair and not misleading',
-    hint: 'Adverts, brochures, website and the sales office. Material shows you are a registered developer, and the Code is available free of charge to any customer who asks.',
+    hint: 'Adverts, brochures, website and the sales office. Material states you are a registered developer and displays the Code logo, and the Code is available free of charge to any customer who asks.',
   },
   {
     key: 'home_described',
@@ -217,7 +268,7 @@ export const PART1_TEMPLATE: ReadonlyArray<{ key: string; clause: string; label:
     key: 'no_pressure',
     clause: '1.3',
     label: 'No high-pressure selling',
-    hint: 'No incentives for an immediate decision. Customers at time-bound events get time to consider before reserving.',
+    hint: 'No incentives for an immediate decision. Customers at time-bound events (such as launch weekends) get seven days to consider before reserving.',
   },
   {
     key: 'part_exchange',
@@ -342,9 +393,11 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       kind: 'refund',
       clause: isContract ? '2.13' : '2.4',
       label: isContract ? 'Refund contract deposit' : 'Refund reservation fee',
-      detail: isContract
-        ? `Within ${CONTRACT_REFUND_DAYS} days of the contract being cancelled.`
-        : `Within ${RESERVATION_REFUND_DAYS} days of the customer's notice, less any deductions set out in the Reservation Agreement.`,
+      detail: plot.cancellation.fullRefund
+        ? `In full — contract deposit, reservation fee and any other payments (Code 2.9) — within ${isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS} days.`
+        : isContract
+          ? `Within ${CONTRACT_REFUND_DAYS} days of the contract being cancelled.`
+          : `Within ${RESERVATION_REFUND_DAYS} days of the customer's notice, less any deductions set out in the Reservation Agreement.`,
       dueDate,
       daysRemaining,
       rag: ragForDeadline(daysRemaining),
@@ -385,7 +438,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       label: passed ? 'Exchange date passed — exchanged yet?' : 'Exchange of contracts due',
       detail:
         (passed
-          ? 'If contracts have exchanged, record the date under Edit details. If not, agree a new exchange-by date with the customer in writing.'
+          ? 'If contracts have exchanged, record the date under Edit details & dates & dates. If not, agree a new exchange-by date with the customer in writing.'
           : 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.') + agreed,
       dueDate: plot.exchangeDeadline,
       daysRemaining,
@@ -406,8 +459,8 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       out.push({
         kind: 'major_change',
         clause: '2.9',
-        label: 'Major change — send the written notice',
-        detail: 'Call the customer first, then send the written notice. Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.',
+        label: 'Major change — written notice not yet received',
+        detail: 'Call the customer first, then send the written notice and record the day they receive it. Their 14-day right to cancel runs from that day, and notice to complete cannot be served during the window.',
         rag: 'amber',
         changeId: change.id,
       })
@@ -445,9 +498,9 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   if (plot.expectedCompletionDate && !plot.completionDate && daysFromToday(plot.expectedCompletionDate) < 0) {
     out.push({
       kind: 'completion_passed',
-      clause: '2.6',
+      clause: '2.8',
       label: 'Expected completion date passed — completed?',
-      detail: 'If legal completion took place, record the date under Edit details. If not, log the delay and update the expected completion date so the customer is kept informed.',
+      detail: 'If legal completion took place, record the date under Edit details & dates & dates. If not, log the delay and update the expected completion date so the customer is kept informed.',
       dueDate: plot.expectedCompletionDate,
       daysRemaining: daysFromToday(plot.expectedCompletionDate),
       rag: 'amber',
@@ -512,10 +565,10 @@ export const FIXED_MILESTONES: MilestoneDef[] = [
   {
     key: 'assessment_response',
     offsetDays: 30,
-    label: 'Complaint Assessment & Response letter',
+    label: 'Complaint Assessment and Response letter',
     hasLetter: true,
   },
-  { key: 'eight_week', offsetDays: 56, label: 'Eight-Week letter', hasLetter: true },
+  { key: 'eight_week', offsetDays: 56, label: 'Eight-Week Letter', hasLetter: true },
 ]
 
 /** Interval for rolling updates after the eight-week letter, until closed. */
@@ -697,7 +750,7 @@ export function clockForIssue(issue: Issue, today = todayISO()): Clock | null {
     return {
       issueId: issue.id,
       type: 'snag',
-      label: explained ? 'Delayed snag — monthly update to the customer' : 'Snag — put right',
+      label: explained ? 'Delayed snag — monthly update to the customer' : 'Snag or defect — put right',
       dueDate,
       daysRemaining,
       rag: ragForDeadline(daysRemaining),

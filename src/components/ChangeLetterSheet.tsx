@@ -49,11 +49,13 @@ export function ChangeLetterSheet({
       title: draft.title,
       body,
     })
-    // Sending the major-change notice is what starts the customer's 14-day
-    // window (Code 2.9) — record the date it went.
-    if (isMajor && !change.noticeSentOn) {
-      dispatch({ type: 'RECORD_NOTICE_SENT', plotId: plot.id, changeId: change.id, date: sentOn || todayISO() })
-    }
+  }
+
+  // Receipt of the written notice is what starts the customer's 14-day window
+  // (Code 2.9) — an explicit step, never a side effect of copying or printing.
+  const markReceived = () => {
+    dispatch({ type: 'RECORD_NOTICE_SENT', plotId: plot.id, changeId: change.id, date: sentOn || todayISO() })
+    onToast('Recorded — the customer\'s 14-day window is running')
   }
 
   const email = () => {
@@ -96,7 +98,7 @@ export function ChangeLetterSheet({
       )}
       {isMajor && change.noticeSentOn && (
         <p className="muted" style={{ fontSize: 12.5, marginTop: 0 }}>
-          Written notice sent {formatDate(change.noticeSentOn)} — the customer may cancel until{' '}
+          Written notice received {formatDate(change.noticeSentOn)} — the customer may cancel until{' '}
           {cancelBy ? formatDate(cancelBy) : '—'}.
         </p>
       )}
@@ -105,12 +107,6 @@ export function ChangeLetterSheet({
         <textarea className="letter-body" value={body} onChange={(e) => setBody(e.target.value)} spellCheck />
       </div>
 
-      {isMajor && !change.noticeSentOn && (
-        <div className="field">
-          <label>Date sent (if posting, the date it goes in the post)</label>
-          <input type="date" value={sentOn} max={todayISO()} onChange={(e) => setSentOn(e.target.value)} />
-        </div>
-      )}
       <div className="wrap-actions" style={{ marginBottom: 12 }}>
         <button className="btn btn-sm btn-primary" onClick={email}>
           <Icon name="mail" size={16} /> Email to customer
@@ -125,16 +121,23 @@ export function ChangeLetterSheet({
       {!plot.customerEmail && (
         <p className="muted" style={{ fontSize: 12, marginTop: -4, marginBottom: 12 }}>
           No customer email saved for this plot — the email will open with a blank "To" box.
-          Add it via "Edit details" on the plot screen.
+          Add it via "Edit details & dates" on the plot screen.
         </p>
       )}
-      {isMajor && (
-        <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
-          Code 2.9: the customer's 14-day cancellation window runs from the day they{' '}
-          <strong>receive</strong> written details. Emailing, copying or printing this records
-          it as sent and starts the window. Do not serve notice to complete until the window
-          has closed.
-        </p>
+      {isMajor && !change.noticeSentOn && (
+        <div className="card" style={{ marginBottom: 12 }}>
+          <div className="field" style={{ marginBottom: 8 }}>
+            <label>Date the customer received it (the day it was emailed, or the delivery date if posted)</label>
+            <input type="date" value={sentOn} max={todayISO()} onChange={(e) => setSentOn(e.target.value)} />
+          </div>
+          <button className="btn btn-primary btn-block" onClick={markReceived}>
+            Record the notice as received
+          </button>
+          <p className="muted" style={{ fontSize: 12, margin: '8px 0 0' }}>
+            Code 2.9: the 14-day cancellation window runs from the day the customer receives
+            written details. Notice to complete cannot be served until it has closed.
+          </p>
+        </div>
       )}
       <button className="btn btn-block" onClick={onClose}>
         Done
