@@ -31,11 +31,11 @@ import { emptyState, id, loadState, saveState } from '../lib/storage'
 type Action =
   | { type: 'SET_DEVELOPER_NAME'; name: string }
   | { type: 'SET_DEVELOPER_EMAIL'; email: string }
-  | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string }
+  | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string; tradingName?: string }
   | {
       type: 'UPDATE_DEVELOPMENT'
       devId: string
-      patch: Partial<Pick<Development, 'name' | 'location' | 'status'>>
+      patch: Partial<Pick<Development, 'name' | 'location' | 'status' | 'tradingName'>>
     }
   | { type: 'DELETE_DEVELOPMENT'; devId: string }
   | {
@@ -60,6 +60,7 @@ type Action =
           | 'customerEmail'
           | 'reservationDate'
           | 'exchangeDeadline'
+          | 'exchangeAgreementNote'
           | 'exchangeDate'
           | 'noticeServedDate'
           | 'expectedCompletionDate'
@@ -85,7 +86,9 @@ type Action =
       date: string
       subject?: string
       body: string
+      issueId?: string
     }
+  | { type: 'RECORD_NOTICE_SENT'; plotId: string; changeId: string; date: string }
   | {
       type: 'RESOLVE_CHANGE'
       plotId: string
@@ -203,6 +206,7 @@ function reducer(state: AppState, action: Action): AppState {
         id: action.devId,
         name: action.name.trim(),
         location: action.location?.trim() || undefined,
+        tradingName: action.tradingName?.trim() || undefined,
         status: 'active',
         createdAt: nowISO(),
       }
@@ -213,6 +217,7 @@ function reducer(state: AppState, action: Action): AppState {
       const patch = { ...action.patch }
       if (patch.name !== undefined) patch.name = patch.name.trim()
       if (patch.location !== undefined) patch.location = patch.location.trim() || undefined
+      if (patch.tradingName !== undefined) patch.tradingName = patch.tradingName.trim() || undefined
       return {
         ...state,
         developments: state.developments.map((d) =>
@@ -283,6 +288,7 @@ function reducer(state: AppState, action: Action): AppState {
         const stamps: [keyof typeof patch, string, string?][] = [
           ['reservationDate', 'Reservation recorded', 'The 14-day cooling-off period runs from this date (Code 2.3).'],
           ['exchangeDeadline', 'Exchange-by date recorded', 'Code 2.2: at least six weeks after reservation unless the customer asks for earlier.'],
+          ['exchangeAgreementNote', 'Exchange-by date agreement noted'],
           ['exchangeDate', 'Exchange of contracts recorded'],
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
           ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6: keep the customer informed of the expected completion date and of any change to it.'],
@@ -317,10 +323,11 @@ function reducer(state: AppState, action: Action): AppState {
           major_change: 'MAJOR change notified in writing',
           delay: 'Delay notified',
           visit: 'Site visit / appointment recorded',
+          build_update: 'Build progress update given',
         }
         const detail =
           action.kind === 'major_change'
-            ? `${change.description}\nCustomer may cancel for a full refund until ${formatDate(majorChangeCancelBy(change))} (Code 2.9). Notice to complete must not be served during this window.`
+            ? `${change.description}\nCode 2.9: call the customer, then send the written notice. Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.`
             : change.description
         const ev = event('change_logged', `${noun[action.kind]}: ${truncate(change.description)}`, detail)
         return { plot: { ...plot, changes: [change, ...plot.changes] }, events: [ev] }
@@ -331,16 +338,19 @@ function reducer(state: AppState, action: Action): AppState {
         const rec: Correspondence = {
           id: id('cor_'),
           direction: action.direction,
+          issueId: action.issueId || undefined,
           date: action.date,
           subject: action.subject?.trim() || undefined,
           body: action.body.trim(),
           createdAt: nowISO(),
         }
         const who = action.direction === 'to_customer' ? 'Email to customer' : 'Email from customer'
+        const re = rec.issueId ? plot.issues.find((i) => i.id === rec.issueId)?.reference : undefined
         const ev = event(
           'correspondence_logged',
-          `${who}${rec.subject ? `: ${truncate(rec.subject)}` : `: ${truncate(rec.body)}`}`,
-          rec.body
+          `${who}${re ? ` (${re})` : ''}${rec.subject ? `: ${truncate(rec.subject)}` : `: ${truncate(rec.body)}`}`,
+          rec.body,
+          rec.issueId
         )
         return { plot: { ...plot, correspondence: [rec, ...(plot.correspondence || [])] }, events: [ev] }
       })
@@ -361,6 +371,26 @@ function reducer(state: AppState, action: Action): AppState {
           action.outcome === 'cancelled'
             ? 'Code 2.9: the customer is entitled to a full refund of the contract deposit, reservation fee and any other payments. Record the cancellation on this plot to start the refund clock.'
             : undefined
+        )
+        return { plot: { ...plot, changes }, events: [ev] }
+      })
+
+    case 'RECORD_NOTICE_SENT':
+      return updatePlot(state, action.plotId, (plot) => {
+        let desc = ''
+        const changes = plot.changes.map((c) => {
+          if (c.id !== action.changeId || c.kind !== 'major_change') return c
+          desc = c.description
+          // First recorded send stands — the window runs from the first notice.
+          return c.noticeSentOn ? c : { ...c, noticeSentOn: action.date }
+        })
+        const target = changes.find((c) => c.id === action.changeId)
+        if (!target || target.noticeSentOn !== action.date) return { plot, events: [] }
+        const cancelBy = majorChangeCancelBy(target)
+        const ev = event(
+          'change_logged',
+          `Written notice of major change sent — ${formatDate(action.date)}: ${truncate(desc)}`,
+          `Code 2.9: the customer may cancel for a full refund until ${cancelBy ? formatDate(cancelBy) : '—'} (14 days from receiving written details). Notice to complete must not be served during this window.`
         )
         return { plot: { ...plot, changes }, events: [ev] }
       })

@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { usePlot } from '../state/store'
 import { describeAction, plotStatus } from '../lib/status'
 import { exportPlotCSV, exportPlotPrintable } from '../lib/export'
+import { letterheadName } from '../lib/letterhead'
 import { useStore } from '../state/store'
 import { DocumentChecklist } from './DocumentChecklist'
 import { IssueSection } from './IssueSection'
@@ -186,7 +187,7 @@ export function PlotScreen({
             full history — ready if a customer query is ever escalated to the Ombudsman.
           </p>
           <div className="wrap-actions">
-            <button className="btn btn-sm btn-primary" onClick={() => exportPlotPrintable(plot, state.developerName)}>
+            <button className="btn btn-sm btn-primary" onClick={() => exportPlotPrintable(plot, letterheadName(state, plot))}>
               <Icon name="file" size={16} /> Export PDF
             </button>
             <button className="btn btn-sm" onClick={() => exportPlotCSV(plot)}>

@@ -9,6 +9,9 @@ import { useMemo, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { delayUpdateLetter, majorChangeLetter } from '../lib/letters'
+import { letterheadName } from '../lib/letterhead'
+import { formatDate, todayISO } from '../lib/dates'
+import { majorChangeCancelBy } from '../lib/code'
 import { Icon } from './icons'
 import type { ChangeRecord, Plot } from '../types'
 
@@ -24,14 +27,18 @@ export function ChangeLetterSheet({
   onToast: (msg: string) => void
 }) {
   const { state, dispatch } = useStore()
+  const from = letterheadName(state, plot)
   const draft = useMemo(
     () =>
       change.kind === 'delay'
-        ? delayUpdateLetter(state.developerName, plot, change)
-        : majorChangeLetter(state.developerName, plot, change),
-    [state.developerName, plot, change]
+        ? delayUpdateLetter(from, plot, change)
+        : majorChangeLetter(from, plot, change),
+    [from, plot, change]
   )
   const [body, setBody] = useState(draft.body)
+  const [sentOn, setSentOn] = useState(todayISO())
+  const isMajor = change.kind === 'major_change'
+  const cancelBy = majorChangeCancelBy(change)
 
   const record = () => {
     dispatch({
@@ -42,6 +49,11 @@ export function ChangeLetterSheet({
       title: draft.title,
       body,
     })
+    // Sending the major-change notice is what starts the customer's 14-day
+    // window (Code 2.9) — record the date it went.
+    if (isMajor && !change.noticeSentOn) {
+      dispatch({ type: 'RECORD_NOTICE_SENT', plotId: plot.id, changeId: change.id, date: sentOn || todayISO() })
+    }
   }
 
   const email = () => {
@@ -73,11 +85,32 @@ export function ChangeLetterSheet({
 
   return (
     <Sheet title={draft.title} subtitle="Check it, fill anything in [brackets], then send." onClose={onClose}>
+      {isMajor && !change.noticeSentOn && (
+        <div className="card" style={{ marginBottom: 12, borderLeft: '4px solid var(--accent)' }}>
+          <strong>Call the customer first.</strong>{' '}
+          <span className="muted">
+            Have the conversation, then send this notice. A letter should never be the first the
+            customer hears of a major change.
+          </span>
+        </div>
+      )}
+      {isMajor && change.noticeSentOn && (
+        <p className="muted" style={{ fontSize: 12.5, marginTop: 0 }}>
+          Written notice sent {formatDate(change.noticeSentOn)} — the customer may cancel until{' '}
+          {cancelBy ? formatDate(cancelBy) : '—'}.
+        </p>
+      )}
       <div className="field">
         <label>Draft (edit anything in [brackets], then send)</label>
         <textarea className="letter-body" value={body} onChange={(e) => setBody(e.target.value)} spellCheck />
       </div>
 
+      {isMajor && !change.noticeSentOn && (
+        <div className="field">
+          <label>Date sent (if posting, the date it goes in the post)</label>
+          <input type="date" value={sentOn} max={todayISO()} onChange={(e) => setSentOn(e.target.value)} />
+        </div>
+      )}
       <div className="wrap-actions" style={{ marginBottom: 12 }}>
         <button className="btn btn-sm btn-primary" onClick={email}>
           <Icon name="mail" size={16} /> Email to customer
@@ -95,11 +128,12 @@ export function ChangeLetterSheet({
           Add it via "Edit details" on the plot screen.
         </p>
       )}
-      {change.kind === 'major_change' && (
+      {isMajor && (
         <p className="muted" style={{ fontSize: 12, marginBottom: 12 }}>
           Code 2.9: the customer's 14-day cancellation window runs from the day they{' '}
-          <strong>receive</strong> written details — send this promptly, and do not serve
-          notice to complete until the window has closed.
+          <strong>receive</strong> written details. Emailing, copying or printing this records
+          it as sent and starts the window. Do not serve notice to complete until the window
+          has closed.
         </p>
       )}
       <button className="btn btn-block" onClick={onClose}>

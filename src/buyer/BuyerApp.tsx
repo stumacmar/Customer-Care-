@@ -11,6 +11,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
 import { BrandLogo, BrandMark } from '../components/Brand'
 import { Icon } from '../components/icons'
 import { Sheet, useToast, DictationField } from '../components/ui'
@@ -22,7 +23,7 @@ import {
   SNAG_PUT_RIGHT_DAYS,
 } from '../lib/code'
 import { NHOS_CONTACT } from '../lib/letters'
-import { CODE_SOURCE_URL } from '../lib/codeContent'
+import { CODE_SOURCE_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
 import { addDays, addYears, daysFromToday, formatDate, nowISO, todayISO } from '../lib/dates'
 import { id } from '../lib/storage'
 import {
@@ -286,7 +287,7 @@ function JourneyStrip({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage 
 }
 
 function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; today?: string }) {
-  const items: string[] = []
+  const items: ReactNode[] = []
   if (stage === 'reserved' && snap.reservationDate) {
     const coolingEnd = addDays(snap.reservationDate, COOLING_OFF_DAYS)
     if (daysFromToday(coolingEnd) >= 0) {
@@ -305,7 +306,15 @@ function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; to
   }
   if (stage === 'notice_served') {
     items.push(
-      'Notice to complete has been served. You have the right to a pre-completion inspection before completion day — you can attend yourself or appoint a professional inspector (using the NHQB checklist). Ask your developer to arrange it.'
+      <>
+        Notice to complete has been served. You have the right to a pre-completion inspection
+        before completion day — you can attend yourself or appoint a suitably qualified
+        professional. Use the NHQB checklist:{' '}
+        <a href={PCI_CHECKLIST_HOUSE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>house</a>
+        {' · '}
+        <a href={PCI_CHECKLIST_APARTMENT_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>apartment</a>
+        . Ask your developer to arrange it.
+      </>
     )
   }
   if (stage === 'completed' && snap.completionDate) {
@@ -314,10 +323,10 @@ function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; to
       `Your developer's after-sales service covers you until ${formatDate(windowEnd)} (${AFTER_SALES_YEARS} years from legal completion). Your developer is your first point of contact for anything that is not right — report it as soon as you notice it.`
     )
   }
-  const openMajor = snap.changes.find((c) => c.kind === 'major_change' && !c.outcome)
-  if (openMajor && daysFromToday(addDays(openMajor.date, MAJOR_CHANGE_CANCEL_DAYS)) >= 0 && stage !== 'completed') {
+  const openMajor = snap.changes.find((c) => c.kind === 'major_change' && !c.outcome && c.cancelBy)
+  if (openMajor && openMajor.cancelBy && daysFromToday(openMajor.cancelBy) >= 0 && stage !== 'completed') {
     items.push(
-      `A major change to your home was notified on ${formatDate(openMajor.date)}. If you find it unacceptable you can cancel within ${MAJOR_CHANGE_CANCEL_DAYS} days of receiving the written details and receive all your money back — speak to your solicitor or conveyancer.`
+      `Your developer has given you written details of a major change to your home. If you find it unacceptable you can cancel within ${MAJOR_CHANGE_CANCEL_DAYS} days of receiving those details — until ${formatDate(openMajor.cancelBy)} — and receive all your money back. Speak to your solicitor or conveyancer.`
     )
   }
   if (items.length === 0) return null
@@ -657,6 +666,7 @@ function ChoicesAndChanges({ snap }: { snap: BuyerSnapshot }) {
     major_change: 'Major change',
     delay: 'Delay',
     visit: 'Site visit',
+    build_update: 'Build update',
   }
   return (
     <div className="section">
@@ -709,7 +719,8 @@ function YourRights() {
         </p>
         <p>
           <strong>The New Homes Ombudsman Service</strong> — if a complaint is not resolved
-          after 56 days you may refer it, free of charge, to the Ombudsman:
+          after 56 days you may refer it, free of charge, to the Ombudsman. Complaints to NHOS are
+          made through their own online portal, separate from this app:
           <br />
           <span className="muted" style={{ fontSize: 13 }}>{NHOS_CONTACT}</span>
         </p>

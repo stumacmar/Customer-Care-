@@ -35,6 +35,17 @@ export const CODE_VERSION = 'Version 2 (March 2026)'
 export const CODE_SOURCE_URL =
   'https://www.nhqb.org.uk/wp-content/uploads/2026/02/New-Homes-Quality-Code-V2-March-2026.pdf'
 
+/** NHQB's published resources (nhqb.org.uk/resources, checked September 2026). */
+export const QUICK_GUIDE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/A-quick-guide-to-the-New-Homes-Quality-Code-V2-March-26.pdf'
+export const PCI_CHECKLIST_HOUSE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/NHQB-PCI-Checklist-house-V2-March-2026.pdf'
+export const PCI_CHECKLIST_APARTMENT_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/02/NHQB-PCI-Checklist-apartment-V2-March-2026.pdf'
+export const SNAGGING_GUIDE_URL =
+  'https://www.nhqb.org.uk/wp-content/uploads/2026/06/A-Homeowner-Guide-to-Snagging-V2-May-2026.pdf'
+export const NHOS_URL = 'https://www.nhos.org.uk/'
+
 const PART_PRINCIPLES = 'Statement of Principles'
 const PART_1 = 'Part 1 · Selling a new home'
 const PART_2 = 'Part 2 · Legal documents, information, inspection & completion'

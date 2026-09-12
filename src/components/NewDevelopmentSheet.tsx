@@ -18,11 +18,12 @@ export function NewDevelopmentSheet({
   const { dispatch } = useStore()
   const [name, setName] = useState('')
   const [location, setLocation] = useState('')
+  const [tradingName, setTradingName] = useState('')
 
   const submit = () => {
     if (!name.trim()) return
     const devId = id('dev_')
-    dispatch({ type: 'ADD_DEVELOPMENT', devId, name, location: location || undefined })
+    dispatch({ type: 'ADD_DEVELOPMENT', devId, name, location: location || undefined, tradingName: tradingName || undefined })
     onCreated(devId)
   }
 
@@ -43,6 +44,14 @@ export function NewDevelopmentSheet({
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           placeholder="e.g. Cheltenham"
+        />
+      </div>
+      <div className="field">
+        <label>Trading name for letters (optional)</label>
+        <input
+          value={tradingName}
+          onChange={(e) => setTradingName(e.target.value)}
+          placeholder="Only if this site trades under a different name, e.g. a subsidiary or JV"
         />
       </div>
       <div className="sheet-actions">

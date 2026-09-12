@@ -5,6 +5,7 @@
  * team, one screen.
  */
 
+import { CODE_SOURCE_URL, NHOS_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL, QUICK_GUIDE_URL, SNAGGING_GUIDE_URL } from '../lib/codeContent'
 import { useRef, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
@@ -65,7 +66,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
 
   const loadDemo = () => {
     if (state.plots.length && !confirm('Load demo data? This adds a sample development alongside what you have.')) return
-    const seed = buildSeedState(state.developerName || 'Meadow Homes Ltd')
+    const seed = buildSeedState(state.developerName || 'Meadow Homes Ltd', state.developerEmail)
     dispatch({
       type: 'REPLACE_STATE',
       state: {
@@ -124,7 +125,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       </div>
 
       <div className="field">
-        <label>Your email (customer reports from shared plot links arrive here)</label>
+        <label>Your email — required before sharing a plot. Customer reports arrive here; use a shared mailbox so nothing is missed.</label>
         <input
           type="email"
           value={email}
@@ -240,8 +241,8 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
             <div className="muted" style={{ fontSize: 14, marginTop: 8 }}>
               <p style={{ marginTop: 0 }}>
                 <strong>Where the data lives:</strong> everything you enter stays on this device
-                only. Nothing is sent to us or anyone else — there is no server. Emailing a
-                letter uses your own email account.
+                only. Nothing is sent to us or anyone else — the app has no online storage.
+                Emailing a letter uses your own email account.
               </p>
               <p>
                 <strong>You are the data controller</strong> for your customers' details (names,
@@ -265,6 +266,23 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
               </p>
             </div>
           )}
+        </div>
+      </div>
+
+      <div className="section">
+        <h3>NHQB resources</h3>
+        <div className="card" style={{ fontSize: 14, lineHeight: 1.7 }}>
+          <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>The New Homes Quality Code V2 (PDF)</a>
+          <br />
+          <a href={QUICK_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>A quick guide to the Code (PDF)</a>
+          <br />
+          <a href={PCI_CHECKLIST_HOUSE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Pre-completion inspection checklist — house (PDF)</a>
+          <br />
+          <a href={PCI_CHECKLIST_APARTMENT_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Pre-completion inspection checklist — apartment (PDF)</a>
+          <br />
+          <a href={SNAGGING_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>A Homeowner Guide to Snagging (PDF)</a>
+          <br />
+          <a href={NHOS_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>New Homes Ombudsman Service — complaints are made through their own portal</a>
         </div>
       </div>
 

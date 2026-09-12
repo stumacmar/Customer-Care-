@@ -69,11 +69,17 @@ export function developmentStatus(dev: Development, plots: Plot[]): DevelopmentS
   if (needAction > 0) rag = 'red'
   else if (dueSoon > 0) rag = 'amber'
 
+  // The nearest dated action across the site, so green and amber carry a
+  // time frame rather than just a colour.
+  const soonest = statuses
+    .map((s) => s.next.daysRemaining)
+    .filter((d): d is number => d !== undefined)
+    .sort((a, b) => a - b)[0]
   const parts: string[] = []
   parts.push(`${active.length} plot${active.length === 1 ? '' : 's'}`)
   if (needAction > 0) parts.push(`${needAction} need action`)
-  else if (dueSoon > 0) parts.push(`${dueSoon} due soon`)
-  else if (dev.status === 'active' && active.length > 0) parts.push('all on track')
+  else if (dueSoon > 0) parts.push(`${dueSoon} due soon${soonest !== undefined ? ` · next ${describeCountdown(soonest)}` : ''}`)
+  else if (dev.status === 'active' && active.length > 0) parts.push(soonest !== undefined ? `on track · next ${describeCountdown(soonest)}` : 'all on track')
   if (retired > 0) parts.push(`${retired} retired`)
   if (dev.status === 'finished') parts.unshift('Finished')
 
@@ -178,6 +184,10 @@ export function nextAction(plot: Plot): NextAction {
   for (const c of plot.changes) {
     if (!journeyLive || c.kind !== 'major_change' || c.outcome) continue
     const cancelBy = majorChangeCancelBy(c)
+    if (!cancelBy) {
+      candidates.push({ label: 'Call the customer, then send the written notice of the major change (Code 2.9)', rag: 'amber', priority: 2 })
+      continue
+    }
     if (daysFromToday(cancelBy) >= 0) {
       candidates.push({
         label: `Waiting on the customer — they may cancel until ${formatDate(cancelBy)}`,

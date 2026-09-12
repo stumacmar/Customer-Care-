@@ -29,6 +29,7 @@ export function EditPlotSheet({
   const [customerEmail, setCustomerEmail] = useState(plot.customerEmail || '')
   const [reservationDate, setReservationDate] = useState(plot.reservationDate || '')
   const [exchangeDeadline, setExchangeDeadline] = useState(plot.exchangeDeadline || '')
+  const [exchangeAgreementNote, setExchangeAgreementNote] = useState(plot.exchangeAgreementNote || '')
   const [exchangeDate, setExchangeDate] = useState(plot.exchangeDate || '')
   const [noticeServedDate, setNoticeServedDate] = useState(plot.noticeServedDate || '')
   const [expectedCompletionDate, setExpectedCompletionDate] = useState(plot.expectedCompletionDate || '')
@@ -46,6 +47,7 @@ export function EditPlotSheet({
         customerEmail,
         reservationDate: reservationDate || undefined,
         exchangeDeadline: exchangeDeadline || undefined,
+        exchangeAgreementNote: exchangeAgreementNote || undefined,
         exchangeDate: exchangeDate || undefined,
         noticeServedDate: noticeServedDate || undefined,
         expectedCompletionDate: expectedCompletionDate || undefined,
@@ -117,6 +119,14 @@ export function EditPlotSheet({
               Use that date
             </button>
           </div>
+        )}
+        {exchangeDeadline && (
+          <input
+            style={{ marginTop: 8 }}
+            value={exchangeAgreementNote}
+            onChange={(e) => setExchangeAgreementNote(e.target.value)}
+            placeholder="Agreed extension or change? Note the reason and who agreed it (kept on the record)"
+          />
         )}
         {exchangeTooEarly && (
           <div className="dictate-hint" style={{ color: 'var(--amber)' }}>

@@ -10,6 +10,7 @@ import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { buildSnapshot, buyerLink, encodeShare } from '../lib/share'
 import { todayISO } from '../lib/dates'
+import { letterheadName } from '../lib/letterhead'
 import { Icon } from './icons'
 import type { Plot } from '../types'
 
@@ -24,18 +25,21 @@ export function BuyerShareSheet({
 }) {
   const { state, dispatch } = useStore()
   const [link, setLink] = useState<string | null>(null)
+  const from = letterheadName(state, plot)
+  // Customer reports come back to this address; without one they would be
+  // lost, so sharing waits until it is set.
+  const ready = !!state.developerEmail
 
   useEffect(() => {
+    if (!ready) return
     let alive = true
-    encodeShare(buildSnapshot(plot, state.developerName, state.developerEmail, todayISO())).then(
-      (code) => {
-        if (alive) setLink(buyerLink(code))
-      }
-    )
+    encodeShare(buildSnapshot(plot, from, state.developerEmail, todayISO())).then((code) => {
+      if (alive) setLink(buyerLink(code))
+    })
     return () => {
       alive = false
     }
-  }, [plot, state.developerName, state.developerEmail])
+  }, [plot, from, state.developerEmail, ready])
 
   const record = () => {
     dispatch({
@@ -67,7 +71,7 @@ export function BuyerShareSheet({
       `the documents you have received, your choices, and how to report anything to us:\n\n${link}\n\n` +
       `Open it on your phone and choose "Add to Home Screen" to keep it like an app. ` +
       `We will send you a fresh link whenever there is an update.\n\n` +
-      `${state.developerName || ''}`
+      `${from}`
     location.href = `mailto:${encodeURIComponent(plot.customerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     onToast('Share recorded — opening your email app')
     onClose()
@@ -94,11 +98,14 @@ export function BuyerShareSheet({
         </p>
       </div>
 
-      {!state.developerEmail && (
-        <div className="card" style={{ marginBottom: 12 }}>
-          <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-            Tip: add your email in Settings first — customer reports will then arrive pre-addressed
-            to you.
+      {!ready && (
+        <div className="card" style={{ marginBottom: 12, borderLeft: '4px solid var(--accent)' }}>
+          <p style={{ margin: 0, fontSize: 14 }}>
+            <strong>Add your email in Settings before sharing.</strong>
+          </p>
+          <p className="muted" style={{ margin: '6px 0 0', fontSize: 13 }}>
+            The customer's reports are sent to that address. Use a shared mailbox (for example
+            customercare@yourcompany.co.uk) so nothing is missed when someone is away.
           </p>
         </div>
       )}

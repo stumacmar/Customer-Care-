@@ -16,12 +16,13 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from './icons'
 import { Sheet } from './ui'
 import { VIDEOS, type VideoSlug } from '../lib/videoLibrary'
+import { PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
 
 type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 136
+const TOUR_DURATION = 140
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -40,7 +41,7 @@ const ORDER: VideoSlug[] = GROUPS.flatMap((g) => g.slugs)
  * than a Code stage. IMPORTANT: tour timestamps must be refreshed whenever
  * demo.mp4 is re-recorded; the scenario videos regenerate with the app.
  */
-const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: string[] }[] = [
+const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: string[]; links?: { label: string; href: string }[] }[] = [
   {
     title: 'Set up once (two minutes)',
     videos: ['setup'],
@@ -81,8 +82,8 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Choices, changes and delays',
     videos: ['choices', 'major-change', 'delay'],
     body: [
-      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
-      'A MAJOR change (one that significantly affects size, appearance or value) is special: the app starts the customer\'s 14-day cancellation window, warns you not to serve notice to complete during it, and drafts the written notice the Code requires. When the window ends, record whether they accepted or cancelled.',
+      '"Log a choice, change, delay or visit" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, roof on and watertight (a build update), plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
+      'A MAJOR change (one that significantly affects size, appearance or value) is special. Call the customer first and have the conversation, then send the written notice the app drafts. The customer\'s 14-day cancellation window runs from the day they receive that notice — the app starts it when you record the notice as sent — and warns you not to serve notice to complete during it. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
       'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. Attendance disputes are among the most common Code disputes, and this is the evidence that settles them.',
     ],
@@ -104,6 +105,10 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
       'When you serve notice to complete, record the date. The app checks you have left at least 14 calendar days before completion and prompts you to offer the pre-completion inspection — the customer can attend themselves or appoint a suitably qualified professional, using the NHQB checklist.',
       'Anything the inspection finds that falls short of warranty standards: log it as a snag or defect — put right before completion where possible, or within 30 days.',
       'At legal completion, work down the handover group of the checklist: schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regulations certificate, after-sales statement. Attach files as you go.',
+    ],
+    links: [
+      { label: 'NHQB pre-completion inspection checklist — house (PDF)', href: PCI_CHECKLIST_HOUSE_URL },
+      { label: 'NHQB pre-completion inspection checklist — apartment (PDF)', href: PCI_CHECKLIST_APARTMENT_URL },
     ],
   },
   {
@@ -127,9 +132,9 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Sharing with your customer',
-    watchAt: 87,
+    watchAt: 90,
     body: [
-      '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, not through any server. Copy it into WhatsApp or use the pre-written email.',
+      '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
       'When they report a problem, you get an email carrying a small code. Tap "Paste a report from the customer\'s app" under the three log buttons, paste the email, and it logs with the correct Code timescale — their words and date preserved. Their app keeps their own record of what they sent and when.',
       'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Note that before completion every report arrives as a formal complaint, because under the Code snags exist only after completion, and the emergency option appears only once they have moved in. A pre-completion report you would call a snag is therefore a complaint under the Code, and its timetable applies.',
@@ -393,6 +398,18 @@ export function GuideTab() {
                   {s.body.map((p, i) => (
                     <p key={i}>{p}</p>
                   ))}
+                  {s.links && (
+                    <p>
+                      {s.links.map((l, i) => (
+                        <span key={l.href}>
+                          {i > 0 && <br />}
+                          <a href={l.href} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
+                            {l.label}
+                          </a>
+                        </span>
+                      ))}
+                    </p>
+                  )}
                 </div>
               </details>
             ))}

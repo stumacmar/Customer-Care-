@@ -9,6 +9,7 @@
 import { useMemo, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
+import { letterheadName } from '../lib/letterhead'
 import { LETTER_MENU, generateLetter } from '../lib/letters'
 import { Icon } from './icons'
 import type { Issue, Plot } from '../types'
@@ -29,10 +30,8 @@ export function LetterSheet({
   const { state, dispatch } = useStore()
   const [key, setKey] = useState(initialKey || 'acknowledgement')
 
-  const generated = useMemo(
-    () => generateLetter(key, state.developerName, plot, issue),
-    [key, state.developerName, plot, issue]
-  )
+  const from = letterheadName(state, plot)
+  const generated = useMemo(() => generateLetter(key, from, plot, issue), [key, from, plot, issue])
   const [body, setBody] = useState(generated.body)
 
   // Regenerate the editable body when the selected letter changes.

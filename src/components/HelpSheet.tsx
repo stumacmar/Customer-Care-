@@ -37,7 +37,7 @@ const STEPS: Step[] = [
   },
   {
     rag: true,
-    text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = on track.',
+    text: 'Glance at the colours daily. Orange = act this week. Red = act today. Green = on track, time in hand.',
   },
   {
     icon: 'edit',

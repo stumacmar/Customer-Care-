@@ -93,7 +93,7 @@ export function DevelopmentsList({
             </div>
             <div className="sell-row">
               <Icon name="key" size={17} strokeWidth={1.8} />
-              <span>Customers get their own app through a private link — no server, no accounts</span>
+              <span>Customers get their own app through a private link — nothing is uploaded anywhere, no accounts to set up</span>
             </div>
             <div className="sell-row">
               <Icon name="mail" size={17} strokeWidth={1.8} />

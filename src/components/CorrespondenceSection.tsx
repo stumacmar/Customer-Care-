@@ -7,7 +7,7 @@
 
 import { useState } from 'react'
 import { DictationField, Sheet } from './ui'
-import { useStore } from '../state/store'
+import { usePlot, useStore } from '../state/store'
 import { formatDate, todayISO } from '../lib/dates'
 import { Icon } from './icons'
 import type { Plot } from '../types'
@@ -48,6 +48,11 @@ export function CorrespondenceSection({
                   {c.direction === 'to_customer' ? 'To customer' : 'From customer'}
                 </span>
                 <span className="ref">{formatDate(c.date)}</span>
+                {c.issueId && (
+                  <span className="ref" style={{ marginLeft: 'auto' }}>
+                    re {plot.issues.find((i) => i.id === c.issueId)?.reference || 'issue'}
+                  </span>
+                )}
               </div>
               {c.subject && (
                 <div style={{ fontWeight: 600, fontSize: 14, margin: '2px 0 4px' }}>{c.subject}</div>
@@ -81,14 +86,19 @@ export function LogEmailSheet({
   onLogged: (msg: string) => void
 }) {
   const { dispatch } = useStore()
+  const plot = usePlot(plotId)
   const [direction, setDirection] = useState<'to_customer' | 'from_customer'>('from_customer')
   const [date, setDate] = useState(todayISO())
   const [subject, setSubject] = useState('')
   const [body, setBody] = useState(initialBody || '')
+  const [issueId, setIssueId] = useState<string>('')
+  // Emails about a live complaint or snag are filed under it, so the NHOS
+  // bundle carries the whole exchange, not just the milestone letters.
+  const openIssues = (plot?.issues || []).filter((i) => i.status === 'open')
 
   const submit = () => {
     if (!body.trim()) return
-    dispatch({ type: 'LOG_CORRESPONDENCE', plotId, direction, date: date || todayISO(), subject, body })
+    dispatch({ type: 'LOG_CORRESPONDENCE', plotId, direction, date: date || todayISO(), subject, body, issueId: issueId || undefined })
     onLogged('Email logged to the record')
     onClose()
   }
@@ -118,6 +128,20 @@ export function LogEmailSheet({
         <label>Date the email was sent</label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>
+
+      {openIssues.length > 0 && (
+        <div className="field">
+          <label>About an open complaint or snag? (optional)</label>
+          <select value={issueId} onChange={(e) => setIssueId(e.target.value)}>
+            <option value="">General — not about a specific issue</option>
+            {openIssues.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.reference} — {i.type}: {i.description.slice(0, 50)}
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
 
       <div className="field">
         <label>Subject (optional)</label>

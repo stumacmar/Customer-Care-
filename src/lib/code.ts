@@ -231,9 +231,13 @@ export function ragForDeadline(daysRemaining: number): Rag {
   return 'green'
 }
 
-/** The cancel-by date for a major change's 14-day window — Code 2.9. */
-export function majorChangeCancelBy(change: ChangeRecord): string {
-  return addDays(change.date, MAJOR_CHANGE_CANCEL_DAYS)
+/**
+ * The cancel-by date for a major change's 14-day window — Code 2.9: 14 days
+ * from the customer receiving written details. Null until the written notice
+ * has been recorded as sent.
+ */
+export function majorChangeCancelBy(change: ChangeRecord): string | null {
+  return change.noticeSentOn ? addDays(change.noticeSentOn, MAJOR_CHANGE_CANCEL_DAYS) : null
 }
 
 /** The completion date the notice period and inspection are measured against. */
@@ -264,9 +268,10 @@ export function milestoneDue(issue: Issue, key: MilestoneKey): string {
 
 /** Open major changes whose 14-day window contains `iso` — Code 2.9. */
 export function majorChangeWindowsCovering(plot: Plot, iso: string): ChangeRecord[] {
-  return plot.changes.filter(
-    (c) => c.kind === 'major_change' && c.date <= iso && iso <= majorChangeCancelBy(c)
-  )
+  return plot.changes.filter((c) => {
+    const end = majorChangeCancelBy(c)
+    return c.kind === 'major_change' && !!c.noticeSentOn && c.noticeSentOn <= iso && !!end && iso <= end
+  })
 }
 
 /**
@@ -323,13 +328,15 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   if (stage === 'reserved' && plot.exchangeDeadline) {
     const daysRemaining = daysFromToday(plot.exchangeDeadline)
     const passed = daysRemaining < 0
+    const agreed = plot.exchangeAgreementNote ? ` Agreed: ${plot.exchangeAgreementNote}` : ''
     out.push({
       kind: 'exchange',
       clause: '2.2',
       label: passed ? 'Exchange date passed — exchanged yet?' : 'Exchange of contracts due',
-      detail: passed
-        ? 'If contracts have exchanged, record the date under Edit details. If not, agree a new exchange-by date with the customer in writing.'
-        : 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.',
+      detail:
+        (passed
+          ? 'If contracts have exchanged, record the date under Edit details. If not, agree a new exchange-by date with the customer in writing.'
+          : 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.') + agreed,
       dueDate: plot.exchangeDeadline,
       daysRemaining,
       rag: passed ? 'amber' : ragForDeadline(daysRemaining),
@@ -343,6 +350,19 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   for (const change of plot.changes) {
     if (change.kind !== 'major_change' || change.outcome) continue
     const cancelBy = majorChangeCancelBy(change)
+    if (!cancelBy) {
+      // Logged but not yet notified in writing — the Code's window has not
+      // started, and the customer has not been told.
+      out.push({
+        kind: 'major_change',
+        clause: '2.9',
+        label: 'Major change — send the written notice',
+        detail: 'Call the customer first, then send the written notice. Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.',
+        rag: 'amber',
+        changeId: change.id,
+      })
+      continue
+    }
     const daysRemaining = daysFromToday(cancelBy)
     out.push({
       kind: 'major_change',

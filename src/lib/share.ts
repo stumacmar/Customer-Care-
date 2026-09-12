@@ -13,6 +13,7 @@
  * paste-code inside a pre-addressed email.
  */
 
+import { majorChangeCancelBy } from './code'
 import type { ChangeKind, DocumentStage, IssueStatus, IssueType, Plot } from '../types'
 
 // ---------------------------------------------------------------------------
@@ -30,6 +31,8 @@ export interface SnapshotChange {
   date: string
   description: string
   outcome?: 'accepted' | 'cancelled'
+  /** Major changes: last day the customer may cancel, once the written notice has been sent. */
+  cancelBy?: string
 }
 
 export interface SnapshotIssue {
@@ -114,6 +117,7 @@ export function buildSnapshot(
       date: c.date,
       description: c.description,
       outcome: c.outcome,
+      cancelBy: c.kind === 'major_change' ? majorChangeCancelBy(c) || undefined : undefined,
     })),
     // A second owner sees only matters raised since the home changed hands —
     // the first owner's complaints are their personal data.

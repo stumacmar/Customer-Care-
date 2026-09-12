@@ -357,7 +357,7 @@ export function majorChangeLetter(
     'Your right to cancel:',
     `   If you find this change unacceptable, you have the right to cancel your ` +
       `Reservation Agreement or contract of sale within 14 days of receiving this ` +
-      `letter — that is, by ${formatDate(cancelBy)} — and receive a full refund of your ` +
+      `letter${cancelBy ? ` — that is, by ${formatDate(cancelBy)} —` : ' —'} and receive a full refund of your ` +
       'contract deposit, reservation fee and any other payments you have made.',
     '',
     'We recommend that you discuss this letter with your legal adviser before deciding.',

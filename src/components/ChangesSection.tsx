@@ -43,6 +43,11 @@ export const CHANGE_KIND_META: Record<
     badgeClass: 'snag',
     blurb: 'The expected completion timetable has moved. Keep the customer informed — and update the expected completion date on this plot too.',
   },
+  build_update: {
+    label: 'Build update',
+    badgeClass: 'complaint',
+    blurb: 'A progress update given to the customer — the stage the build has reached and what happens next. Not a change to the home; the record that they were kept informed.',
+  },
   visit: {
     label: 'Site visit',
     badgeClass: 'complaint',
@@ -123,7 +128,8 @@ function ChangeCard({
 }) {
   const meta = CHANGE_KIND_META[change.kind]
   const isMajor = change.kind === 'major_change'
-  const windowOpen = isMajor && !change.outcome && daysFromToday(majorChangeCancelBy(change)) >= 0
+  const cancelBy = isMajor ? majorChangeCancelBy(change) : null
+  const windowOpen = isMajor && !change.outcome && !!cancelBy && daysFromToday(cancelBy) >= 0
 
   return (
     <div className="card">
@@ -132,9 +138,11 @@ function ChangeCard({
         <span className="ref">{formatDate(change.date)}</span>
         {isMajor && !change.outcome && (
           <span className="badge snag" style={{ marginLeft: 'auto' }}>
-            {windowOpen
-              ? `cancel window ${describeCountdown(daysFromToday(majorChangeCancelBy(change))).replace('due ', 'ends ')}`
-              : 'record outcome'}
+            {!cancelBy
+              ? 'notice not sent'
+              : windowOpen
+                ? `cancel window ${describeCountdown(daysFromToday(cancelBy)).replace('due ', 'ends ')}`
+                : 'record outcome'}
           </span>
         )}
         {isMajor && change.outcome && (
@@ -153,7 +161,7 @@ function ChangeCard({
             <Icon name="mail" size={15} /> {change.kind === 'delay' ? 'Draft update' : 'Draft written notice'}
           </button>
         )}
-        {isMajor && !change.outcome && (
+        {isMajor && !change.outcome && !!cancelBy && (
           <button className="btn btn-sm" onClick={onResolve}>
             Record outcome
           </button>

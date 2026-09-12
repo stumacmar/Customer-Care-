@@ -12,7 +12,7 @@ import { id } from '../lib/storage'
 import { CHANGE_KIND_META } from './ChangesSection'
 import type { ChangeKind } from '../types'
 
-const KINDS: ChangeKind[] = ['choice', 'extra', 'minor_change', 'major_change', 'delay', 'visit']
+const KINDS: ChangeKind[] = ['choice', 'extra', 'minor_change', 'major_change', 'delay', 'build_update', 'visit']
 
 const PLACEHOLDERS: Record<ChangeKind, string> = {
   choice: 'e.g. Front door confirmed: Anthracite grey, Suffolk style',
@@ -21,6 +21,7 @@ const PLACEHOLDERS: Record<ChangeKind, string> = {
   major_change: 'e.g. Kitchen/diner layout revised — window moved to side elevation',
   delay: 'e.g. Completion moved from June to August — brickwork delays',
   visit: 'e.g. Plumber attended 8:30–11:00, fixed S-001 — or: electrician 9am, no access, card left',
+  build_update: 'e.g. Roof on and watertight; first fix starts next week — customer emailed with photos',
 }
 
 export function LogChangeSheet({
@@ -54,7 +55,7 @@ export function LogChangeSheet({
     })
     onLogged(
       kind === 'major_change'
-        ? 'Major change logged — 14-day cancellation window started'
+        ? 'Major change logged — call the customer, then send the written notice'
         : `${meta.label} logged`,
       kind,
       changeId
@@ -99,7 +100,7 @@ export function LogChangeSheet({
 
       <div className="field">
         <label>
-          {kind === 'delay' ? 'Date the customer was told' : kind === 'visit' ? 'Date of the visit / appointment' : kind.endsWith('change') ? 'Date notified to the customer' : 'Date agreed / confirmed'}
+          {kind === 'delay' || kind === 'build_update' ? 'Date the customer was told' : kind === 'visit' ? 'Date of the visit / appointment' : kind === 'major_change' ? 'Date the change was identified' : kind === 'minor_change' ? 'Date notified to the customer' : 'Date agreed / confirmed'}
         </label>
         <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
       </div>

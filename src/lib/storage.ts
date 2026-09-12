@@ -56,6 +56,12 @@ function migrate(parsed: Partial<AppState>): AppState {
       p.expectedCompletionDate = p.completionDate
       p.completionDate = undefined
     }
+    // Pre-v5 major changes were logged as "date notified to the customer", so
+    // that date is the notice date; new records start their window only when
+    // the written notice is recorded as sent.
+    for (const c of p.changes) {
+      if (c.kind === 'major_change' && !c.noticeSentOn) c.noticeSentOn = c.date
+    }
     const existing = new Map<string, DocumentItem>((p.documents || []).map((d) => [d.key, d]))
     p.documents = DOCUMENT_TEMPLATE.map((t) => {
       const prior = existing.get(t.key)

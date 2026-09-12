@@ -85,7 +85,7 @@ export interface DocumentItem {
  *  - delay         change to the expected completion timetable — Code 2.6/2.8:
  *                  keep the customer informed and updated
  */
-export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit'
+export type ChangeKind = 'choice' | 'extra' | 'minor_change' | 'major_change' | 'delay' | 'visit' | 'build_update'
 
 /** One entry in the spec-and-changes log. */
 export interface ChangeRecord {
@@ -95,6 +95,12 @@ export interface ChangeRecord {
   /** ISO date the choice was confirmed / the change or delay was notified. */
   date: string
   photoDataUrl?: string
+  /**
+   * Major changes only: ISO date the written notice was sent. Code 2.9 runs
+   * the customer's 14-day window from receipt of written details, so there
+   * is no window until this is recorded.
+   */
+  noticeSentOn?: string
   /** Major changes only: how the 14-day window ended. */
   outcome?: 'accepted' | 'cancelled'
   outcomeDate?: string // ISO date
@@ -167,6 +173,8 @@ export interface Development {
   id: string
   name: string
   location?: string
+  /** Name used on letters and exports for this site, if different from the company name (subsidiary, JV). */
+  tradingName?: string
   status: 'active' | 'finished'
   createdAt: string // ISO datetime
 }
@@ -186,6 +194,8 @@ export type PlotStage = 'setup' | 'reserved' | 'exchanged' | 'notice_served' | '
 export interface Correspondence {
   id: string
   direction: 'to_customer' | 'from_customer'
+  /** The complaint or snag this email is about, if any — groups the NHOS bundle. */
+  issueId?: string
   /** The email's own date — when it was sent/received, not when pasted. */
   date: string // ISO date
   subject?: string
@@ -209,6 +219,8 @@ export interface Plot {
    * customer asks for earlier.
    */
   exchangeDeadline?: string // ISO date
+  /** Any agreed extension or change to the exchange-by date, with the reason — kept on the record (2.2). */
+  exchangeAgreementNote?: string
   /** Date contracts were actually exchanged (missives concluded in Scotland). */
   exchangeDate?: string // ISO date
   /** Date the notice to complete was served — opens the PCI window (2.8). */
