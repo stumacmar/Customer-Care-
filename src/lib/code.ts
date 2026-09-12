@@ -195,6 +195,56 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   },
 ]
 
+/**
+ * Part 1 of the Code — selling a new home. These apply before any plot is
+ * reserved and to the site as a whole, so they are ticked once per
+ * development rather than per plot. Wording follows the Code's own headings.
+ */
+export const PART1_TEMPLATE: ReadonlyArray<{ key: string; clause: string; label: string; hint: string }> = [
+  {
+    key: 'marketing_clear',
+    clause: '1.1',
+    label: 'Sales information and marketing is clear, fair and not misleading',
+    hint: 'Adverts, brochures, website and the sales office. Material shows you are a registered developer, and the Code is available free of charge to any customer who asks.',
+  },
+  {
+    key: 'home_described',
+    clause: '1.2',
+    label: 'Each home is described with the minimum information',
+    hint: 'Size, tenure, price, energy rating, expected completion date, warranty provider, service charges and future phases, before the customer reserves.',
+  },
+  {
+    key: 'no_pressure',
+    clause: '1.3',
+    label: 'No high-pressure selling',
+    hint: 'No incentives for an immediate decision. Customers at time-bound events get time to consider before reserving.',
+  },
+  {
+    key: 'part_exchange',
+    clause: '1.4',
+    label: 'Part-exchange or assisted-move terms are clear and fair (if offered)',
+    hint: 'Written terms covering valuation, deductions, deadlines and what happens if dates do not align. Tick if you do not offer these schemes.',
+  },
+  {
+    key: 'vulnerable',
+    clause: '1.5',
+    label: 'Vulnerable customers are considered and offered extra support',
+    hint: 'Every customer is treated as situationally vulnerable when buying a home. Staff know how to offer appropriate help.',
+  },
+  {
+    key: 'training',
+    clause: '1.6',
+    label: 'All customer-facing staff have completed the NHQB Code training',
+    hint: 'Through the NHQB developer portal. Audits may ask for evidence, to be provided within 30 days.',
+  },
+  {
+    key: 'advisers',
+    clause: '1.7',
+    label: 'Customers told to get independent legal advice and are free to choose their own advisers',
+    hint: 'Recommended advisers are optional. Any fee, commission or reward for a referral is disclosed in writing before the customer commits.',
+  },
+]
+
 export function buildDocumentChecklist(): DocumentItem[] {
   return DOCUMENT_TEMPLATE.map((d) => ({ ...d, completed: false }))
 }

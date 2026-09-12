@@ -45,6 +45,9 @@ export const PCI_CHECKLIST_APARTMENT_URL =
 export const SNAGGING_GUIDE_URL =
   'https://www.nhqb.org.uk/wp-content/uploads/2026/06/A-Homeowner-Guide-to-Snagging-V2-May-2026.pdf'
 export const NHOS_URL = 'https://www.nhos.org.uk/'
+export const NHQB_FEES_URL = 'https://www.nhqb.org.uk/developer-fees/'
+export const NHQB_PORTAL_URL = 'https://developers.nhqb.org.uk/login.html'
+export const NHQB_DEVELOPERS_EMAIL = 'developers@nhqb.org.uk'
 
 const PART_PRINCIPLES = 'Statement of Principles'
 const PART_1 = 'Part 1 · Selling a new home'

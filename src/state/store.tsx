@@ -38,6 +38,7 @@ type Action =
       patch: Partial<Pick<Development, 'name' | 'location' | 'status' | 'tradingName'>>
     }
   | { type: 'DELETE_DEVELOPMENT'; devId: string }
+  | { type: 'TOGGLE_PART1'; devId: string; key: string; completed: boolean }
   | {
       type: 'ADD_PLOT'
       plotId: string
@@ -225,6 +226,22 @@ function reducer(state: AppState, action: Action): AppState {
         ),
       }
     }
+
+    case 'TOGGLE_PART1':
+      return {
+        ...state,
+        developments: state.developments.map((d) =>
+          d.id === action.devId
+            ? {
+                ...d,
+                part1: {
+                  ...(d.part1 || {}),
+                  [action.key]: { completed: action.completed, completedDate: action.completed ? todayISO() : undefined },
+                },
+              }
+            : d
+        ),
+      }
 
     case 'DELETE_DEVELOPMENT':
       // Removes the development and every plot on it.

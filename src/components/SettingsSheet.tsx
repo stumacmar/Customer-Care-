@@ -5,7 +5,7 @@
  * team, one screen.
  */
 
-import { CODE_SOURCE_URL, NHOS_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL, QUICK_GUIDE_URL, SNAGGING_GUIDE_URL } from '../lib/codeContent'
+import { CODE_SOURCE_URL, NHOS_URL, NHQB_DEVELOPERS_EMAIL, NHQB_FEES_URL, NHQB_PORTAL_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL, QUICK_GUIDE_URL, SNAGGING_GUIDE_URL } from '../lib/codeContent'
 import { useRef, useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
@@ -283,6 +283,34 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
           <a href={SNAGGING_GUIDE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>A Homeowner Guide to Snagging (PDF)</a>
           <br />
           <a href={NHOS_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>New Homes Ombudsman Service — complaints are made through their own portal</a>
+          <br />
+          <a href={NHQB_PORTAL_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>NHQB developer portal (login)</a>
+          <span className="muted"> — Code training for customer-facing staff is completed through the portal (Code 1.6).</span>
+          <br />
+          <a href={NHQB_FEES_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>Registration fees and NHOS complaint charges</a>
+          <span className="muted"> — from 1 January 2027 a two-tier NHOS complaint fee applies, paid quarterly in arrears, with the first three complaints each calendar year free.</span>
+        </div>
+      </div>
+
+      <div className="section">
+        <h3>About this app</h3>
+        <div className="card muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
+          <p style={{ marginTop: 0 }}>
+            NHQB Plot Tracker is a free tool provided by the New Homes Quality Board to help
+            registered developers keep to the New Homes Quality Code. Using it is your choice, and
+            it does not replace the Code, your own procedures, or NHQB's audits and attestation.
+          </p>
+          <p>
+            You are the data controller for the customer information you enter. Everything is
+            stored on your own device; NHQB does not receive, hold or process it, and accepts no
+            responsibility for how the app is used or for any loss or breach of data held on your
+            device. Keep backups and follow the data protection guidance above.
+          </p>
+          <p style={{ marginBottom: 0 }}>
+            Problems with the app: <a href={`mailto:${NHQB_DEVELOPERS_EMAIL}`} style={{ color: 'var(--link)' }}>{NHQB_DEVELOPERS_EMAIL}</a>.
+            <br />
+            <span style={{ fontSize: 12 }}>Wording subject to NHQB legal review.</span>
+          </p>
         </div>
       </div>
 

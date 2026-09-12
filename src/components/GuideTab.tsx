@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from './icons'
 import { Sheet } from './ui'
 import { VIDEOS, type VideoSlug } from '../lib/videoLibrary'
-import { PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
+import { NHOS_URL, NHQB_FEES_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
 
 type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
@@ -155,6 +155,11 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     body: [
       'Tap "Export PDF" on the plot: every date, document, change, email, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman Service, or your insurer.',
       'Plots archive themselves two years after legal completion, when the Ombudsman window closes. Settings → Data housekeeping then prompts you to export a copy and delete the personal data (good practice under data protection law).',
+      'Complaints to the Ombudsman are made by the customer through the NHOS portal, separate from this app. From 1 January 2027 NHQB\'s fee model includes a two-tier NHOS complaint fee, paid quarterly in arrears, with the first three complaints each calendar year free — one more reason to resolve complaints within the Code timescales.',
+    ],
+    links: [
+      { label: 'NHQB registration fees and NHOS complaint charges', href: NHQB_FEES_URL },
+      { label: 'New Homes Ombudsman Service', href: NHOS_URL },
     ],
   },
 ]

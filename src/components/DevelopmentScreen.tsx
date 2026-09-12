@@ -10,6 +10,7 @@ import { useStore } from '../state/store'
 import { plotStatus } from '../lib/status'
 import { isPlotRetired } from '../lib/status'
 import { formatDate } from '../lib/dates'
+import { PART1_TEMPLATE } from '../lib/code'
 import type { Plot, Rag } from '../types'
 import { EditDevelopmentSheet } from './EditDevelopmentSheet'
 import { Icon } from './icons'
@@ -137,6 +138,46 @@ export function DevelopmentScreen({
             ))}
           </div>
         )}
+      </div>
+
+      {/* Part 1 of the Code applies to the site as a whole, before any plot is
+          reserved — a small developer working plot by plot can otherwise miss it. */}
+      <div className="section">
+        <h3>
+          Before reservation — Part 1 of the Code{' '}
+          <span className="count-pill">
+            {PART1_TEMPLATE.filter((t) => dev.part1?.[t.key]?.completed).length}/{PART1_TEMPLATE.length}
+          </span>
+        </h3>
+        <div className="card">
+          <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
+            Selling a new home. Tick each once for this site; the Code tab has the full clause
+            behind every line.
+          </p>
+          {PART1_TEMPLATE.map((t) => {
+            const p = dev.part1?.[t.key]
+            const on = !!p?.completed
+            return (
+              <div key={t.key} className="doc">
+                <button
+                  className={`check${on ? ' on' : ''}`}
+                  aria-pressed={on}
+                  aria-label={on ? `Mark "${t.label}" not done` : `Mark "${t.label}" done`}
+                  onClick={() => dispatch({ type: 'TOGGLE_PART1', devId, key: t.key, completed: !on })}
+                >
+                  {on && <Icon name="check" size={14} strokeWidth={2.6} />}
+                </button>
+                <div className="doc-body">
+                  <div className="doc-label">
+                    {t.label} <span className="clause-ref">Code {t.clause}</span>
+                  </div>
+                  <div className="doc-hint">{t.hint}</div>
+                  {on && p?.completedDate && <div className="doc-hint">Ticked {formatDate(p.completedDate)}</div>}
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {retired.length > 0 && (

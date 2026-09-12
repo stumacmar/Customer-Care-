@@ -175,6 +175,8 @@ export interface Development {
   location?: string
   /** Name used on letters and exports for this site, if different from the company name (subsidiary, JV). */
   tradingName?: string
+  /** Part 1 of the Code (selling a new home) — ticked once per site, by clause key. */
+  part1?: Record<string, { completed: boolean; completedDate?: string }>
   status: 'active' | 'finished'
   createdAt: string // ISO datetime
 }
