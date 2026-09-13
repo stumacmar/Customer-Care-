@@ -22,7 +22,7 @@ type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 142
+const TOUR_DURATION = 141
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -58,13 +58,13 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['reservation'],
     body: [
       'Add the development if it is new, then "+ Plot" — address, customer name and email, reservation date. That is all the typing.',
-      'The app starts the 14-day cooling-off period itself, and sets the exchange-by date to the Code minimum of six weeks (edit it if your Reservation Agreement says otherwise).',
+      'The app starts the cooling-off period itself (14 days, the Code minimum — set a longer period under "Edit details & dates" if your Reservation Agreement gives one) and sets the exchange-by date to six weeks. Six weeks is the Code minimum unless the customer asks for earlier; the date must be reasonable for the transaction, so edit it if your Reservation Agreement says otherwise.',
       'Tick off the reservation documents as you hand them over: the signed Reservation Agreement and the Affordability Schedule. The checklist only ever asks for what is due at the stage you have reached.',
     ],
   },
   {
     title: 'Reading the screen',
-    watchAt: 20,
+    watchAt: 21,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
       'Colours: red means overdue or an emergency, amber means due within five days, green means on track. Anything red sorts to the top of every list.',
@@ -85,7 +85,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['choices', 'major-change', 'delay'],
     body: [
       '"Log a choice, change, delay, visit or email" on the plot — one line, optional photo, ten seconds. Front door colour confirmed, worktop upgrade paid, completion slipping three weeks, roof on and watertight (a build update), plumber attended (or got no access): log it the day it happens and the evidence trail builds itself.',
-      'A MAJOR change (one that significantly affects size, appearance or value) is special. Call the customer first and have the conversation, then send the written notice the app drafts and record the day they receive it. The customer\'s 14-day cancellation window runs from that day, and the app warns you not to serve notice to complete during it. When the window ends, record whether they accepted or cancelled.',
+      'A MAJOR change (one you are responsible for that significantly and substantially affects size, appearance or value, including the internal layout) is special. Speak to the customer first, then send the written notice the Code requires — the app drafts it — and record the day they receive it. The customer\'s 14-day cancellation window runs from that day, and the app warns you not to serve notice to complete during it. When the window ends, record whether they accepted or cancelled.',
       'A delay offers a ready-drafted timetable update letter — and remember to update the expected completion date on the plot.',
       'A site visit takes ten seconds to log: who came, when, and whether they attended, got no access, or were turned away — with a photo of the job sheet if there is one. This is your evidence if attendance is disputed.',
     ],
@@ -104,7 +104,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Notice, inspection and completion',
     videos: ['notice-inspection', 'completion'],
     body: [
-      'When you serve notice to complete, record the date. The app checks you have left at least 14 calendar days before completion and prompts you to offer the pre-completion inspection — the customer can attend themselves or appoint a suitably qualified professional, using the NHQB checklist.',
+      'When you serve notice to complete, record the date. The app checks you have left at least 14 calendar days before completion (the Code\'s usual expectation, unless you and the customer agree otherwise) and prompts you to offer the pre-completion inspection — the customer can attend themselves or appoint a suitably qualified professional, using the NHQB checklist.',
       'Anything the inspection finds that falls short of warranty standards: log it as a snag or defect — put right before legal completion where possible, or within 30 days. The Code\'s glossary says snags may be identified at the pre-completion inspection or after completion.',
       'At legal completion, work down the Completion & handover group of the checklist: warranty evidence, schedules of incomplete work, home demonstration, warranty documents, complaints procedure, health & safety file, building regulation completion certificate, after-sales statement. Attach files as you go.',
     ],
@@ -118,9 +118,9 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['snag', 'complaint', 'emergency'],
     body: [
       'The moment a customer reports anything, log it with one of the three big buttons. You never work out a date — the app does it.',
-      'Snag or defect: a 30-day put-right deadline. A snag is a minor issue or cosmetic imperfection; a defect is incomplete work, or a fault in completed work, that does not meet the expected quality or finish, including the warranty standards. Both carry the same duty. If it cannot be put right in 30 days, the app reminds you to update the customer at least monthly, with the reason for the delay, until it is.',
+      'Snag or defect: acknowledge it as soon as possible, then a 30-day put-right timescale. A snag is a minor imperfection or fault that does not meet the expected quality or finish; a defect is incomplete work, or a fault in completed work, that does not meet the expected quality or finish, including the warranty standards. Both carry the same duty. If it cannot be put right in 30 days, the app reminds you to update the customer at least monthly, with the reason for the delay, until it is.',
       'Complaint: the formal timetable starts — acknowledgement by day 5, Path to Resolution letter by day 10, Complaint Assessment and Response letter by day 30, Eight-Week Letter by day 56, then 28-day updates. Each step has a "Draft" button; the letter comes pre-filled with the right dates. Check it, complete the brackets, email it. If a second complaint arrives while one is open, you can add it to the existing one — a single timetable from the first.',
-      'Emergency: the Code defines it as an immediate threat to safety, security, health or well-being, and your after-sales statement sets out what qualifies — typically external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
+      'Emergency: the Code defines it as an immediate threat to safety, security, health or well-being, and your after-sales statement sets out what qualifies — NHQB\'s guidance gives as typical examples external door locks that will not secure the home, an uncontainable water leak, complete failure of heating and hot water, or total loss of power. It is flagged urgent and never queues behind routine work.',
       '"Remind me" on any issue (or on the journey) drops its deadlines into your phone calendar with alerts.',
       'If the home is sold on within the two years, Code 3.6 says only that your after-sales service applies to matters reported within two years of the original legal completion, and that future owners should get legal advice. The app does not need anything extra: the plot record stays as it is.',
     ],
@@ -131,8 +131,8 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     body: [
       '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
-      'When they report a problem, you get an email carrying a small code. Tap Snag, Complaint or Emergency, paste the email into the description, and it logs with the correct Code timescale — their words and date preserved, and if their app sent it as a different type the sheet switches to match. Their app keeps their own record of what they sent and when.',
-      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Under the Code\'s glossary, snags may be identified at the pre-completion inspection or after completion — so a problem with the home arrives as a snag or defect from notice to complete onwards, and as a formal complaint before that. The emergency option appears only once they have moved in.',
+      'When they report a problem, you get an email. Tap the link at the foot of it: Plot Tracker opens on the right plot with the report filled in, and one tap logs it with their words and their date, on the correct Code timescale. If the link opens in your web browser rather than the app on your home screen, the page shows the report with a Copy button: open the app, tap Snag, Complaint or Emergency, and paste. Their app keeps their own record of what they sent and when.',
+      'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Under the Code\'s glossary, snags may be identified at the pre-completion inspection or after completion — so a problem with the home arrives as a snag or defect from notice to complete onwards, and before that as an issue the app treats as a formal complaint so the Code\'s timetable is never missed. The emergency option appears only once they have moved in.',
       'Share a fresh link whenever there is an update worth showing — each new link replaces their snapshot.',
     ],
   },
@@ -140,7 +140,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'If the sale falls through',
     videos: ['cooling-off-cancellation'],
     body: [
-      'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee within 14 days (in full if they are still in cooling-off), or the contract deposit within 28 days if contracts had been exchanged.',
+      'Record it under "Edit details & dates" → "If the customer pulls out". The refund deadline starts: the reservation fee in full if they are still in cooling-off (Code 2.3 sets no timescale for that, so the app applies the 14 days of Code 2.4), or less any deductions set out in the Reservation Agreement within 14 days after it (2.4); the contract deposit within 28 days if contracts had been exchanged (2.13).',
       'Mark the refund paid when it is done — the plot is then archived with its evidence intact.',
     ],
   },
@@ -149,7 +149,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     videos: ['ombudsman'],
     body: [
       'Tap "Export PDF" on the plot: every date, document, change, email, letter and timeline event in one clean file — the record you hand to the NHQB compliance team, the New Homes Ombudsman Service, or your insurer.',
-      'Plots are archived two years after legal completion. Settings → Data housekeeping lists a plot for export and deletion two years after the later of reservation and legal completion, once nothing is open — the period in which a complaint can be referred to the Ombudsman.',
+      'Plots are archived two years after legal completion. Settings → Data housekeeping lists a plot for export and deletion two years after the later of reservation and legal completion, once nothing is open — the period in which a complaint can be made (Code Part 3). A complaint raised inside it can still be referred to the Ombudsman later (Code 3.5), so a plot is only listed once every complaint is past that point.',
       'Complaints to the New Homes Ombudsman Service (NHOS) are made by the customer through the NHOS portal, separate from this app. From 1 January 2027 NHQB\'s fee model includes a two-tier NHOS complaint fee, paid quarterly in arrears, with the first three complaints each calendar year free (nhqb.org.uk, September 2026).',
     ],
     links: [

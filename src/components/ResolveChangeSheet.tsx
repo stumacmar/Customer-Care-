@@ -4,6 +4,7 @@
  * needs to start, so we offer to record the cancellation in the same tap.
  */
 
+import { useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
 import { plotStage } from '../lib/code'
@@ -22,6 +23,8 @@ export function ResolveChangeSheet({
   onToast: (msg: string) => void
 }) {
   const { dispatch } = useStore()
+  // Code 2.4 / 2.13 count the refund from the date of the customer's notice, not from today.
+  const [cancelDate, setCancelDate] = useState(todayISO())
 
   const accept = () => {
     dispatch({ type: 'RESOLVE_CHANGE', plotId: plot.id, changeId: change.id, outcome: 'accepted' })
@@ -30,7 +33,7 @@ export function ResolveChangeSheet({
   }
 
   const cancelled = () => {
-    dispatch({ type: 'RESOLVE_CHANGE', plotId: plot.id, changeId: change.id, outcome: 'cancelled' })
+    dispatch({ type: 'RESOLVE_CHANGE', plotId: plot.id, changeId: change.id, outcome: 'cancelled', date: cancelDate })
     // Starting the refund clock needs the cancellation recorded on the plot:
     // deposit within 28 days if contracts were exchanged, reservation fee
     // within 14 days otherwise (Code 2.13 / 2.4).
@@ -40,7 +43,7 @@ export function ResolveChangeSheet({
       return
     }
     const kind = plotStage(plot) === 'reserved' ? 'reservation' : 'contract'
-    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: todayISO(), fullRefund: true })
+    dispatch({ type: 'RECORD_CANCELLATION', plotId: plot.id, kind, date: cancelDate, fullRefund: true })
     onToast('Cancellation recorded — the refund deadline is running')
     onClose()
   }
@@ -55,6 +58,10 @@ export function ResolveChangeSheet({
         <button className="btn btn-block btn-primary" onClick={accept}>
           Customer accepted — carry on
         </button>
+        <div className="field" style={{ marginBottom: 0 }}>
+          <label>If they cancelled: date of the customer's notice</label>
+          <input type="date" value={cancelDate} max={todayISO()} onChange={(e) => setCancelDate(e.target.value)} />
+        </div>
         <button className="btn btn-block btn-danger" onClick={cancelled}>
           Customer cancelled the purchase
         </button>

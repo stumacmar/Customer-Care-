@@ -6,7 +6,7 @@
  * documents received, choices and changes, and issue status. It is stored
  * locally so the app works offline and can be added to the home screen.
  * Reporting a problem generates a pre-addressed email carrying a small code
- * the developer pastes into their tracker — which starts the Code's clock —
+ * carried in a link the developer taps — which starts the Code's clock —
  * and every report is kept here as the buyer's own evidence trail.
  */
 
@@ -31,6 +31,7 @@ import {
   encodeShare,
   isValidPayload,
   type BuyerReport,
+  reportLink,
   type BuyerSnapshot,
   type SnapshotIssue,
 } from '../lib/share'
@@ -41,9 +42,11 @@ export const BUYER_STORAGE_KEY = 'nhqb-buyer-state-v1'
 const TYPE_LABEL: Record<IssueType, string> = { snag: 'Snag or defect', complaint: 'Complaint', emergency: 'Emergency' }
 const SUBTITLES: Record<IssueType, string> = {
   snag: 'Your developer should put this right within 30 days.',
-  complaint: 'Handled under the Code\'s complaints process, with fixed timescales.',
-  emergency: 'Telephone your developer first, then send this record.',
+  complaint: 'Your developer will deal with this under the Code\'s complaints process, with set timescales.',
+  emergency: 'Follow your developer\'s emergency process: telephone them first, then send this record.',
 }
+/** At notice stage the Code's wording is "ideally before legal completion" (2.8). */
+const SNAG_SUBTITLE_NOTICE = 'Your developer should put this right ideally before legal completion, or within 30 days if that is not possible.'
 /** The Code's letter names, in the words a homeowner would use. */
 const MILESTONE_PLAIN: Record<string, string> = {
   acknowledgement: 'Written acknowledgement of your complaint',
@@ -201,10 +204,12 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
             <Icon name="megaphone" size={17} /> Report a problem
           </button>
           <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-            Your report goes to your developer by email, and a copy is kept here as your own
-            record. The Code's response timescales run from the first business day after your
-            developer receives it. Anything that is not an emergency is dealt with in your
-            developer's normal working hours. Keep all paperwork and emails about your home.
+            Your report goes to your developer by email. When they open the link in it, your
+            report goes into their records with today's date, and a copy is kept here as your
+            own record. For a complaint, the Code's timetable runs from the first business day
+            after your developer receives it; a snag's 30 days run from the day you report it.
+            Anything that is not an emergency is dealt with as set out in your developer's
+            after-sales information. Keep all paperwork and emails about your home.
           </p>
         </div>
 
@@ -275,10 +280,11 @@ function JourneyStrip({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage 
 function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; today?: string }) {
   const items: ReactNode[] = []
   if (stage === 'reserved' && snap.reservationDate) {
-    const coolingEnd = addDays(snap.reservationDate, COOLING_OFF_DAYS)
+    const coolingDays = snap.coolingOffDays && snap.coolingOffDays > COOLING_OFF_DAYS ? snap.coolingOffDays : COOLING_OFF_DAYS
+    const coolingEnd = addDays(snap.reservationDate, coolingDays)
     if (daysFromToday(coolingEnd) >= 0) {
       items.push(
-        `You are in your ${COOLING_OFF_DAYS}-day cooling-off period until ${formatDate(coolingEnd)} — you may cancel for any reason and receive your reservation fee back in full.`
+        `You are in your cooling-off period until ${formatDate(coolingEnd)} (the Code says at least ${COOLING_OFF_DAYS} days; your Reservation Agreement gives the exact period) — you may cancel for any reason and receive your reservation fee back in full.`
       )
     }
     items.push('Your solicitor or conveyancer will guide you to exchange of contracts. Ask them anything you are unsure about.')
@@ -295,24 +301,26 @@ function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; to
       <>
         Notice to complete has been served{snap.expectedCompletionDate ? `, with legal completion expected on ${formatDate(snap.expectedCompletionDate)}` : ''}. You have the right to a pre-completion inspection
         before completion day — you can attend yourself or appoint a suitably qualified
-        professional. The NHQB checklist was designed for a professional to use:{' '}
+        professional. If you inspect yourself, the NHQB checklist must be used; it was designed
+        for a professional:{' '}
         <a href={PCI_CHECKLIST_HOUSE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>house</a>
         {' · '}
         <a href={PCI_CHECKLIST_APARTMENT_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>apartment</a>
-        . Ask your developer to arrange it.
+        . Anything found that breaches the warranty standards should be put right ideally before
+        completion, or within 30 days if that is not possible. Ask your developer to arrange it.
       </>
     )
   }
   if (stage === 'completed' && snap.completionDate) {
     const windowEnd = addYears(snap.completionDate, AFTER_SALES_YEARS)
     items.push(
-      `Your developer's after-sales service covers you until ${formatDate(windowEnd)} (${AFTER_SALES_YEARS} years from legal completion). Your developer is your first point of contact for anything that is not right — report it as soon as you notice it.`
+      `Your developer's after-sales service runs for at least ${AFTER_SALES_YEARS} years from legal completion (until at least ${formatDate(windowEnd)}). Your developer is your first point of contact for anything that is not right — report it as soon as you notice it.`
     )
   }
   const openMajor = snap.changes.find((c) => c.kind === 'major_change' && !c.outcome && c.cancelBy)
   if (openMajor && openMajor.cancelBy && daysFromToday(openMajor.cancelBy) >= 0 && stage !== 'completed') {
     items.push(
-      `Your developer has given you written details of a major change to your home. If you find it unacceptable you can cancel within ${MAJOR_CHANGE_CANCEL_DAYS} days of receiving those details — until ${formatDate(openMajor.cancelBy)} — and receive a full refund of your deposit, reservation fee and any other payments you have made. Speak to your solicitor or conveyancer.`
+      `Your developer has given you written details of a major change to your home. If you find it unacceptable you can cancel within ${MAJOR_CHANGE_CANCEL_DAYS} days of receiving those details — until ${formatDate(openMajor.cancelBy)} — and receive a full refund of your deposit, reservation fee and any other payments you have made. Notice to complete cannot be served during this period. Speak to your solicitor or conveyancer.`
     )
   }
   if (items.length === 0) return null
@@ -334,7 +342,7 @@ function WhatsNext({ snap, stage }: { snap: BuyerSnapshot; stage: BuyerStage; to
  * The guided report flow. Buyers should not need to know the Code's
  * vocabulary to end up in the right process, so step one asks what the
  * issue is about and the app routes it: an emergency (only after
- * completion — Code 3.2: emergency issues are not snags and belong to the
+ * completion — Code 3.3: emergency issues are not snags and belong to the
  * after-sales service), a snag (a fault found after completion), or a
  * formal complaint (everything else, including all pre-completion issues —
  * money, specification, timescales, appointments).
@@ -343,10 +351,12 @@ interface ReportCategory {
   key: string
   label: string
   hint: string
+  /** Before notice to complete, when a problem with the home is not yet a snag (glossary). */
+  earlyHint?: string
 }
 
 const REPORT_CATEGORIES: ReportCategory[] = [
-  { key: 'home', label: 'A problem with the home', hint: 'A snag or defect: damaged, unfinished, faulty, or not as it should be' },
+  { key: 'home', label: 'A problem with the home', hint: 'A snag or defect: damaged, unfinished, faulty, or not as it should be', earlyHint: 'Something you have seen on a site visit, in the plans or in the specification' },
   { key: 'money', label: 'Money or a refund', hint: 'Reservation fee, deposit, payments for extras, or a refund owed' },
   { key: 'spec', label: 'Choices, extras or specification', hint: 'Something differs from what was agreed or ordered' },
   { key: 'timing', label: 'Timescales or delay', hint: 'Exchange, completion or repair dates moving or unclear' },
@@ -379,20 +389,18 @@ function GuidedReport({
   const type: IssueType =
     category === 'emergency' ? 'emergency' : category === 'home' && inspectionStage ? 'snag' : 'complaint'
 
-  const titles: Record<IssueType, string> = {
-    snag: 'Report a snag or defect',
-    complaint: 'Make a formal complaint',
-    emergency: 'Report an emergency',
-  }
+  // The customer's own words head the screen and the email. The Code's
+  // process (snag, complaint) is explained underneath and carried to the
+  // developer in the link; the customer never has to call it a complaint.
+  const catLabel = REPORT_CATEGORIES.find((c) => c.key === category)?.label
+  const heading = category === 'emergency' ? 'Emergency' : catLabel || 'Report a problem'
   const blurbs: Record<IssueType, string> = {
     snag: `A snag is a minor issue or cosmetic imperfection, such as a scratch or a paint mark. A defect is incomplete work, or a fault in completed work, that does not meet the expected quality or finish, including the warranty standards. Under the Code your developer should put snags and defects right within ${SNAG_PUT_RIGHT_DAYS} days, or explain the reason for any delay and keep you updated at least monthly.`,
     complaint:
-      "This will be handled under the Code's complaints process. Its timescales run from the complaint start date — the first business day after your developer receives your report: a written acknowledgement within 5 days, a Path to Resolution letter (setting out how your complaint will be investigated and resolved) within 10 days, and a full Complaint Assessment and Response within 30 days.",
+      "This will be handled under the Code's complaints process. Its timescales run from the complaint start date — the first business day after your developer receives your report: a written acknowledgement within 5 days, a Path to Resolution letter (setting out how your complaint will be investigated) within 10 days, and a full Complaint Assessment and Response within 30 days.",
     emergency:
-      'The Code defines an emergency as an immediate threat to safety, security, health or well-being. Your developer\'s after-sales statement sets out what qualifies; typical examples are external door locks that will not secure the home, an uncontainable water leak, complete failure of the heating and hot water, or total loss of power. Telephone your developer now, using their out-of-hours number if it is outside office hours; do not wait for an email. Then send this report so there is a written record.',
+      `The Code defines an emergency as an immediate threat to safety, security, health or well-being. Your developer's after-sales information sets out what qualifies and how to report one; NHQB's guidance gives as typical examples external door locks that will not secure the home, an uncontainable water leak, complete failure of the heating and hot water, or total loss of power. Telephone your developer now${snap.developerPhone ? ` on ${snap.developerPhone}` : ''}; do not wait for an email. Then send this report so there is a written record.`,
   }
-
-  const catLabel = REPORT_CATEGORIES.find((c) => c.key === category)?.label
 
   const send = async (via: 'email' | 'copy') => {
     if (!description.trim()) return
@@ -408,21 +416,28 @@ function GuidedReport({
       sentOn,
       address: snap.address,
       customerNames: snap.customerNames || undefined,
+      plotId: snap.plotId,
     }
     const code = await encodeShare(report)
+    const intro =
+      category === 'emergency'
+        ? `Please treat this as an emergency at ${snap.address}. I am also telephoning you.`
+        : category === 'home'
+          ? `I would like to report a problem with my home at ${snap.address}.`
+          : `I would like to raise a problem about ${snap.address}. It is about ${(catLabel || 'something else').toLowerCase()}.`
+    // Reads as a normal email. The developer's one instruction is the last line.
     const human =
-      `${titles[type]} — ${snap.address}\n` +
-      `From: ${snap.customerNames || 'the customer'}\nDate: ${formatDate(sentOn)}\n\n` +
-      `${body}\n\n` +
-      `--- Reference code for your developer's records — please leave it in ---\n${code}`
+      `Hi,\n\n${intro}\n\n${body}\n\n` +
+      `Sent ${formatDate(sentOn)} from my Plot Tracker link.\n${snap.customerNames || ''}\n\n` +
+      `---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
     if (via === 'email') {
-      const subject = `[Customer report] ${titles[type]} — ${snap.address}`
+      const subject = `[Customer report] ${heading} — ${snap.address}`
       location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(human)}`
       onToast('Opening your email — press send there')
     } else {
       try {
         await navigator.clipboard.writeText(human)
-        onToast('Report copied — paste it into a message to your developer')
+        onToast('Report copied — send it to your developer any way you like')
       } catch {
         onToast('Could not copy — use the email button instead')
       }
@@ -445,11 +460,11 @@ function GuidedReport({
               style={{ textAlign: 'left', width: '100%', borderLeft: '4px solid var(--red)' }}
               onClick={() => setCategory('emergency')}
             >
-              <div style={{ fontWeight: 700, color: 'var(--red)' }}>Emergency — immediate danger</div>
+              <div style={{ fontWeight: 700, color: 'var(--red)' }}>Emergency — immediate threat</div>
               <div className="muted" style={{ fontSize: 13 }}>
-                An immediate threat to safety, security, health or well-being. Typical examples:
-                a door that will not lock, an uncontainable leak, no heating and hot water, no
-                power. Telephone your developer first.
+                An immediate threat to safety, security, health or well-being. NHQB guidance
+                examples: a door that will not lock, an uncontainable leak, no heating and hot
+                water, no power. Telephone your developer first{snap.developerPhone ? ` on ${snap.developerPhone}` : ''}.
               </div>
             </button>
           )}
@@ -461,14 +476,14 @@ function GuidedReport({
               onClick={() => setCategory(c.key)}
             >
               <div style={{ fontWeight: 700 }}>{c.label}</div>
-              <div className="muted" style={{ fontSize: 13 }}>{c.hint}</div>
+              <div className="muted" style={{ fontSize: 13 }}>{!inspectionStage && c.earlyHint ? c.earlyHint : c.hint}</div>
             </button>
           ))}
         </div>
         <p className="muted" style={{ fontSize: 12.5 }}>
           {completed
-            ? 'Anything that is not an emergency is dealt with in your developer\'s normal working hours.'
-            : 'Before legal completion, anything urgent should also be raised with your developer by phone in working hours.'}
+            ? 'Anything that is not an emergency is dealt with as set out in your developer\'s after-sales information.'
+            : 'Before legal completion, anything urgent should also be raised with the contact your developer gave you in writing for questions before completion.'}
         </p>
       </Sheet>
     )
@@ -476,7 +491,7 @@ function GuidedReport({
 
   // Step 2 — describe it.
   return (
-    <Sheet title={catLabel && category !== 'home' ? catLabel : titles[type]} subtitle={SUBTITLES[type]} onClose={onClose}>
+    <Sheet title={heading} subtitle={type === 'snag' && stage === 'notice_served' ? SNAG_SUBTITLE_NOTICE : SUBTITLES[type]} onClose={onClose}>
       <p className="muted" style={{ fontSize: 12.5, marginTop: -4 }}>{blurbs[type]}</p>
       <div className="field">
         <label>What has happened? Where exactly?</label>
@@ -527,9 +542,10 @@ function MyReports({
       sentOn: r.sentOn,
       address: snap.address,
       customerNames: snap.customerNames || undefined,
+      plotId: snap.plotId,
     })
-    const subject = `[Customer report — resend] ${r.type} — ${snap.address}`
-    const body = `First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n--- For your tracker ---\n${code}`
+    const subject = `[Customer report — resend] ${TYPE_LABEL[r.type]} — ${snap.address}`
+    const body = `Hi,\n\nSending this again. First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n${snap.customerNames || ''}\n\n---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
     location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     onToast('Opening your email — press send there')
   }
@@ -701,28 +717,38 @@ function YourRights() {
           New Homes Quality Code (the Code). Key protections under the Code:
         </p>
         <p>
-          <strong>Snags or defects</strong> found after legal completion should be put right
-          within {SNAG_PUT_RIGHT_DAYS} days. If that is not possible, your developer must
-          explain the reason for the delay and keep you updated at least monthly.
+          <strong>Snags or defects</strong> found at your pre-completion inspection or after
+          legal completion should be put right within {SNAG_PUT_RIGHT_DAYS} days. If that is not
+          possible, your developer must explain the reason for the delay and keep you updated at
+          least monthly. If a snag is not put right within {SNAG_PUT_RIGHT_DAYS} days, you can ask
+          for it to be dealt with as a formal complaint.
         </p>
         <p>
           <strong>Complaints</strong> follow a fixed timetable counted from the complaint start
           date (the first business day after your complaint is received): a written
           acknowledgement within 5 days; a Path to Resolution letter — setting out how your
-          complaint will be investigated and resolved — within 10 days; a full Complaint
-          Assessment and Response within 30 days; and an Eight-Week Letter at 56 days if it is
-          still open.
+          complaint will be investigated, and whether your warranty provider offers a dispute
+          resolution service — within 10 days; a full Complaint Assessment and Response within
+          30 days; an Eight-Week Letter by 56 days if it is still open; then updates at least
+          every 28 days until a Closure Letter.
         </p>
         <p>
-          <strong>The New Homes Ombudsman Service (NHOS)</strong> — if a complaint is not resolved
-          after 56 days you may refer it, free of charge, to the Ombudsman. Complaints to NHOS are
-          made through their own online portal, separate from this app:
+          <strong>The New Homes Ombudsman Service (NHOS)</strong> — if you are not satisfied with
+          the outcome, you may refer a complaint to the Ombudsman from 56 days after the complaint
+          start date, and should do so as soon as you can. Complaints to NHOS are made through
+          their own online portal, separate from this app. You may also take other action, such
+          as through the courts:
           <br />
           <span className="muted" style={{ fontSize: 13 }}>{NHOS_CONTACT}</span>
         </p>
+        <p>
+          <strong>Refunds</strong> — if you cancel after the cooling-off period, your reservation
+          fee (less any deductions set out in your Reservation Agreement) is due within 14 days of
+          your notice; if a contract is cancelled, your deposit is due within 28 days.
+        </p>
         <p style={{ marginBottom: 0 }}>
-          These Code protections cover the home for {AFTER_SALES_YEARS} years from legal
-          completion.{' '}
+          The Code protects you from reservation until at least {AFTER_SALES_YEARS} years after
+          legal completion.{' '}
           <a href={CODE_SOURCE_URL} target="_blank" rel="noreferrer" style={{ color: 'var(--link)' }}>
             Read the full Code
           </a>

@@ -36,7 +36,7 @@ export const CHANGE_KIND_META: Record<
   major_change: {
     label: 'Major change',
     badgeClass: 'snag',
-    blurb: 'Significantly affects size, appearance or value (including internal layout). Call the customer, then tell them in writing — they can cancel within 14 days of receiving it for a full refund, and notice to complete cannot be served in that window.',
+    blurb: 'A change you are responsible for that significantly and substantially affects the size, appearance or value of the home (including the internal layout) from the Reservation Agreement or contract of sale. Speak to the customer, then tell them in writing (Code 2.9) — they can cancel within 14 days of receiving it for a full refund, and notice to complete cannot be served in that window.',
   },
   delay: {
     label: 'Delay',

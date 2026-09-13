@@ -25,12 +25,12 @@ import {
   STAGE_LABELS,
   targetCompletion,
 } from './code'
-import { addYears, daysFromToday, describeCountdown, formatDate, todayISO } from './dates'
+import { addDays, addYears, daysFromToday, describeCountdown, formatDate, todayISO } from './dates'
 import type { Development, Plot, PlotStage, Rag } from '../types'
 
 /**
  * A plot auto-retires once its completion date is more than two years ago —
- * the point the customer's New Homes Ombudsman window has closed. Retired plots
+ * the end of the period in which a new complaint can be made (Code Part 3, 3.2). Retired plots
  * drop out of the active list (but are never auto-deleted; the record is kept
  * until the developer chooses to export and remove it). A cancelled plot
  * retires once its refund has been paid — nothing is left to track.
@@ -46,11 +46,14 @@ export function isPlotRetired(plot: Plot, today = todayISO()): boolean {
 
 /**
  * When the personal data can go: two years from the later of reservation and
- * legal completion (the period in which a complaint can be referred to the
- * Ombudsman — Code 3.5), with nothing still open.
+ * legal completion (the period in which a complaint can be made — Code Part 3,
+ * 3.2), with nothing still open, and no complaint that could still be referred
+ * to the Ombudsman: 3.5 allows referral from 56 days after the complaint start
+ * date, so every complaint must be past that point.
  */
 export function isPlotDeletable(plot: Plot, today = todayISO()): boolean {
   if (plot.issues.some((i) => i.status === 'open')) return false
+  if (plot.issues.some((i) => i.type === 'complaint' && addDays(i.startedAt, 56) > today)) return false
   const anchors = [plot.reservationDate, plot.completionDate].filter((d): d is string => !!d)
   if (anchors.length === 0) return false
   const latest = anchors.sort()[anchors.length - 1]
@@ -180,7 +183,7 @@ export function nextAction(plot: Plot): NextAction {
       if (daysFromToday(putRight) >= 0 || !update) {
         candidates.push(candidateFromDeadline(`Put the snag right (${ref})`, putRight))
       } else {
-        const verb = update.n === 1 ? `Snag overdue — put it right, or update the customer with the reason (${ref})` : `Send this month's update on the delayed snag (${ref})`
+        const verb = update.n === 1 ? `Snag overdue — put it right, or update the customer with the reason; they may now ask for it to be treated as a formal complaint (${ref})` : `Send this month's update on the delayed snag (${ref})`
         candidates.push(candidateFromDeadline(verb, update.dueDate, { floorRag: 'amber' }))
       }
     }
@@ -198,7 +201,7 @@ export function nextAction(plot: Plot): NextAction {
     if (!journeyLive || c.kind !== 'major_change' || c.outcome) continue
     const cancelBy = majorChangeCancelBy(c)
     if (!cancelBy) {
-      candidates.push({ label: 'Call the customer, then send the written notice of the major change', rag: 'amber', priority: 2 })
+      candidates.push({ label: 'Send the written notice of the major change and record the day the customer receives it', rag: 'amber', priority: 2 })
       continue
     }
     if (daysFromToday(cancelBy) >= 0) {
@@ -254,7 +257,7 @@ export function nextAction(plot: Plot): NextAction {
 
   // Nothing to do.
   if (stage === 'reserved' && plot.reservationDate) {
-    const coolingEnd = coolingOffEnd(plot.reservationDate)
+    const coolingEnd = coolingOffEnd(plot.reservationDate, plot.coolingOffDays)
     if (daysFromToday(coolingEnd) >= 0) {
       return { label: `Nothing due — cooling-off until ${formatDate(coolingEnd)}`, rag: 'green' }
     }

@@ -27,17 +27,23 @@ import { EditPlotSheet } from './EditPlotSheet'
 import { BuyerShareSheet } from './BuyerShareSheet'
 import { Icon } from './icons'
 import type { Issue, IssueType } from '../types'
+import type { BuyerReport } from '../lib/share'
 
 export function PlotScreen({
   plotId,
   onBack,
   onToast,
   onExplainCode,
+  incomingReport,
+  onIncomingHandled,
 }: {
   plotId: string
   onBack: () => void
   onToast: (msg: string) => void
   onExplainCode: (ref: string) => void
+  /** A report that arrived by link from the customer's app — opens the log sheet filled in. */
+  incomingReport?: BuyerReport
+  onIncomingHandled?: () => void
 }) {
   const plot = usePlot(plotId)
   const { state, dispatch } = useStore()
@@ -140,8 +146,8 @@ export function PlotScreen({
           </button>
         </div>
         <p className="muted" style={{ fontSize: 12.5, margin: '8px 0 0' }}>
-          Email from the customer's app? Tap any of the three and paste it in — their words,
-          their date and the right type are kept.
+          A report from the customer's app? Tap the link in their email and it lands here,
+          filled in.
         </p>
       </div>
 
@@ -184,13 +190,18 @@ export function PlotScreen({
       </div>
 
 
-      {logType && (
+      {(logType || incomingReport) && (
         <LogIssueSheet
           plotId={plot.id}
-          initialType={logType}
-          onClose={() => setLogType(null)}
+          initialType={incomingReport?.type || logType || 'snag'}
+          initialReport={incomingReport}
+          onClose={() => {
+            setLogType(null)
+            onIncomingHandled?.()
+          }}
           onLogged={(msg) => {
             setLogType(null)
+            onIncomingHandled?.()
             onToast(msg)
           }}
         />

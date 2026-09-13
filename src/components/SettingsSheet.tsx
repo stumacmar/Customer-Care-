@@ -21,12 +21,17 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
   const { state, dispatch } = useStore()
   const [name, setName] = useState(state.developerName)
   const [email, setEmail] = useState(state.developerEmail || '')
+  const [phone, setPhone] = useState(state.developerPhone || '')
   const [showGdpr, setShowGdpr] = useState(false)
   const restoreRef = useRef<HTMLInputElement>(null)
 
   const saveEmail = (v: string) => {
     setEmail(v)
     dispatch({ type: 'SET_DEVELOPER_EMAIL', email: v })
+  }
+  const savePhone = (v: string) => {
+    setPhone(v)
+    dispatch({ type: 'SET_DEVELOPER_PHONE', phone: v })
   }
 
   const backup = () => {
@@ -137,6 +142,16 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         />
       </div>
 
+      <div className="field">
+        <label>Phone number customers ring for an emergency (shown on their page)</label>
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => savePhone(e.target.value)}
+          placeholder="e.g. 01234 567890"
+        />
+      </div>
+
       <div className="section" style={{ marginTop: 8 }}>
         <h3>Back up &amp; restore</h3>
         <div className="card">
@@ -195,9 +210,9 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
           {oldPlots.length === 0 ? (
             <p className="muted" style={{ margin: 0 }}>
               Nothing needs attention. A plot appears here two years after the later of its
-              reservation and legal completion, once nothing is open — the period in which a
-              complaint can be referred to the Ombudsman. Export a copy, then delete the
-              personal data.
+              reservation and legal completion, once nothing is open and no complaint could
+              still go to the Ombudsman — the period in which a complaint can be made (Code
+              Part 3). Export a copy, then delete the personal data.
             </p>
           ) : (
             <>

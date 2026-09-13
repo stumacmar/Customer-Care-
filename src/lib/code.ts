@@ -80,7 +80,7 @@ export const DUE_STAGES: Record<PlotStage, string[]> = {
 export function dueStagesFor(plot: Plot, today = todayISO()): string[] {
   const stage = plotStage(plot, today)
   const stages = [...DUE_STAGES[stage]]
-  if (stage === 'reserved' && plot.reservationDate && coolingOffEnd(plot.reservationDate) < today) {
+  if (stage === 'reserved' && plot.reservationDate && coolingOffEnd(plot.reservationDate, plot.coolingOffDays) < today) {
     stages.push('pre_contract')
   }
   return stages
@@ -142,6 +142,14 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
     stage: 'pre_contract',
   },
   {
+    key: 'timetable_hs_explained',
+    label: 'Timetable-update process and site-visit safety explained',
+    customerLabel: 'How you will be kept up to date on the timetable, and site-visit safety rules',
+    hint: 'Explain how you will keep the customer up to date on when the home is likely to be ready, and the health and safety precautions they must take if they visit the site.',
+    clause: '2.8',
+    stage: 'pre_contract',
+  },
+  {
     key: 'deposit_protection',
     label: 'Deposit and fee protection arrangement in place',
     hint: 'Code 2.13: reservation fees, deposits and other fees must be protected — through the warranty provider, a separate client account, or another adequate arrangement. Record which applies.',
@@ -190,9 +198,9 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
   },
   {
     key: 'home_demonstration',
-    label: 'Home demonstration completed',
+    label: 'Home demonstration appointment provided',
     customerLabel: 'Home demonstration (how your home and its systems work)',
-    hint: 'Show the customer how the home, its systems and appliances work — can be combined with the pre-completion inspection.',
+    hint: 'An appointment to show the customer how the home, its systems and appliances work — it can take place at the pre-completion inspection.',
     clause: '2.11',
     stage: 'completion',
   },
@@ -224,7 +232,7 @@ export const DOCUMENT_TEMPLATE: ReadonlyArray<Omit<DocumentItem, 'completed'>> =
     key: 'building_reg_certificate',
     label: 'Building regulation completion certificate',
     customerLabel: 'Building regulation completion certificate',
-    hint: 'Or confirmation the local authority has inspected (Scotland) — or a note explaining when it will be available.',
+    hint: 'Or confirmation the local authority has inspected (Scotland). If it is not available, tell the customer it will not be until after completion, or signpost the organisation that can provide it. Give a copy of the inspection records if the customer asks.',
     clause: '2.11',
     stage: 'completion',
   },
@@ -256,19 +264,19 @@ export const PART1_TEMPLATE: ReadonlyArray<{ key: string; clause: string; label:
     key: 'marketing_clear',
     clause: '1.1',
     label: 'Sales information and marketing is clear, fair and not misleading',
-    hint: 'Adverts, brochures, website and the sales office. Material states you are a registered developer and displays the Code logo, and the Code is available free of charge to any customer who asks.',
+    hint: 'Adverts, brochures, website and the sales office. Material states you are a registered developer and displays the Code logo, and the Code is available free of charge to any interested customer, in appropriate formats and languages.',
   },
   {
     key: 'home_described',
     clause: '1.2',
     label: 'Each home is described with the minimum information',
-    hint: 'Size, tenure, price, energy rating, expected completion date, warranty provider, service charges and future phases, before the customer reserves.',
+    hint: 'The 14 items in Code 1.2, before the customer reserves: size, tenure, specification, energy ratings, price, mobility adaptations, estimated legal completion dates, the warranty that applies, management services, service charges, future phases, resale restrictions, additional products (cost, benefit and cover) and Council Tax band.',
   },
   {
     key: 'no_pressure',
     clause: '1.3',
     label: 'No high-pressure selling',
-    hint: 'No incentives for an immediate decision. Customers at time-bound events (such as launch weekends) get seven days to consider before reserving.',
+    hint: 'No incentives for an immediate decision. Customers at time-bound events (such as launch weekends) get seven days to consider, with the incentive (not the home) held open for them — and are told the home could still be sold to someone else.',
   },
   {
     key: 'part_exchange',
@@ -286,7 +294,7 @@ export const PART1_TEMPLATE: ReadonlyArray<{ key: string; clause: string; label:
     key: 'training',
     clause: '1.6',
     label: 'All customer-facing staff have completed the NHQB Code training',
-    hint: 'Through the NHQB developer portal. Audits may ask for evidence, to be provided within 30 days.',
+    hint: 'Through the NHQB developer portal. Any agents you use must also know and meet the Code. Audits may ask for evidence, to be provided within 30 days.',
   },
   {
     key: 'advisers',
@@ -347,8 +355,8 @@ export function targetCompletion(plot: Plot): string | undefined {
 }
 
 /** Last day of the cooling-off period — Code 2.3. */
-export function coolingOffEnd(reservationDate: string): string {
-  return addDays(reservationDate, COOLING_OFF_DAYS)
+export function coolingOffEnd(reservationDate: string, days: number = COOLING_OFF_DAYS): string {
+  return addDays(reservationDate, Math.max(days || COOLING_OFF_DAYS, COOLING_OFF_DAYS))
 }
 
 /** Refund due date after a cancellation — Code 2.4 (reservation fee) / 2.13 (contract deposit). */
@@ -394,7 +402,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       clause: isContract ? '2.13' : '2.4',
       label: isContract ? 'Refund contract deposit' : 'Refund reservation fee',
       detail: plot.cancellation.fullRefund
-        ? `In full — contract deposit, reservation fee and any other payments (Code 2.9) — within ${isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS} days.`
+        ? `In full — contract deposit, reservation fee and any other payments (Code 2.9). The Code sets no timescale for this refund; the app applies ${isContract ? CONTRACT_REFUND_DAYS : RESERVATION_REFUND_DAYS} days (Code ${isContract ? '2.13' : '2.4'}) as the safe default.`
         : isContract
           ? `Within ${CONTRACT_REFUND_DAYS} days of the contract being cancelled.`
           : `Within ${RESERVATION_REFUND_DAYS} days of the customer's notice, less any deductions set out in the Reservation Agreement.`,
@@ -408,7 +416,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   // Cooling-off — 2.3. Awareness, not a developer deadline: the customer can
   // cancel for a full refund until this date.
   if (plot.reservationDate && stage === 'reserved') {
-    const end = coolingOffEnd(plot.reservationDate)
+    const end = coolingOffEnd(plot.reservationDate, plot.coolingOffDays)
     const daysRemaining = daysFromToday(end)
     if (daysRemaining >= 0) {
       out.push({
@@ -438,7 +446,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       label: passed ? 'Exchange date passed — exchanged yet?' : 'Exchange of contracts due',
       detail:
         (passed
-          ? 'If contracts have exchanged, record the date under Edit details & dates & dates. If not, agree a new exchange-by date with the customer in writing.'
+          ? 'If contracts have exchanged, record the date under Edit details & dates. If not, agree a new exchange-by date with the customer in writing.'
           : 'The exchange-by date agreed in the Reservation Agreement. If it passes, agree a new date with the customer in writing.') + agreed,
       dueDate: plot.exchangeDeadline,
       daysRemaining,
@@ -460,7 +468,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
         kind: 'major_change',
         clause: '2.9',
         label: 'Major change — written notice not yet received',
-        detail: 'Call the customer first, then send the written notice and record the day they receive it. Their 14-day right to cancel runs from that day, and notice to complete cannot be served during the window.',
+        detail: 'Speak to the customer, then send the written notice the Code requires and record the day they receive it. Their 14-day right to cancel runs from that day, and notice to complete cannot be served during the window.',
         rag: 'amber',
         changeId: change.id,
       })
@@ -500,7 +508,7 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
       kind: 'completion_passed',
       clause: '2.8',
       label: 'Expected completion date passed — completed?',
-      detail: 'If legal completion took place, record the date under Edit details & dates & dates. If not, log the delay and update the expected completion date so the customer is kept informed.',
+      detail: 'If legal completion took place, record the date under Edit details & dates. If not, log the delay and update the expected completion date so the customer is kept informed.',
       dueDate: plot.expectedCompletionDate,
       daysRemaining: daysFromToday(plot.expectedCompletionDate),
       rag: 'amber',
@@ -635,6 +643,15 @@ export function computeComplaintMilestones(issue: Issue, today = todayISO()): Co
     const daysOpen = diffDays(issue.startedAt, today)
     let n = 1
     let offset = 56 + UPDATE_INTERVAL_DAYS
+    // 3.4c(v) and 3.4d(iv): an update within 28 days of the Assessment and
+    // Response or Eight-Week letter actually sent — earlier than day 84 if
+    // that letter went out early.
+    const lastLetter = ['assessment_response', 'eight_week']
+      .map((k) => progress[k]?.completedDate)
+      .filter((d): d is string => !!d)
+      .sort()
+      .pop()
+    if (lastLetter) offset = Math.min(offset, diffDays(issue.startedAt, lastLetter) + UPDATE_INTERVAL_DAYS)
     // Generate updates that are already due, plus the next upcoming one.
     while (offset <= daysOpen + UPDATE_INTERVAL_DAYS) {
       out.push(build(`update_28_${n}`, offset, `28-day update #${n}`, false, true))

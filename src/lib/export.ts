@@ -97,7 +97,7 @@ export function exportPlotPrintable(plot: Plot, developerName: string, part1?: {
           ? c.outcome
             ? `${c.outcome === 'accepted' ? 'Accepted' : 'Customer cancelled'} ${formatDate(c.outcomeDate)}`
             : c.noticeSentOn
-              ? `Written notice sent ${formatDate(c.noticeSentOn)} · cancellation window to ${formatDate(majorChangeCancelBy(c) || undefined)}`
+              ? `Written notice received ${formatDate(c.noticeSentOn)} · cancellation window to ${formatDate(majorChangeCancelBy(c) || undefined)}`
               : 'Written notice not yet sent'
           : ''
       return `<tr>

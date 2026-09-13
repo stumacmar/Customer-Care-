@@ -30,6 +30,7 @@ export function EditPlotSheet({
   const [customerNames, setCustomerNames] = useState(plot.customerNames)
   const [customerEmail, setCustomerEmail] = useState(plot.customerEmail || '')
   const [reservationDate, setReservationDate] = useState(plot.reservationDate || '')
+  const [coolingOffDays, setCoolingOffDays] = useState(plot.coolingOffDays ? String(plot.coolingOffDays) : '')
   const [exchangeDeadline, setExchangeDeadline] = useState(plot.exchangeDeadline || '')
   const [exchangeAgreementNote, setExchangeAgreementNote] = useState(plot.exchangeAgreementNote || '')
   const [exchangeDate, setExchangeDate] = useState(plot.exchangeDate || '')
@@ -48,6 +49,7 @@ export function EditPlotSheet({
         customerNames,
         customerEmail,
         reservationDate: reservationDate || undefined,
+        coolingOffDays: coolingOffDays && Number(coolingOffDays) > 14 ? Math.floor(Number(coolingOffDays)) : undefined,
         exchangeDeadline: exchangeDeadline || undefined,
         exchangeAgreementNote: exchangeAgreementNote || undefined,
         exchangeDate: exchangeDate || undefined,
@@ -106,6 +108,17 @@ export function EditPlotSheet({
       <div className="field">
         <label>Reservation date</label>
         <input type="date" value={reservationDate} onChange={(e) => setReservationDate(e.target.value)} />
+      </div>
+      <div className="field">
+        <label>Cooling-off period in days (14 unless your Reservation Agreement gives longer)</label>
+        <input
+          type="number"
+          min={14}
+          inputMode="numeric"
+          value={coolingOffDays}
+          onChange={(e) => setCoolingOffDays(e.target.value)}
+          placeholder="14"
+        />
       </div>
       <div className="field">
         <label>Exchange-by date (from the Reservation Agreement)</label>
@@ -175,11 +188,12 @@ export function EditPlotSheet({
           <div className="card">
             <p className="muted" style={{ marginTop: 0, fontSize: 13 }}>
               Recording a cancellation keeps the plot (and its evidence) and starts the refund
-              deadline: the reservation fee within 14 days (in full if still in cooling-off), or
-              the contract deposit within 28 days.
+              deadline: the reservation fee within 14 days of the notice (in full if still in
+              cooling-off — the Code sets no timescale for that, so the app uses the same 14
+              days), or the contract deposit within 28 days.
             </p>
             <div className="field" style={{ marginBottom: 10 }}>
-              <label>Date the customer's notice was received</label>
+              <label>Date of the customer's notice of cancellation</label>
               <input type="date" value={cancelDate} max={todayISO()} onChange={(e) => setCancelDate(e.target.value)} />
             </div>
             <div className="wrap-actions">

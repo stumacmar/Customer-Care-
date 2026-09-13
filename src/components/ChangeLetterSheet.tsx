@@ -89,10 +89,10 @@ export function ChangeLetterSheet({
     <Sheet title={draft.title} subtitle="Check it, fill anything in [brackets], then send." onClose={onClose}>
       {isMajor && !change.noticeSentOn && (
         <div className="card" style={{ marginBottom: 12, borderLeft: '4px solid var(--accent)' }}>
-          <strong>Call the customer first.</strong>{' '}
+          <strong>Speak to the customer first.</strong>{' '}
           <span className="muted">
-            Have the conversation, then send this notice. A letter should never be the first the
-            customer hears of a major change.
+            Good practice, not a Code step: have the conversation, then send this notice. The
+            Code requires the notice in writing (2.9).
           </span>
         </div>
       )}
