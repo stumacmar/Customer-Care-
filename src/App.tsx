@@ -18,6 +18,9 @@ import { BrandLogo } from './components/Brand'
 import { Icon } from './components/icons'
 import { Sheet, useToast } from './components/ui'
 import { LogEmailSheet } from './components/CorrespondenceSection'
+import { AccessGate } from './components/AccessGate'
+import { rememberAccess, statusForHash, storedAccess, type AccessStatus } from './lib/access'
+import { todayISO } from './lib/dates'
 import { useStore } from './state/store'
 
 type Tab = 'plots' | 'guide' | 'code'
@@ -34,6 +37,10 @@ export function App() {
   const [showNewDev, setShowNewDev] = useState(false)
   const [showSettings, setShowSettings] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
+  // The developer's side is for NHQB-registered developers: the access code
+  // from the developer portal, checked and remembered on this phone only.
+  const [access, setAccess] = useState<AccessStatus>(() => statusForHash(storedAccess(), todayISO()))
+  const unlocked = access === 'ok'
   // "Why?" affordances deep-link into the Code tab at the relevant clause.
   const [codeRef, setCodeRef] = useState<string | null>(null)
   // An email shared into the app from the mail client (Android Web Share
@@ -65,8 +72,9 @@ export function App() {
     setTab('code')
   }
 
-  // First-ever open: show the 7-line guide once. After that it lives behind ❓.
+  // First-ever open (once past the access code): show the how-to once. After that it lives behind ❓.
   useEffect(() => {
+    if (!unlocked) return
     try {
       if (!localStorage.getItem('plot-clock-help-seen')) {
         localStorage.setItem('plot-clock-help-seen', '1')
@@ -75,7 +83,7 @@ export function App() {
     } catch {
       /* private browsing — skip */
     }
-  }, [])
+  }, [unlocked])
 
   const openDevelopment = (devId: string) => setView({ name: 'development', devId })
   const openPlot = (plotId: string, devId: string) => setView({ name: 'plot', plotId, devId })
@@ -88,7 +96,7 @@ export function App() {
     else toDevelopments()
   }
 
-  const showBack = tab === 'plots' && view.name !== 'developments'
+  const showBack = unlocked && tab === 'plots' && view.name !== 'developments'
 
   return (
     <div className="app">
@@ -110,9 +118,11 @@ export function App() {
         <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">
           <Icon name="help" size={22} />
         </button>
-        <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label="Settings">
-          <Icon name="settings" size={21} />
-        </button>
+        {unlocked && (
+          <button className="iconbtn" onClick={() => setShowSettings(true)} aria-label="Settings">
+            <Icon name="settings" size={21} />
+          </button>
+        )}
       </header>
 
       <main className="tab-body">
@@ -120,6 +130,15 @@ export function App() {
           <CodeSearch openRef={codeRef} onRefConsumed={() => setCodeRef(null)} />
         ) : tab === 'guide' ? (
           <GuideTab />
+        ) : !unlocked ? (
+          <AccessGate
+            initialStatus={access === 'expired' ? 'expired' : undefined}
+            onUnlocked={(hash) => {
+              rememberAccess(hash)
+              setAccess('ok')
+            }}
+            onOpenGuide={() => setTab('guide')}
+          />
         ) : view.name === 'developments' ? (
           <DevelopmentsList
             onOpenDevelopment={openDevelopment}
@@ -145,7 +164,7 @@ export function App() {
 
       {/* The FAB is hidden on the empty state, which has its own centred CTA —
           otherwise "add development" appears twice (most obvious on desktop). */}
-      {tab === 'plots' && view.name === 'developments' && state.developments.length > 0 && (
+      {unlocked && tab === 'plots' && view.name === 'developments' && state.developments.length > 0 && (
         <button className="fab" onClick={() => setShowNewDev(true)}>
           + Development
         </button>
@@ -200,7 +219,7 @@ export function App() {
         />
       )}
 
-      {sharedEmail && !sharedEmailPlot && (
+      {unlocked && sharedEmail && !sharedEmailPlot && (
         <Sheet
           title="Log a shared email"
           subtitle="Which plot is this email about?"
@@ -230,7 +249,7 @@ export function App() {
         </Sheet>
       )}
 
-      {sharedEmail && sharedEmailPlot && (
+      {unlocked && sharedEmail && sharedEmailPlot && (
         <LogEmailSheet
           plotId={sharedEmailPlot}
           initialBody={sharedEmail.text}
