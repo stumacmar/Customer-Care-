@@ -31,6 +31,7 @@ import { emptyState, id, loadState, saveState } from '../lib/storage'
 type Action =
   | { type: 'SET_DEVELOPER_NAME'; name: string }
   | { type: 'SET_DEVELOPER_EMAIL'; email: string }
+  | { type: 'SET_DEVELOPER_PHONE'; phone: string }
   | { type: 'ADD_DEVELOPMENT'; devId: string; name: string; location?: string; tradingName?: string }
   | {
       type: 'UPDATE_DEVELOPMENT'
@@ -62,6 +63,7 @@ type Action =
           | 'reservationDate'
           | 'exchangeDeadline'
           | 'exchangeAgreementNote'
+          | 'coolingOffDays'
           | 'exchangeDate'
           | 'noticeServedDate'
           | 'expectedCompletionDate'
@@ -94,6 +96,8 @@ type Action =
       plotId: string
       changeId: string
       outcome: 'accepted' | 'cancelled'
+      /** If cancelled: the date of the customer's notice (Code 2.4 / 2.13 count from it). */
+      date?: string
     }
   | { type: 'DELETE_CHANGE'; plotId: string; changeId: string }
   | { type: 'RECORD_CANCELLATION'; plotId: string; kind: Cancellation['kind']; date: string; fullRefund?: boolean }
@@ -200,6 +204,8 @@ function reducer(state: AppState, action: Action): AppState {
 
     case 'SET_DEVELOPER_EMAIL':
       return { ...state, developerEmail: action.email.trim() || undefined }
+    case 'SET_DEVELOPER_PHONE':
+      return { ...state, developerPhone: action.phone.trim() || undefined }
 
     case 'ADD_DEVELOPMENT': {
       const dev: Development = {
@@ -259,7 +265,7 @@ function reducer(state: AppState, action: Action): AppState {
           event(
             'stage_recorded',
             `Reservation recorded — ${formatDate(action.reservationDate)}`,
-            'The 14-day cooling-off period runs from this date (Code 2.3).'
+            'The cooling-off period (at least 14 days) runs from this date (Code 2.3).'
           )
         )
       }
@@ -302,11 +308,11 @@ function reducer(state: AppState, action: Action): AppState {
         // Journey dates get their own timeline entries when set or changed —
         // the audit record should show when each stage was recorded.
         const stamps: [keyof typeof patch, string, string?][] = [
-          ['reservationDate', 'Reservation recorded', 'The 14-day cooling-off period runs from this date (Code 2.3).'],
+          ['reservationDate', 'Reservation recorded', 'The cooling-off period (at least 14 days) runs from this date (Code 2.3).'],
           ['exchangeDeadline', 'Exchange-by date recorded', 'Code 2.2: at least six weeks after reservation unless the customer asks for earlier.'],
           ['exchangeDate', 'Exchange of contracts recorded'],
           ['noticeServedDate', 'Notice to complete recorded', 'Code 2.8: the notice period is usually expected to be at least 14 calendar days, with the pre-completion inspection offered before completion.'],
-          ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6: keep the customer informed of the expected completion date and of any change to it.'],
+          ['expectedCompletionDate', 'Expected completion date recorded', 'Code 2.6 / 2.8: give the customer the expected completion date and keep them up to date on the timetable.'],
           ['completionDate', 'Legal completion recorded', 'Code 3.1: the two-year after-sales service runs from this date.'],
         ]
         const events: TimelineEvent[] = []
@@ -346,7 +352,7 @@ function reducer(state: AppState, action: Action): AppState {
         }
         const detail =
           action.kind === 'major_change'
-            ? `${change.description}\nCode 2.9: call the customer, then send the written notice. Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.`
+            ? `${change.description}\nSpeak to the customer, then send the written notice the Code requires (2.9). Their 14-day right to cancel runs from the day they receive it, and notice to complete cannot be served during that window.`
             : change.description
         const ev = event('change_logged', `${noun[action.kind]}: ${truncate(change.description)}`, detail)
         return { plot: { ...plot, changes: [change, ...plot.changes] }, events: [ev] }
@@ -380,7 +386,7 @@ function reducer(state: AppState, action: Action): AppState {
         const changes = plot.changes.map((c) => {
           if (c.id !== action.changeId) return c
           desc = c.description
-          return { ...c, outcome: action.outcome, outcomeDate: todayISO() }
+          return { ...c, outcome: action.outcome, outcomeDate: action.date || todayISO() }
         })
         const ev = event(
           'change_logged',
@@ -432,7 +438,7 @@ function reducer(state: AppState, action: Action): AppState {
           isContract
             ? 'Code 2.13: refund the contract deposit and any other amounts due within 28 days.'
             : action.fullRefund
-              ? 'Code 2.9: refund the reservation fee and any other payments in full within 14 days of the notice.'
+              ? 'Code 2.9: refund the reservation fee and any other payments in full. The Code sets no timescale for this; the app applies the 14 days of Code 2.4 as the safe default.'
               : 'Code 2.4: refund the reservation fee, less any deductions set out in the Reservation Agreement, within 14 days of the notice. Within the 14-day cooling-off period the refund must be in full (Code 2.3).'
         )
         // A cancellation already on record (possibly refunded) is never

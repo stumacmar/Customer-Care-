@@ -33,13 +33,13 @@ export function BuyerShareSheet({
   useEffect(() => {
     if (!ready) return
     let alive = true
-    encodeShare(buildSnapshot(plot, from, state.developerEmail, todayISO())).then((code) => {
+    encodeShare(buildSnapshot(plot, from, state.developerEmail, todayISO(), state.developerPhone)).then((code) => {
       if (alive) setLink(buyerLink(code))
     })
     return () => {
       alive = false
     }
-  }, [plot, from, state.developerEmail, ready])
+  }, [plot, from, state.developerEmail, state.developerPhone, ready])
 
   const record = () => {
     dispatch({

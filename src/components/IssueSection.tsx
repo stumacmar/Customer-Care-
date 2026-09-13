@@ -145,7 +145,7 @@ function IssueCard({
       )}
       {issue.type === 'emergency' && isOpen && (
         <div className="badge emergency" style={{ marginBottom: 8 }}>
-          Health, safety or well-being risk — deal with this first.
+          Safety, security, health or well-being risk — deal with this first.
         </div>
       )}
 

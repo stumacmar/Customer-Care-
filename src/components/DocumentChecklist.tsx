@@ -12,8 +12,8 @@ import type { DocumentItem, DocumentStage, Plot } from '../types'
 
 const STAGE_GROUPS: { stage: DocumentStage; title: string; clause: string; whyRef: string }[] = [
   { stage: 'reservation', title: 'At reservation', clause: 'Code 2.2 – 2.3', whyRef: '2.2' },
-  { stage: 'pre_contract', title: 'Pre-contract & exchange', clause: 'Code 2.5 – 2.7', whyRef: '2.6' },
-  { stage: 'completion', title: 'Completion & handover', clause: 'Code 2.8, 2.11 – 2.12, 3.1', whyRef: '2.11' },
+  { stage: 'pre_contract', title: 'Pre-contract & exchange', clause: 'Code 2.5 – 2.7, 2.13', whyRef: '2.6' },
+  { stage: 'completion', title: 'Completion & handover', clause: 'Code 2.8, 2.10 – 2.12, 3.1', whyRef: '2.11' },
 ]
 
 export function DocumentChecklist({

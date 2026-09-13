@@ -13,13 +13,13 @@ import { useState } from 'react'
 import { DictationField, PhotoField, Sheet } from './ui'
 import { usePlot, useStore } from '../state/store'
 import { SNAG_PUT_RIGHT_DAYS } from '../lib/code'
-import { addDays, formatDate, todayISO } from '../lib/dates'
+import { addDays, formatDate, nextBusinessDay, todayISO } from '../lib/dates'
 import { decodeShare, extractCode, type BuyerReport } from '../lib/share'
 import type { IconName } from './icons'
 import type { IssueType } from '../types'
 
 const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] = [
-  { key: 'snag', label: 'Snag or defect', ico: 'wrench', blurb: `Put right within ${SNAG_PUT_RIGHT_DAYS} days of the report, or explain the delay and update the customer monthly (Code 3.3).` },
+  { key: 'snag', label: 'Snag or defect', ico: 'wrench', blurb: `Acknowledge it as soon as possible, then put it right within ${SNAG_PUT_RIGHT_DAYS} days of the report, or explain the delay and update the customer monthly (Code 3.3).` },
   {
     key: 'complaint',
     label: 'Complaint',
@@ -113,7 +113,7 @@ export function LogIssueSheet({
         : type === 'snag'
           ? `${meta.label} logged — put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
           : type === 'complaint'
-            ? 'Complaint logged — acknowledge in writing within 5 days'
+            ? `Complaint logged — acknowledge in writing by ${formatDate(addDays(nextBusinessDay(receivedOn || todayISO()), 5))}`
             : 'Emergency logged — deal with it now'
     )
   }
@@ -138,6 +138,26 @@ export function LogIssueSheet({
       >
         {meta.blurb}
       </div>
+
+      {report && (
+        <div className="field">
+          <label>Log as</label>
+          <div className="type-picker" style={{ gridTemplateColumns: '1fr 1fr 1fr' }}>
+            {TYPES.map((t) => (
+              <button
+                key={t.key}
+                className={`type-opt${type === t.key ? ` active ${t.key}` : ''}`}
+                aria-pressed={type === t.key}
+                onClick={() => setType(t.key)}
+                style={{ fontSize: 12, padding: '10px 2px' }}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
+          <div className="dictate-hint">The customer's app chose {TYPES.find((t) => t.key === report.type)?.label.toLowerCase()}. A snag reported to you is not automatically a complaint — change it if that is right.</div>
+        </div>
+      )}
 
       {type === 'complaint' && openComplaints.length > 0 && (
         <div className="field">
@@ -191,7 +211,7 @@ export function LogIssueSheet({
         {report && (
           <div className="dictate-hint">
             From the customer's app{report.sentOn ? `, sent ${formatDate(report.sentOn)}` : ''}. Their words and date are kept.
-            {report.type !== initialType && ` Their app sent it as a${report.type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}, so it is logged as one.`}
+
           </div>
         )}
       </div>

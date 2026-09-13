@@ -78,6 +78,7 @@ function migrate(parsed: Partial<AppState>): AppState {
     version: CURRENT_VERSION,
     developerName: parsed.developerName || '',
     developerEmail: parsed.developerEmail || undefined,
+    developerPhone: parsed.developerPhone || undefined,
     showCodeRefs: parsed.showCodeRefs || false,
     lastBackupAt: parsed.lastBackupAt,
     developments,

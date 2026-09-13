@@ -117,7 +117,7 @@ export interface ChangeRecord {
  */
 export interface Cancellation {
   kind: 'reservation' | 'contract'
-  /** ISO date the customer's notice of cancellation was received. */
+  /** ISO date of the customer's notice of cancellation (Code 2.4 counts from it). */
   date: string
   /** Cancelled over a major change (2.9): the refund is in full, no deductions. */
   fullRefund?: boolean
@@ -228,6 +228,8 @@ export interface Plot {
   exchangeDeadline?: string // ISO date
   /** Any agreed extension or change to the exchange-by date, with the reason — kept on the record (2.2). */
   exchangeAgreementNote?: string
+  /** Length of the cooling-off period in days: at least 14 (Code 2.3); longer if the Reservation Agreement says so. Default 14. */
+  coolingOffDays?: number
   /** Date contracts were actually exchanged (missives concluded in Scotland). */
   exchangeDate?: string // ISO date
   /** Date the notice to complete was served — opens the PCI window (2.8). */
@@ -254,6 +256,8 @@ export interface AppState {
   developerName: string
   /** Where buyer reports are emailed — included in shared buyer links. */
   developerEmail?: string
+  /** The number customers ring for an emergency — shown on their page (Code 3.1e). */
+  developerPhone?: string
   /** UI preferences. Compliance is built in; showing the clause numbers is opt-in. */
   showCodeRefs?: boolean
   /** ISO datetime of the last backup download — drives the weekly backup nag. */

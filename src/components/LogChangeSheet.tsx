@@ -63,7 +63,7 @@ export function LogChangeSheet({
     })
     onLogged(
       kind === 'major_change'
-        ? 'Major change logged — call the customer, then send the written notice'
+        ? 'Major change logged — speak to the customer, then send the written notice'
         : `${meta.label} logged`,
       kind,
       changeId

@@ -54,6 +54,8 @@ export interface BuyerSnapshot {
   k: 'snapshot'
   developerName: string
   developerEmail?: string
+  /** The number to ring in an emergency (Code 3.1e). */
+  developerPhone?: string
   address: string
   customerNames: string
   reservationDate?: string
@@ -63,6 +65,8 @@ export interface BuyerSnapshot {
   expectedCompletionDate?: string
   /** Legal completion — only present once it has happened. */
   completionDate?: string
+  /** Cooling-off length in days, at least 14 (Code 2.3). */
+  coolingOffDays?: number
   docs: SnapshotDoc[]
   changes: SnapshotChange[]
   issues: SnapshotIssue[]
@@ -91,14 +95,17 @@ export function buildSnapshot(
   plot: Plot,
   developerName: string,
   developerEmail: string | undefined,
-  today: string
+  today: string,
+  developerPhone?: string
 ): BuyerSnapshot {
   return {
     k: 'snapshot',
     plotId: plot.id,
     developerName,
     developerEmail: developerEmail || undefined,
+    developerPhone: developerPhone || undefined,
     address: plot.address,
+    coolingOffDays: plot.coolingOffDays,
     customerNames: plot.customerNames,
     reservationDate: plot.reservationDate,
     exchangeDate: plot.exchangeDate,

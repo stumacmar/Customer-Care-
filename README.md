@@ -1,6 +1,6 @@
 # NHQB — Plot Tracker
 
-**Tracks each plot's progress, keeps your customers updated, and keeps you Code compliant — with almost no typing.**
+**Tracks each plot's progress, keeps your customers updated, and helps you keep to the Code — with almost no typing.**
 
 A mobile-first tool for micro-developers (1–5 homes a year) who are registered NHQB developers with no customer-care team and no CRM. It is deliberately **not** a defect-management CRM. It covers the whole journey the New Homes Quality Code attaches to a plot — **from the day the Reservation Agreement is signed to the end of the two-year after-sales window** — and nothing else:
 
@@ -29,13 +29,13 @@ Rows sort most urgent first.
 
 ### The journey: reservation → completion → two years of after-sales
 
-A plot is added the day it is **reserved**. Its stage is derived from dates, never managed by hand: Reserved → Exchanged → Notice served → Completed (→ archived when the two-year Ombudsman window closes), or Cancelled at any point. Each stage carries its own Code deadlines:
+A plot is added the day it is **reserved**. Its stage is derived from dates, never managed by hand: Reserved → Exchanged → Notice served → Completed (→ archived two years after completion, the end of the period in which a complaint can be made), or Cancelled at any point. Each stage carries its own Code deadlines:
 
 | Stage | Deadlines the app runs | Code |
 | --- | --- | --- |
 | Reserved | 14-day cooling-off; exchange-by date (defaults to the Code minimum of six weeks) | 2.3 / 2.2m |
 | Any pre-completion | Major change → the customer's 14-day cancellation window, during which notice to complete must not be served | 2.9 |
-| Cancelled | Refund of the reservation fee within 14 days, or the contract deposit within 28 days | 2.4 / 2.13 |
+| Cancelled | Refund of the reservation fee in full during cooling-off (2.3, no timescale set; the app applies 14 days), less agreed deductions within 14 days after it (2.4), or the contract deposit within 28 days (2.13) | 2.3 / 2.4 / 2.13 |
 | Notice served | Warns if the notice period is under 14 calendar days; reminds you to offer the pre-completion inspection | 2.8 |
 | Completed | The three log buttons below, for two years | 3.1–3.4 |
 
@@ -67,7 +67,7 @@ The traffic-light only counts documents due by the plot's current stage — a fr
 
 ### Auto-generated letters
 
-The Code specifies exact required content for five complaint letters. Each generator pre-fills the customer name, address, complaint reference and the correct legal deadline dates, and lays out the Code's required content as editable fields — you review, tweak the `[bracketed]` prompts, then **copy** or **print/PDF**. Never a black-box auto-send. Saving a letter records it on the timeline and ticks off the matching milestone.
+The Code specifies the timing of five complaint letters and the required content of three of them. Each generator pre-fills the customer name, address, complaint reference and the correct legal deadline dates, and lays out the Code's required content as editable fields — you review, tweak the `[bracketed]` prompts, then **copy** or **print/PDF**. Never a black-box auto-send. Saving a letter records it on the timeline and ticks off the matching milestone.
 
 - Acknowledgement (day 5)
 - Path to Resolution (day 10)

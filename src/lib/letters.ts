@@ -27,9 +27,8 @@ import { addDays, formatDate, todayISO } from './dates'
 import { majorChangeCancelBy, milestoneDue, SNAG_PUT_RIGHT_DAYS, UPDATE_INTERVAL_DAYS } from './code'
 import type { ChangeRecord, Issue, MilestoneKey, Plot } from '../types'
 
-/** New Homes Ombudsman Service contact details (nhos.org.uk). */
-export const NHOS_CONTACT =
-  'New Homes Ombudsman Service — www.nhos.org.uk · 0330 808 4286 · customer.services@nhos.org.uk'
+/** New Homes Ombudsman Service — the website is the one contact route the Code and NHQB's guides give. */
+export const NHOS_CONTACT = 'New Homes Ombudsman Service — www.nhos.org.uk'
 
 export interface LetterContext {
   developerName: string
@@ -75,9 +74,9 @@ function signOff(ctx: LetterContext): string {
 function ombudsmanBlock(): string {
   return [
     'Referring your complaint to the New Homes Ombudsman Service:',
-    '   If your complaint is not resolved through our complaints process — or once it',
-    '   has been open for 56 days — you may refer it to the New Homes Ombudsman',
-    '   Service, which is free and independent.',
+    '   If you are not satisfied with the outcome of our complaints process, you may refer',
+    '   your complaint to the independent New Homes Ombudsman Service from 56 days after',
+    '   your complaint start date.',
     `   ${NHOS_CONTACT}`,
   ].join('\n')
 }
@@ -108,8 +107,7 @@ function acknowledgement(ctx: LetterContext): LetterDraft {
     'Your point of contact for this complaint is [name], who can be reached on ' +
       '[telephone] or [email].',
     '',
-    'A copy of our complaints procedure was provided with your home information and is ' +
-      'available on request.',
+    'A copy of our complaints procedure is available on request.',
     signOff(ctx),
   ].join('\n')
   return {
@@ -138,10 +136,9 @@ function pathToResolution(ctx: LetterContext): LetterDraft {
     '  • Steps and timescales: [e.g. inspection by DD/MM, works by DD/MM]',
     '',
     'Your home warranty:',
-    '   [State whether this complaint can be referred to your warranty provider and its ' +
-      "dispute resolution service — e.g. \"This issue falls under your structural warranty " +
-      'with [provider], whose dispute resolution service is available to you at [contact]\" ' +
-      'or "We do not consider this complaint falls within the warranty provider\'s scheme."]',
+    '   [If you are not satisfied with the outcome of our complaints procedure, you ' +
+      '[can / cannot] refer this complaint to the dispute resolution service offered by ' +
+      'your warranty provider, [provider and contact].]',
     '',
     `We will send you our full Complaint Assessment and Response letter by ` +
       `${formatDate(milestoneDue(ctx.issue, 'assessment_response'))}. If anything delays this, we will ` +
@@ -208,8 +205,8 @@ function eightWeek(ctx: LetterContext): LetterDraft {
     '',
     `Re: Eight-Week update on your complaint (${ref})`,
     '',
-    'Your complaint has now been open for eight weeks and has not yet been fully ' +
-      'resolved. We are sorry that this is the case and want to keep you fully informed.',
+    'Your complaint has not yet been fully resolved. We are sorry that this is the case ' +
+      'and want to keep you fully informed.',
     '',
     'Summary of the action we have taken so far:',
     '   [Clear summary of everything done to date.]',
@@ -226,8 +223,8 @@ function eightWeek(ctx: LetterContext): LetterDraft {
     '',
     ombudsmanBlock(),
     '',
-    '   As your complaint has now been open for more than 56 days, you are entitled to ' +
-      'refer it to the Ombudsman now, whether or not you wait for us to finish.',
+    `   You may refer your complaint to the Ombudsman from ${formatDate(addDays(ctx.issue.startedAt, 56))}, ` +
+      'whether or not you wait for us to finish.',
     signOff(ctx),
   ].join('\n')
   return {
@@ -348,8 +345,10 @@ export function majorChangeLetter(
     `Re: Notice of a major change to your new home at ${plot.address || '[address]'}`,
     '',
     'We are writing to tell you about a change to your new home that we consider to be a ' +
-      'major change — one that significantly and substantially affects the size, appearance ' +
-      'or value of the home compared with what you were shown when you reserved.',
+      'major change — a change that we are responsible for, that can reasonably be considered ' +
+      'as significantly and substantially affecting the size, appearance or value of the home ' +
+      '(including the internal layout) from what you were shown in the Reservation Agreement ' +
+      'or contract of sale.',
     '',
     'The change:',
     `   ${change.description || '[describe the change, and how it differs from what was shown]'}`,
@@ -363,8 +362,8 @@ export function majorChangeLetter(
     '',
     'We recommend that you discuss this letter with your solicitor or conveyancer before deciding.',
     '',
-    'Please let us know your decision by the date above, and contact us with any questions ' +
-      'in the meantime.',
+    'If you wish to cancel, please tell us in writing by the date above. If we do not hear ' +
+      'from you, we will proceed with the change. Please contact us with any questions in the meantime.',
     journeySignOff(developerName),
   ].join('\n')
   return {
@@ -375,8 +374,9 @@ export function majorChangeLetter(
 }
 
 /**
- * Delay / timetable update — Code 2.6 and 2.8: keep the customer informed
- * about when the home is likely to be ready, with updates at appropriate times.
+ * Delay / timetable update — Code 2.7 and 2.8: keep the customer up to date
+ * on the timetable for when the home is likely to be ready, with updates at
+ * appropriate times.
  */
 export function delayUpdateLetter(
   developerName: string,
@@ -399,9 +399,12 @@ export function delayUpdateLetter(
     `   Expected completion: ${plot.expectedCompletionDate ? formatDate(plot.expectedCompletionDate) : '[updated expected completion date]'}`,
     '   [Set out anything the customer should do, and when you will update them next.]',
     '',
-    'Your contract of sale sets out what happens if the home is not ready by the date we ' +
-      'said it would be, including the circumstances in which you can cancel. If you have ' +
-      'any questions we recommend speaking to your solicitor or conveyancer.',
+    plot.exchangeDate
+      ? 'Your contract of sale sets out what happens if the home is not ready by the date we ' +
+        'said it would be, including the circumstances in which you can cancel. If you have ' +
+        'any questions we recommend speaking to your solicitor or conveyancer.'
+      : 'Your Reservation Agreement sets out how and when it will end. If you have any ' +
+        'questions we recommend speaking to your solicitor or conveyancer.',
     '',
     'We are sorry for the inconvenience and will keep you updated.',
     journeySignOff(developerName),

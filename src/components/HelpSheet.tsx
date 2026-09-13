@@ -23,7 +23,7 @@ const STEPS: Step[] = [
   {
     icon: 'clipboard',
     tint: 'var(--green)',
-    text: 'Log every choice, extra, change, delay, site visit and email with the one button under Spec & changes. For a major change, call the customer first; the app drafts the written notice, and the customer\'s 14-day cancellation window runs from the day they receive it.',
+    text: 'Log every choice, extra, change, delay, site visit and email with the one button under Spec & changes. For a major change, speak to the customer, then send the written notice the Code requires; the app drafts it, and the customer\'s 14-day cancellation window runs from the day they receive it.',
   },
   {
     icon: 'check-circle',
@@ -91,7 +91,7 @@ export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpe
         <div style={{ minWidth: 0 }}>
           <div style={{ fontWeight: 800, letterSpacing: '0.16em', fontSize: 16 }}>NHQB</div>
           <div className="muted" style={{ fontSize: 12 }}>
-            Tracks plot progress, keeps customers updated, and keeps you on the Code.
+            Tracks plot progress, keeps customers updated, and helps you keep to the Code.
           </div>
         </div>
       </div>
