@@ -9,8 +9,9 @@
  * they go straight from one phone to the other via whatever channel the two
  * people already use (email, WhatsApp, SMS).
  *
- * The same encoding carries the buyer's reports back the other way as a small
- * paste-code inside a pre-addressed email.
+ * The same encoding carries the buyer's reports back the other way, inside a
+ * link (#/report/…) at the foot of a pre-addressed email. The developer taps
+ * it and their app opens on the right plot with the report filled in.
  */
 
 import { majorChangeCancelBy, snagPutRightDate } from './code'
@@ -67,6 +68,8 @@ export interface BuyerSnapshot {
   issues: SnapshotIssue[]
   /** ISO date the developer generated this link. */
   sharedOn: string
+  /** The developer's own id for the plot, so a report link can open the right one. */
+  plotId?: string
 }
 
 /** What travels back when the buyer reports a problem. */
@@ -78,6 +81,8 @@ export interface BuyerReport {
   sentOn: string
   address: string
   customerNames?: string
+  /** Copied from the snapshot, so the developer's app can find the plot. */
+  plotId?: string
 }
 
 export type SharePayload = BuyerSnapshot | BuyerReport
@@ -90,6 +95,7 @@ export function buildSnapshot(
 ): BuyerSnapshot {
   return {
     k: 'snapshot',
+    plotId: plot.id,
     developerName,
     developerEmail: developerEmail || undefined,
     address: plot.address,
@@ -215,6 +221,11 @@ export function isValidPayload(p: unknown): p is SharePayload {
 /** The buyer link for a payload — the data rides in the fragment. */
 export function buyerLink(code: string): string {
   return `${location.origin}${location.pathname}#/buyer/${code}`
+}
+
+/** The link at the foot of a customer's report email — tapping it opens the developer's app on the report. */
+export function reportLink(code: string): string {
+  return `${location.origin}${location.pathname}#/report/${code}`
 }
 
 /** Extract a share code from pasted text (a bare code or a whole link/email). */

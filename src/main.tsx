@@ -11,6 +11,8 @@ import './styles.css'
  *    the fragment carries the plot snapshot and never touches the network;
  *  - a device that has only ever held buyer data boots straight into the
  *    buyer view (so the buyer's home-screen install opens their app);
+ *  - a #/report/<code> link (from a customer's email) opens the developer's
+ *    tracker on that report;
  *  - otherwise the developer's tracker loads as before.
  */
 function boot() {
@@ -20,6 +22,9 @@ function boot() {
     const rest = hash.slice('#/buyer'.length)
     buyerCode = rest.startsWith('/') ? rest.slice(1) : ''
   }
+  // A report link from a customer's email (#/report/<code>) always opens the
+  // developer's app, which decodes it and opens the right plot.
+  const reportCode = hash.startsWith('#/report/') ? hash.slice('#/report/'.length) : null
   let hasBuyerState = false
   let hasDevState = false
   try {
@@ -28,7 +33,7 @@ function boot() {
   } catch {
     /* private browsing */
   }
-  const buyerMode = buyerCode !== null || (hasBuyerState && !hasDevState)
+  const buyerMode = reportCode === null && (buyerCode !== null || (hasBuyerState && !hasDevState))
 
   createRoot(document.getElementById('root')!).render(
     <StrictMode>
@@ -36,13 +41,19 @@ function boot() {
         <BuyerApp initialCode={buyerCode || undefined} />
       ) : (
         <StoreProvider>
-          <App />
+          <App reportCode={reportCode || undefined} />
         </StoreProvider>
       )}
     </StrictMode>
   )
 }
 boot()
+
+// A report link tapped while the app is already open in this tab only changes
+// the fragment; reload so boot() sees it and opens the report.
+window.addEventListener('hashchange', () => {
+  if (location.hash.startsWith('#/report/')) location.reload()
+})
 
 // Register the offline service worker (production builds only — in dev the
 // module paths differ and caching just gets in the way).

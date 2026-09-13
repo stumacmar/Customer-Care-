@@ -3,10 +3,10 @@
  * phone: pick type → photo → one-line voice/typed description → done. The app
  * then calculates every downstream deadline itself.
  *
- * A report from the customer's app arrives by email carrying a small code.
- * Paste that email into the description of any of the three and the sheet
- * decodes it: the customer's own words and the date they sent it are kept,
- * and if their app sent it as a different type the sheet switches to match.
+ * A report from the customer's app arrives by email with a link. Tapping the
+ * link opens this sheet filled in (initialReport): the customer's own words
+ * and the date they sent it are kept. Pasting the email into the description
+ * does the same, as a fallback when the link opens outside the installed app.
  */
 
 import { useState } from 'react'
@@ -34,25 +34,35 @@ const TYPES: { key: IssueType; label: string; ico: IconName; blurb: string }[] =
   },
 ]
 
+/** The customer's words, plus the line that shows on the record where they came from. */
+function describeReport(r: BuyerReport): string {
+  return `${r.description}\n[Reported by the customer via their plot link${r.sentOn ? `, sent ${formatDate(r.sentOn)}` : ''}]`
+}
+
 export function LogIssueSheet({
   plotId,
   initialType,
+  initialReport,
   onClose,
   onLogged,
 }: {
   plotId: string
   initialType: IssueType
+  /** A report that arrived by link — the sheet opens filled in from it. */
+  initialReport?: BuyerReport
   onClose: () => void
   onLogged: (msg: string) => void
 }) {
   const { dispatch } = useStore()
   const plot = usePlot(plotId)
-  const [type, setType] = useState<IssueType>(initialType)
-  const [description, setDescription] = useState('')
-  const [receivedOn, setReceivedOn] = useState(todayISO())
+  const [type, setType] = useState<IssueType>(initialReport?.type ?? initialType)
+  const [description, setDescription] = useState(initialReport ? describeReport(initialReport) : '')
+  const [receivedOn, setReceivedOn] = useState(
+    initialReport?.sentOn && initialReport.sentOn <= todayISO() ? initialReport.sentOn : todayISO()
+  )
   const [photo, setPhoto] = useState<string | undefined>(undefined)
-  // Set once a pasted customer report has been decoded into the fields.
-  const [report, setReport] = useState<BuyerReport | null>(null)
+  // The customer's report, once it has arrived by link or been decoded from a paste.
+  const [report, setReport] = useState<BuyerReport | null>(initialReport ?? null)
   // Code 3.4: complaints can be combined into one, with the timetable running
   // from the first complaint received. null = start a separate complaint.
   const [combineWith, setCombineWith] = useState<string | null>(null)
@@ -71,10 +81,7 @@ export function LogIssueSheet({
       if (!decoded || decoded.k !== 'report') return
       setReport(decoded)
       setType(decoded.type)
-      setDescription(
-        `${decoded.description}\n[Reported by the customer via their plot link` +
-          `${decoded.sentOn ? `, sent ${formatDate(decoded.sentOn)}` : ''}]`
-      )
+      setDescription(describeReport(decoded))
       if (decoded.sentOn && decoded.sentOn <= todayISO()) setReceivedOn(decoded.sentOn)
     })
   }
@@ -112,7 +119,7 @@ export function LogIssueSheet({
   }
 
   return (
-    <Sheet title={`Log a${type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}`} subtitle="Date, one line, optional photo — or paste the email from the customer's app." onClose={onClose}>
+    <Sheet title={`Log a${type === 'emergency' ? 'n' : ''} ${meta.label.toLowerCase()}`} subtitle={report ? "From the customer's app. Check it, then log it." : 'Date, one line, optional photo.'} onClose={onClose}>
 
       <div
         className={`badge ${type}`}
@@ -178,7 +185,7 @@ export function LogIssueSheet({
         <DictationField
           value={description}
           onChange={onDescription}
-          placeholder="One line — tap the mic to dictate, or paste the email from the customer's app"
+          placeholder="One line — tap the mic to dictate"
           rows={3}
         />
         {report && (

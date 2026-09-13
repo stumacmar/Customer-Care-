@@ -6,7 +6,7 @@
  * documents received, choices and changes, and issue status. It is stored
  * locally so the app works offline and can be added to the home screen.
  * Reporting a problem generates a pre-addressed email carrying a small code
- * the developer pastes into their tracker — which starts the Code's clock —
+ * carried in a link the developer taps — which starts the Code's clock —
  * and every report is kept here as the buyer's own evidence trail.
  */
 
@@ -31,6 +31,7 @@ import {
   encodeShare,
   isValidPayload,
   type BuyerReport,
+  reportLink,
   type BuyerSnapshot,
   type SnapshotIssue,
 } from '../lib/share'
@@ -201,9 +202,10 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
             <Icon name="megaphone" size={17} /> Report a problem
           </button>
           <p className="muted" style={{ fontSize: 12.5, marginTop: 8 }}>
-            Your report goes to your developer by email, and a copy is kept here as your own
-            record. The Code's response timescales run from the first business day after your
-            developer receives it. Anything that is not an emergency is dealt with in your
+            Your report goes to your developer by email. When they open the link in it, your
+            report goes into their records with today's date, and a copy is kept here as your
+            own record. The Code's response timescales run from the first business day after
+            your developer receives it. Anything that is not an emergency is dealt with in your
             developer's normal working hours. Keep all paperwork and emails about your home.
           </p>
         </div>
@@ -408,13 +410,20 @@ function GuidedReport({
       sentOn,
       address: snap.address,
       customerNames: snap.customerNames || undefined,
+      plotId: snap.plotId,
     }
     const code = await encodeShare(report)
+    const intro =
+      type === 'emergency'
+        ? `Please treat this as an emergency at ${snap.address}. I am also telephoning you.`
+        : type === 'snag'
+          ? `I would like to report a snag or defect at ${snap.address}.`
+          : `I would like to make a formal complaint about ${snap.address}.`
+    // Reads as a normal email. The developer's one instruction is the last line.
     const human =
-      `${titles[type]} — ${snap.address}\n` +
-      `From: ${snap.customerNames || 'the customer'}\nDate: ${formatDate(sentOn)}\n\n` +
-      `${body}\n\n` +
-      `--- Reference code for your developer's records — please leave it in ---\n${code}`
+      `Hi,\n\n${intro}\n\n${body}\n\n` +
+      `Sent ${formatDate(sentOn)} from my Plot Tracker link.\n${snap.customerNames || ''}\n\n` +
+      `---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
     if (via === 'email') {
       const subject = `[Customer report] ${titles[type]} — ${snap.address}`
       location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(human)}`
@@ -422,7 +431,7 @@ function GuidedReport({
     } else {
       try {
         await navigator.clipboard.writeText(human)
-        onToast('Report copied — paste it into a message to your developer')
+        onToast('Report copied — send it to your developer any way you like')
       } catch {
         onToast('Could not copy — use the email button instead')
       }
@@ -527,9 +536,10 @@ function MyReports({
       sentOn: r.sentOn,
       address: snap.address,
       customerNames: snap.customerNames || undefined,
+      plotId: snap.plotId,
     })
-    const subject = `[Customer report — resend] ${r.type} — ${snap.address}`
-    const body = `First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n--- For your tracker ---\n${code}`
+    const subject = `[Customer report — resend] ${TYPE_LABEL[r.type]} — ${snap.address}`
+    const body = `Hi,\n\nSending this again. First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n${snap.customerNames || ''}\n\n---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
     location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     onToast('Opening your email — press send there')
   }

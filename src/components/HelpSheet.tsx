@@ -33,7 +33,7 @@ const STEPS: Step[] = [
   {
     icon: 'wrench',
     tint: 'var(--snag)',
-    text: 'The moment a customer reports anything, log it: Snag (or defect), Complaint, or Emergency — or paste in the email from their app. The app works out the Code deadline — you never calculate a date.',
+    text: 'The moment a customer reports anything, log it: Snag (or defect), Complaint, or Emergency. A report from the customer\'s app arrives by email: tap the link in it and the sheet opens filled in. The app works out the Code deadline — you never calculate a date.',
   },
   {
     rag: true,

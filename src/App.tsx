@@ -19,6 +19,8 @@ import { Icon } from './components/icons'
 import { Sheet, useToast } from './components/ui'
 import { LogEmailSheet } from './components/CorrespondenceSection'
 import { AccessGate } from './components/AccessGate'
+import { IncomingReportSheet } from './components/IncomingReportSheet'
+import { decodeShare, type BuyerReport } from './lib/share'
 import { rememberAccess, statusForHash, storedAccess, type AccessStatus } from './lib/access'
 import { todayISO } from './lib/dates'
 import { useStore } from './state/store'
@@ -29,7 +31,7 @@ type View =
   | { name: 'development'; devId: string }
   | { name: 'plot'; plotId: string; devId: string }
 
-export function App() {
+export function App({ reportCode }: { reportCode?: string } = {}) {
   const { state } = useStore()
   const [tab, setTab] = useState<Tab>('plots')
   const [view, setView] = useState<View>({ name: 'developments' })
@@ -41,6 +43,36 @@ export function App() {
   // from the developer portal, checked and remembered on this phone only.
   const [access, setAccess] = useState<AccessStatus>(() => statusForHash(storedAccess(), todayISO()))
   const unlocked = access === 'ok'
+  // A report link from a customer's email (#/report/<code>): decode it, find
+  // its plot, and open that plot with the log sheet filled in. If no plot
+  // here matches, ask; if this phone has no plots at all, offer a copy.
+  const [incoming, setIncoming] = useState<BuyerReport | null>(null)
+  const [reportForPlot, setReportForPlot] = useState<{ plotId: string; report: BuyerReport } | null>(null)
+  const findPlotFor = (r: BuyerReport) =>
+    state.plots.find((p) => p.id === r.plotId) ||
+    state.plots.find((p) => p.address.trim().toLowerCase() === r.address.trim().toLowerCase())
+  const incomingMatch = incoming ? findPlotFor(incoming) : undefined
+  const openReport = (plotId: string, report: BuyerReport) => {
+    const plot = state.plots.find((p) => p.id === plotId)
+    if (!plot) return
+    setIncoming(null)
+    setTab('plots')
+    setView({ name: 'plot', plotId, devId: plot.developmentId })
+    setReportForPlot({ plotId, report })
+  }
+  useEffect(() => {
+    if (!reportCode) return
+    history.replaceState(null, '', location.pathname + '#')
+    void decodeShare(reportCode).then((d) => {
+      if (d && d.k === 'report') setIncoming(d)
+      else show('That report link is not valid — ask the customer to send it again')
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportCode])
+  useEffect(() => {
+    if (incoming && incomingMatch && unlocked) openReport(incomingMatch.id, incoming)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incoming, incomingMatch, unlocked])
   // "Why?" affordances deep-link into the Code tab at the relevant clause.
   const [codeRef, setCodeRef] = useState<string | null>(null)
   // An email shared into the app from the mail client (Android Web Share
@@ -158,6 +190,8 @@ export function App() {
             onBack={() => setView({ name: 'development', devId: view.devId })}
             onToast={show}
             onExplainCode={explainCode}
+            incomingReport={reportForPlot?.plotId === view.plotId ? reportForPlot.report : undefined}
+            onIncomingHandled={() => setReportForPlot(null)}
           />
         )}
       </main>
@@ -216,6 +250,17 @@ export function App() {
             setShowHelp(false)
             setTab('guide')
           }}
+        />
+      )}
+
+      {unlocked && incoming && !incomingMatch && reportCode && (
+        <IncomingReportSheet
+          report={incoming}
+          code={reportCode}
+          plots={state.plots}
+          onPick={(plotId) => openReport(plotId, incoming)}
+          onClose={() => setIncoming(null)}
+          onToast={show}
         />
       )}
 
