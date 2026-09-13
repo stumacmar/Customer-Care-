@@ -42,7 +42,7 @@ export const BUYER_STORAGE_KEY = 'nhqb-buyer-state-v1'
 const TYPE_LABEL: Record<IssueType, string> = { snag: 'Snag or defect', complaint: 'Complaint', emergency: 'Emergency' }
 const SUBTITLES: Record<IssueType, string> = {
   snag: 'Your developer should put this right within 30 days.',
-  complaint: 'Handled under the Code\'s complaints process, with fixed timescales.',
+  complaint: 'Your developer will deal with this under the Code\'s complaints process, with set timescales.',
   emergency: 'Telephone your developer first, then send this record.',
 }
 /** The Code's letter names, in the words a homeowner would use. */
@@ -381,11 +381,11 @@ function GuidedReport({
   const type: IssueType =
     category === 'emergency' ? 'emergency' : category === 'home' && inspectionStage ? 'snag' : 'complaint'
 
-  const titles: Record<IssueType, string> = {
-    snag: 'Report a snag or defect',
-    complaint: 'Make a formal complaint',
-    emergency: 'Report an emergency',
-  }
+  // The customer's own words head the screen and the email. The Code's
+  // process (snag, complaint) is explained underneath and carried to the
+  // developer in the link; the customer never has to call it a complaint.
+  const catLabel = REPORT_CATEGORIES.find((c) => c.key === category)?.label
+  const heading = category === 'emergency' ? 'Emergency' : catLabel || 'Report a problem'
   const blurbs: Record<IssueType, string> = {
     snag: `A snag is a minor issue or cosmetic imperfection, such as a scratch or a paint mark. A defect is incomplete work, or a fault in completed work, that does not meet the expected quality or finish, including the warranty standards. Under the Code your developer should put snags and defects right within ${SNAG_PUT_RIGHT_DAYS} days, or explain the reason for any delay and keep you updated at least monthly.`,
     complaint:
@@ -393,8 +393,6 @@ function GuidedReport({
     emergency:
       'The Code defines an emergency as an immediate threat to safety, security, health or well-being. Your developer\'s after-sales statement sets out what qualifies; typical examples are external door locks that will not secure the home, an uncontainable water leak, complete failure of the heating and hot water, or total loss of power. Telephone your developer now, using their out-of-hours number if it is outside office hours; do not wait for an email. Then send this report so there is a written record.',
   }
-
-  const catLabel = REPORT_CATEGORIES.find((c) => c.key === category)?.label
 
   const send = async (via: 'email' | 'copy') => {
     if (!description.trim()) return
@@ -414,18 +412,18 @@ function GuidedReport({
     }
     const code = await encodeShare(report)
     const intro =
-      type === 'emergency'
+      category === 'emergency'
         ? `Please treat this as an emergency at ${snap.address}. I am also telephoning you.`
-        : type === 'snag'
-          ? `I would like to report a snag or defect at ${snap.address}.`
-          : `I would like to make a formal complaint about ${snap.address}.`
+        : category === 'home'
+          ? `I would like to report a problem with my home at ${snap.address}.`
+          : `I would like to raise a problem about ${snap.address}. It is about ${(catLabel || 'something else').toLowerCase()}.`
     // Reads as a normal email. The developer's one instruction is the last line.
     const human =
       `Hi,\n\n${intro}\n\n${body}\n\n` +
       `Sent ${formatDate(sentOn)} from my Plot Tracker link.\n${snap.customerNames || ''}\n\n` +
       `---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
     if (via === 'email') {
-      const subject = `[Customer report] ${titles[type]} — ${snap.address}`
+      const subject = `[Customer report] ${heading} — ${snap.address}`
       location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(human)}`
       onToast('Opening your email — press send there')
     } else {
@@ -485,7 +483,7 @@ function GuidedReport({
 
   // Step 2 — describe it.
   return (
-    <Sheet title={catLabel && category !== 'home' ? catLabel : titles[type]} subtitle={SUBTITLES[type]} onClose={onClose}>
+    <Sheet title={heading} subtitle={SUBTITLES[type]} onClose={onClose}>
       <p className="muted" style={{ fontSize: 12.5, marginTop: -4 }}>{blurbs[type]}</p>
       <div className="field">
         <label>What has happened? Where exactly?</label>
