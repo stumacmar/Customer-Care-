@@ -20,7 +20,7 @@ export type VideoSlug =
   | 'ombudsman'
 
 export const VIDEOS: Record<VideoSlug, { title: string; code: string; duration: number }> = {
-  'setup': { title: "First setup", code: "Settings", duration: 40 },
+  'setup': { title: "First setup", code: "Settings", duration: 54 },
   'reservation': { title: "Reservation day", code: "Code 2.2 · 2.3", duration: 60 },
   'cooling-off-cancellation': { title: "If the sale falls through", code: "Code 2.4 · 2.13", duration: 43 },
   'exchange': { title: "Exchange of contracts", code: "Code 2.2 · 2.6 · 2.7", duration: 50 },

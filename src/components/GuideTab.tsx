@@ -16,7 +16,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Icon } from './icons'
 import { Sheet } from './ui'
 import { VIDEOS, type VideoSlug } from '../lib/videoLibrary'
-import { NHOS_URL, NHQB_FEES_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
+import { NHOS_URL, NHQB_FEES_URL, NHQB_PORTAL_URL, PCI_CHECKLIST_APARTMENT_URL, PCI_CHECKLIST_HOUSE_URL } from '../lib/codeContent'
 
 type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
@@ -46,10 +46,12 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Set up once (two minutes)',
     videos: ['setup'],
     body: [
+      'Plot Tracker is free to NHQB-registered developers. On first open, enter the access code from the NHQB developer portal. It is checked and kept on your phone; nothing is sent to NHQB. NHQB changes the code each year and the app asks again.',
       'Open Settings (the gear, top right). Enter your company name — it appears on every letter and export — and your email, which is where customer reports arrive when you share a plot link.',
       'Take your first backup from Settings too. Everything lives only on this device, so the backup file (kept in your email, Drive or iCloud) is your safety net — and how you move your records between phone and computer.',
       'On your phone, open plotclock.co.uk in the browser and choose "Add to Home Screen" — the app then works like any other app, including with no signal on site.',
     ],
+    links: [{ label: 'NHQB developer portal (login)', href: NHQB_PORTAL_URL }],
   },
   {
     title: 'The day a home is reserved',
