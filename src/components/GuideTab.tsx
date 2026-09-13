@@ -22,7 +22,7 @@ type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 142
+const TOUR_DURATION = 141
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -64,7 +64,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Reading the screen',
-    watchAt: 20,
+    watchAt: 21,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
       'Colours: red means overdue or an emergency, amber means due within five days, green means on track. Anything red sorts to the top of every list.',
