@@ -23,7 +23,7 @@ const STEPS: Step[] = [
   {
     icon: 'clipboard',
     tint: 'var(--green)',
-    text: 'Log every choice, extra, change, delay and site visit in Spec & changes. For a major change, call the customer first; the app drafts the written notice, and the customer\'s 14-day cancellation window runs from the day they receive it.',
+    text: 'Log every choice, extra, change, delay, site visit and email with the one button under Spec & changes. For a major change, call the customer first; the app drafts the written notice, and the customer\'s 14-day cancellation window runs from the day they receive it.',
   },
   {
     icon: 'check-circle',
@@ -33,7 +33,7 @@ const STEPS: Step[] = [
   {
     icon: 'wrench',
     tint: 'var(--snag)',
-    text: 'The moment a customer reports anything, log it: Snag (or defect), Complaint, or Emergency. The app works out the Code deadline — you never calculate a date.',
+    text: 'The moment a customer reports anything, log it: Snag (or defect), Complaint, or Emergency — or paste in the email from their app. The app works out the Code deadline — you never calculate a date.',
   },
   {
     rag: true,
@@ -47,7 +47,7 @@ const STEPS: Step[] = [
   {
     icon: 'mail',
     tint: 'var(--complaint)',
-    text: 'Paste emails to and from the customer into the plot as they happen, so the evidence trail is in the record and not only in your inbox.',
+    text: 'Log emails to and from the customer as they happen — pick Email under the same button — so the evidence trail is in the record and not only in your inbox.',
   },
   {
     icon: 'file',
