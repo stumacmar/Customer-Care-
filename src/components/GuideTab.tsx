@@ -22,7 +22,7 @@ type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 141
+const TOUR_DURATION = 121
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -64,7 +64,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Reading the screen',
-    watchAt: 21,
+    watchAt: 25,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
       'Colours: red means overdue or an emergency, amber means due within five days, green means on track. Anything red sorts to the top of every list.',
@@ -127,7 +127,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Sharing with your customer',
-    watchAt: 92,
+    watchAt: 78,
     body: [
       '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',

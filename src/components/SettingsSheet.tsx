@@ -77,6 +77,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       type: 'REPLACE_STATE',
       state: {
         ...seed,
+        developerPhone: state.developerPhone,
         showCodeRefs: state.showCodeRefs,
         lastBackupAt: state.lastBackupAt,
         developments: [...seed.developments, ...state.developments],
