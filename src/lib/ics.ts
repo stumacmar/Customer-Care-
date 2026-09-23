@@ -99,7 +99,7 @@ function wrap(events: CalEvent[], filename: string): { filename: string; content
   const content = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//NHQB//Plot Tracker//EN',
+    'PRODID:-//NHQB//New Home Tracker//EN',
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...events.map(vevent),

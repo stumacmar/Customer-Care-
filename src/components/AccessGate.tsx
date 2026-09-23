@@ -1,5 +1,5 @@
 /*
- * The turnstile. Plot Tracker is free to NHQB-registered developers, so the
+ * The turnstile. New Home Tracker is free to NHQB-registered developers, so the
  * developer's side asks once for the access code NHQB publishes in its
  * developer portal. The code is checked on the phone against a hash and
  * remembered there; nothing is sent anywhere. Customers' links never pass
@@ -49,12 +49,12 @@ export function AccessGate({
           <BrandMark size={40} className="brand-mark" />
           <div>
             <div style={{ fontWeight: 800, letterSpacing: '0.16em', fontSize: 16 }}>NHQB</div>
-            <div className="muted" style={{ fontSize: 12 }}>Plot Tracker</div>
+            <div className="muted" style={{ fontSize: 12 }}>New Home Tracker</div>
           </div>
         </div>
         <h2 style={{ fontSize: 24, margin: '0 0 8px' }}>For NHQB-registered developers</h2>
         <p className="muted" style={{ marginTop: 0 }}>
-          Plot Tracker is free to developers registered with the New Homes Quality Board. Enter
+          New Home Tracker is free to developers registered with the New Homes Quality Board. Enter
           the access code from the NHQB developer portal. It stays on this phone; nothing is sent
           to NHQB.
         </p>
