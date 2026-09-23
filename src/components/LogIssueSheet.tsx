@@ -107,15 +107,14 @@ export function LogIssueSheet({
       photoDataUrl: photo,
       receivedOn: receivedOn || undefined,
     })
-    onLogged(
-      report
-        ? `${meta.label} logged from the customer's report`
-        : type === 'snag'
-          ? `${meta.label} logged — put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
-          : type === 'complaint'
-            ? `Complaint logged — acknowledge in writing by ${formatDate(addDays(nextBusinessDay(receivedOn || todayISO()), 5))}`
-            : 'Emergency logged — deal with it now'
-    )
+    // The same deadline whether it was typed in or arrived from the customer's app.
+    const deadline =
+      type === 'snag'
+        ? `put right by ${formatDate(addDays(receivedOn || todayISO(), SNAG_PUT_RIGHT_DAYS))}`
+        : type === 'complaint'
+          ? `acknowledge in writing by ${formatDate(addDays(nextBusinessDay(receivedOn || todayISO()), 5))}`
+          : 'deal with it now'
+    onLogged(report ? `${meta.label} logged from the customer's report — ${deadline}` : `${meta.label} logged — ${deadline}`)
   }
 
   return (

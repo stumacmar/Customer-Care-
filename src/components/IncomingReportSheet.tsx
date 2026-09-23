@@ -39,7 +39,7 @@ export function IncomingReportSheet({
       `${report.description}\n\n${reportLink(code)}`
     try {
       await navigator.clipboard.writeText(text)
-      onToast('Report copied — open Plot Tracker, tap Snag, Complaint or Emergency, and paste')
+      onToast('Report copied — open New Home Tracker, tap Snag, Complaint or Emergency, and paste')
     } catch {
       onToast('Could not copy — select the text and copy it instead')
     }
@@ -58,7 +58,7 @@ export function IncomingReportSheet({
       {plots.length === 0 ? (
         <>
           <p className="muted" style={{ marginTop: 0 }}>
-            This phone has no plots in Plot Tracker, so the report cannot be logged here. If the
+            This phone has no plots in New Home Tracker, so the report cannot be logged here. If the
             app is on your home screen, open it there: tap Snag, Complaint or Emergency on the
             plot and paste this report in.
           </p>

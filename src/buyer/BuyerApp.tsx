@@ -152,7 +152,7 @@ export function BuyerApp({ initialCode }: { initialCode?: string }) {
             </p>
           ) : (
             <p>
-              This is the customer view of NHQB Plot Tracker.
+              This is the customer view of NHQB New Home Tracker.
               <br />
               Open the link your developer sent you to see your new home.
             </p>
@@ -428,8 +428,8 @@ function GuidedReport({
     // Reads as a normal email. The developer's one instruction is the last line.
     const human =
       `Hi,\n\n${intro}\n\n${body}\n\n` +
-      `Sent ${formatDate(sentOn)} from my Plot Tracker link.\n${snap.customerNames || ''}\n\n` +
-      `---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
+      `Sent ${formatDate(sentOn)} from my New Home Tracker link.\n${snap.customerNames || ''}\n\n` +
+      `---\nDeveloper: tap this link to log it in New Home Tracker.\n${reportLink(code)}`
     if (via === 'email') {
       const subject = `[Customer report] ${heading} — ${snap.address}`
       location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(human)}`
@@ -545,7 +545,7 @@ function MyReports({
       plotId: snap.plotId,
     })
     const subject = `[Customer report — resend] ${TYPE_LABEL[r.type]} — ${snap.address}`
-    const body = `Hi,\n\nSending this again. First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n${snap.customerNames || ''}\n\n---\nDeveloper: tap this link to log it in Plot Tracker.\n${reportLink(code)}`
+    const body = `Hi,\n\nSending this again. First sent ${formatDate(r.sentOn)}:\n\n${r.description}\n\n${snap.customerNames || ''}\n\n---\nDeveloper: tap this link to log it in New Home Tracker.\n${reportLink(code)}`
     location.href = `mailto:${encodeURIComponent(snap.developerEmail || '')}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
     onToast('Opening your email — press send there')
   }

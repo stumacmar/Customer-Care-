@@ -1,5 +1,5 @@
 /*
- * The access code. Plot Tracker is free to NHQB-registered developers, so
+ * The access code. New Home Tracker is free to NHQB-registered developers, so
  * the developer's side asks once for the code NHQB publishes in its
  * developer portal. The code never leaves the phone: it is normalised
  * (upper-case, letters and digits only), hashed with SHA-256, compared with
@@ -9,7 +9,7 @@
  * last day it is valid. Keep the old lines so the app can tell a developer
  * "that code has expired" rather than "not recognised".
  *
- * To hash a new code:  echo -n NHQBPLOT2027 | sha256sum
+ * To hash a new code:  echo -n NHQBHOME2027 | sha256sum
  */
 
 export const ACCESS_KEY = 'plot-clock-access'
@@ -17,13 +17,16 @@ export const ACCESS_KEY = 'plot-clock-access'
 export type AccessStatus = 'ok' | 'expired' | 'unknown'
 
 export const ACCESS_CODES: { hash: string; validUntil: string; label: string }[] = [
-  // NHQB-PLOT-2026 — the launch code, valid through January 2027 to cover the change of year.
-  { hash: '57b9b7721f58c0de65cabe0a3b67211320525eb6563f79ccc431f8a990b154c8', validUntil: '2027-01-31', label: '2026' },
+  // NHQB-HOME-2026 — the launch code, valid through January 2027 to cover the change of year.
+  { hash: 'bb629dc9bd63aa7b4e7df55452116b81cd974141389c5a31dcaa0faa43949e84', validUntil: '2027-01-31', label: '2026' },
+  // NHQB-PLOT-2026 — withdrawn when the app was renamed; kept so anyone holding it
+  // is told it has expired rather than that it is not recognised.
+  { hash: '57b9b7721f58c0de65cabe0a3b67211320525eb6563f79ccc431f8a990b154c8', validUntil: '2026-09-22', label: '2026 (withdrawn)' },
   // NHQB-PILOT-2025 — the pilot code, now expired; kept so the message is "expired", not "unknown".
   { hash: '693ba46845d430252e2bfa6922b113f9dfbf14b58982f1c8062a862f07e94728', validUntil: '2025-12-31', label: '2025 pilot' },
 ]
 
-/** Upper-case letters and digits only, so "nhqb plot 2026" and "NHQB-PLOT-2026" are the same code. */
+/** Upper-case letters and digits only, so "nhqb home 2026" and "NHQB-HOME-2026" are the same code. */
 export function normaliseCode(raw: string): string {
   return raw.toUpperCase().replace(/[^A-Z0-9]/g, '')
 }

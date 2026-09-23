@@ -459,8 +459,25 @@ export function journeyClocksForPlot(plot: Plot, today = todayISO()): JourneyClo
   // Major-change windows — 2.9. A hold on serving notice, and the customer's
   // right to cancel; amber while open so it is never missed.
   for (const change of plot.changes) {
-    if (change.kind !== 'major_change' || change.outcome) continue
+    if (change.kind !== 'major_change' || change.outcome === 'cancelled') continue
     const cancelBy = majorChangeCancelBy(change)
+    if (change.outcome === 'accepted') {
+      // Accepted, but 2.9's 14-day period runs from receipt of the written
+      // details regardless: notice to complete still cannot be served in it.
+      if (cancelBy && daysFromToday(cancelBy) >= 0) {
+        out.push({
+          kind: 'major_change',
+          clause: '2.9',
+          label: 'Major change accepted — 14-day period still running',
+          detail: "The Code's 14-day cancellation period runs from the day the customer received the written details, whatever they have said since. Notice to complete cannot be served until it has closed.",
+          dueDate: cancelBy,
+          daysRemaining: daysFromToday(cancelBy),
+          rag: 'amber',
+          info: true,
+        })
+      }
+      continue
+    }
     if (!cancelBy) {
       // Logged but not yet notified in writing — the Code's window has not
       // started, and the customer has not been told.

@@ -75,7 +75,7 @@ function StepIcon({ step }: { step: Step }) {
 
 export function HelpSheet({ onClose, onOpenGuide }: { onClose: () => void; onOpenGuide?: () => void }) {
   return (
-    <Sheet title="How to use NHQB Plot Tracker" subtitle="The whole app in 9 lines." onClose={onClose}>
+    <Sheet title="How to use NHQB New Home Tracker" subtitle="The whole app in 9 lines." onClose={onClose}>
       <div
         style={{
           display: 'flex',

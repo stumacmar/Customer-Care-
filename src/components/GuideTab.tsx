@@ -22,7 +22,7 @@ type Panel = 'watch' | 'read' | 'print'
 type Playing = { kind: 'scenario'; slug: VideoSlug } | { kind: 'tour'; at?: number }
 
 const PANEL_KEY = 'nhqb-guide-panel'
-const TOUR_DURATION = 141
+const TOUR_DURATION = 121
 
 /** The Watch grid, in journey order. Theatre's "Next" follows this order. */
 const GROUPS: { title: string; slugs: VideoSlug[] }[] = [
@@ -46,7 +46,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     title: 'Set up once (two minutes)',
     videos: ['setup'],
     body: [
-      'Plot Tracker is free to NHQB-registered developers. On first open, enter the access code from the NHQB developer portal. It is checked and kept on your phone; nothing is sent to NHQB. NHQB changes the code each year and the app asks again.',
+      'New Home Tracker is free to NHQB-registered developers. On first open, enter the access code from the NHQB developer portal. It is checked and kept on your phone; nothing is sent to NHQB. NHQB changes the code each year and the app asks again.',
       'Open Settings (the gear, top right). Enter your company name — it appears on every letter and export — and your email, which is where customer reports arrive when you share a plot link.',
       'Take your first backup from Settings too. Everything lives only on this device, so the backup file (kept in your email, Drive or iCloud) is your safety net — and how you move your records between phone and computer.',
       'On your phone, open plotclock.co.uk in the browser and choose "Add to Home Screen" — the app then works like any other app, including with no signal on site.',
@@ -64,7 +64,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Reading the screen',
-    watchAt: 21,
+    watchAt: 25,
     body: [
       'Every plot leads with one line — the next thing to do and when. If you look at one thing, look at that.',
       'Colours: red means overdue or an emergency, amber means due within five days, green means on track. Anything red sorts to the top of every list.',
@@ -96,7 +96,7 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
     body: [
       'The evidence trail is only complete if the emails are in it. If a dispute arises, the correspondence needs to be in the record, not only in your inbox. Tap "Log a choice, change, delay, visit or email" on the plot and pick Email: paste the email, to or from the customer, with the date it was actually sent (not the date you pasted it).',
       'It joins the timeline and both exports, so the file you hand the Ombudsman carries the correspondence alongside the dates, documents and letters.',
-      'On Android you can skip the copying: share an email straight from your mail app to Plot Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
+      'On Android you can skip the copying: share an email straight from your mail app to New Home Tracker, pick the plot, and the form arrives filled in. On iPhone, copy and paste.',
       'Log it the day it happens, like everything else, so the record is made at the time.',
     ],
   },
@@ -127,11 +127,11 @@ const SECTIONS: { title: string; videos?: VideoSlug[]; watchAt?: number; body: s
   },
   {
     title: 'Sharing with your customer',
-    watchAt: 92,
+    watchAt: 78,
     body: [
       '"Share with customer" on the plot creates a private link — the plot\'s details travel inside the link itself, so nothing is uploaded anywhere. Copy it into WhatsApp or use the pre-written email.',
       'The customer sees their own app: where their home is up to, their rights under the Code, the documents they have received, their choices, and any issues with the response deadlines they are entitled to. They can add it to their home screen.',
-      'When they report a problem, you get an email. Tap the link at the foot of it: Plot Tracker opens on the right plot with the report filled in, and one tap logs it with their words and their date, on the correct Code timescale. If the link opens in your web browser rather than the app on your home screen, the page shows the report with a Copy button: open the app, tap Snag, Complaint or Emergency, and paste. Their app keeps their own record of what they sent and when.',
+      'When they report a problem, you get an email. Tap the link at the foot of it: New Home Tracker opens on the right plot with the report filled in, and one tap logs it with their words and their date, on the correct Code timescale. If the link opens in your web browser rather than the app on your home screen, the page shows the report with a Copy button: open the app, tap Snag, Complaint or Emergency, and paste. Their app keeps their own record of what they sent and when.',
       'Their side is guided, so they never have to know the Code\'s vocabulary: they choose what the issue is about — the home, money or a refund, specification, timescales, a missed appointment — and the app routes it to the right process. Under the Code\'s glossary, snags may be identified at the pre-completion inspection or after completion — so a problem with the home arrives as a snag or defect from notice to complete onwards, and before that as an issue the app treats as a formal complaint so the Code\'s timetable is never missed. The emergency option appears only once they have moved in.',
       'Share a fresh link whenever there is an update worth showing — each new link replaces their snapshot.',
     ],

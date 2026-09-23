@@ -7,8 +7,8 @@
 import { useState } from 'react'
 import { Sheet } from './ui'
 import { useStore } from '../state/store'
-import { plotStage } from '../lib/code'
-import { todayISO } from '../lib/dates'
+import { majorChangeCancelBy, plotStage } from '../lib/code'
+import { formatDate, todayISO } from '../lib/dates'
 import type { ChangeRecord, Plot } from '../types'
 
 export function ResolveChangeSheet({
@@ -28,7 +28,14 @@ export function ResolveChangeSheet({
 
   const accept = () => {
     dispatch({ type: 'RESOLVE_CHANGE', plotId: plot.id, changeId: change.id, outcome: 'accepted' })
-    onToast('Recorded — customer accepted the change')
+    // Code 2.9: the 14-day period runs from receipt of the written details
+    // regardless, and notice to complete cannot be served inside it.
+    const cancelBy = majorChangeCancelBy(change)
+    onToast(
+      cancelBy && cancelBy >= todayISO()
+        ? `Recorded — customer accepted. Notice to complete still cannot be served until ${formatDate(cancelBy)} (Code 2.9)`
+        : 'Recorded — customer accepted the change'
+    )
     onClose()
   }
 

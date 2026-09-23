@@ -77,6 +77,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
       type: 'REPLACE_STATE',
       state: {
         ...seed,
+        developerPhone: state.developerPhone,
         showCodeRefs: state.showCodeRefs,
         lastBackupAt: state.lastBackupAt,
         developments: [...seed.developments, ...state.developments],
@@ -315,7 +316,7 @@ export function SettingsSheet({ onClose, onToast }: { onClose: () => void; onToa
         <h3>About this app</h3>
         <div className="card muted" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
           <p style={{ marginTop: 0 }}>
-            NHQB Plot Tracker is a free tool provided by the New Homes Quality Board to help
+            NHQB New Home Tracker is a free tool provided by the New Homes Quality Board to help
             registered developers keep to the New Homes Quality Code. Using it is your choice, and
             it does not replace the Code, your own procedures, or NHQB's audits and attestation.
           </p>

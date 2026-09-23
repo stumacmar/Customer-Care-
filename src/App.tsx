@@ -144,7 +144,7 @@ export function App({ reportCode }: { reportCode?: string } = {}) {
           <div className="brand">
             <BrandLogo height={44} />
             <span className="brand-divider" />
-            <span className="brand-product">Plot Tracker</span>
+            <span className="brand-product">New Home Tracker</span>
           </div>
         )}
         <button className="iconbtn" onClick={() => setShowHelp(true)} aria-label="How to use">
